@@ -17,7 +17,7 @@ const Login = () => {
       let response = await fetch("http://localhost:8080/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify({ admissionNo: phone, password }),
       });
 
       if (response.ok) {
