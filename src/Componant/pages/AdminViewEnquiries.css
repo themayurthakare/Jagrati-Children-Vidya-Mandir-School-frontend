@@ -1,0 +1,122 @@
+.enq-container {
+    padding: 20px;
+    max-width: 980px;
+    margin: 0 20px;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+        Arial, "Noto Sans", sans-serif;
+    color: #222;
+}
+
+.enq-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.enq-title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+/* Table wrapper */
+.enq-table-wrap {
+    overflow-x: auto;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    background: #fff;
+}
+
+/* Table */
+.enq-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Table header */
+.enq-table thead th {
+    text-align: left;
+    padding: 12px;
+    background: #f0f0f0;
+    font-weight: 600;
+    border: 1px solid #ccc;
+}
+
+/* Table rows */
+.enq-table tbody td {
+    padding: 7px;
+    border: 1px solid #ccc;
+    vertical-align: top;
+    max-width: 420px;
+    word-wrap: break-word;
+}
+
+/* Row hover */
+.enq-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+/* Empty / loading message row */
+.enq-empty {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    border: 1px solid #ccc;
+}
+
+/* AdminViewEnquiries.css - Add these styles to your existing file */
+
+/* Add these styles for the Delete button */
+.enq-delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    min-width: 80px;
+}
+
+.enq-delete-btn:hover:not(:disabled) {
+    background: #c0392b;
+}
+
+.enq-delete-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.enq-delete-btn.deleting {
+    background: #f39c12;
+}
+
+/* Message cell styling for better readability */
+.enq-message-cell {
+    max-width: 300px;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* Responsive design for table */
+@media (max-width: 768px) {
+    .enq-table {
+        font-size: 0.9rem;
+    }
+
+    .enq-delete-btn {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        min-width: 70px;
+    }
+
+    .enq-message-cell {
+        max-width: 200px;
+        font-size: 0.85rem;
+    }
+}

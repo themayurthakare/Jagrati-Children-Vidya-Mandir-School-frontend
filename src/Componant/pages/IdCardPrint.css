@@ -1,0 +1,175 @@
+.print-page {
+    padding: 20px;
+    background: #f2f2f2;
+}
+
+.print-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.print-btn {
+    background: green;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+}
+
+.id-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.id-card {
+    width: 440px;
+    /* 🔽 reduced width */
+    border: 1px solid #000;
+    font-family: Arial, sans-serif;
+    background: white;
+    margin: auto;
+    margin-bottom: 5mm;
+}
+
+/* HEADER */
+.id-header {
+    background: #3b0a60;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    padding: 5px;
+    font-size: 13px;
+}
+
+.id-sub-header {
+    background: #ff0080;
+    padding: 3px;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+/* BODY */
+.id-body {
+    display: flex;
+    padding: 6px;
+}
+
+.id-photo {
+    width: 100px;
+    text-align: center;
+}
+
+.id-photo img {
+    width: 100px;
+    height: 110px;
+    border: 1px solid #000;
+    object-fit: cover;
+}
+
+.signature {
+    font-size: 11px;
+    margin-top: 60px;
+    border-top: 1px solid #000;
+}
+
+/* DETAILS */
+.id-details {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 12px;
+}
+
+.id-details table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 4px;
+}
+
+.id-details th,
+.id-details td {
+    border: 1px solid #000;
+    padding: 2px;
+    font-size: 11px;
+    text-align: center;
+}
+
+.id-details p {
+    margin: 2px 0;
+}
+
+/* FOOTER */
+.id-footer {
+    height: 6px;
+    background: #ff0080;
+}
+
+@media print {
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    /* Force browser to print colors */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+
+    /* Hide buttons */
+    .print-actions,
+    .print-btn,
+    .back-btn {
+        display: none !important;
+    }
+
+    /* Hide everything */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show only printable area */
+    .print-root,
+    .print-root * {
+        visibility: visible;
+    }
+
+    .print-root {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* 2 CARDS PER PAGE (VERTICAL) */
+    .id-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10mm;
+    }
+
+    .id-card {
+        width: 135mm;
+        margin-bottom: 5mm;
+        page-break-inside: avoid;
+    }
+
+
+}

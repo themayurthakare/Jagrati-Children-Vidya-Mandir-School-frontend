@@ -1,0 +1,109 @@
+.musicdance-page {
+    background: linear-gradient(145deg, #d1c4e9, #b39ddb);
+    padding: 30px;
+    border-radius: 25px;
+    margin: 20px auto;
+    max-width: 900px;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.musicdance-page h2 {
+    font-size: 32px;
+    color: #673ab7;
+    margin-bottom: 15px;
+}
+
+.musicdance-subtitle {
+    font-size: 18px;
+    margin-bottom: 25px;
+}
+
+.back-button {
+    background: linear-gradient(145deg, #ff9a9e, #fad0c4);
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.back-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.video-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.video-box {
+    width: 100%;
+    max-width: 400px;
+    background: #f3e5f5;
+    padding: 15px;
+    border-radius: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.video-box h3 {
+    margin-bottom: 10px;
+    color: #6a1b9a;
+}
+
+.video-box video {
+    width: 100%;
+    border-radius: 15px;
+}
+
+.links-section {
+    margin-bottom: 25px;
+}
+
+.links-buttons button {
+    background: linear-gradient(145deg, #ffcc80, #ffb74d);
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.links-buttons button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.musicdance-info {
+    background: #ede7f6;
+    padding: 20px;
+    border-radius: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 80px;
+}
+
+.musicdance-info h3 {
+    color: #512da8;
+    margin-bottom: 10px;
+}
+
+.musicdance-info p {
+    font-size: 18px;
+    line-height: 1.6;
+}

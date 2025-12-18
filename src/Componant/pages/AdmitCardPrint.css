@@ -1,0 +1,116 @@
+/* PAGE */
+.print-root {
+    padding: 20px;
+    font-family: "Times New Roman", serif;
+}
+
+/* BUTTONS */
+.print-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.back-btn,
+.print-btn {
+    padding: 8px 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.print-btn {
+    background: #198754;
+    color: white;
+}
+
+.admit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+
+}
+
+/* CARD */
+.admit-card {
+    border: 1px solid #000;
+    padding: 16px;
+    width: 100%;
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+}
+
+/* HEADER */
+.school-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.session-text {
+    text-align: center;
+    font-size: 14px;
+    margin: 6px 0 10px;
+}
+
+/* ADMIT BOX */
+.admit-label {
+    background: #000;
+    color: #fff;
+    width: fit-content;
+    padding: 4px 18px;
+    margin: 0 auto 14px;
+    font-weight: bold;
+}
+
+/* DETAILS */
+.details {
+    font-size: 15px;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    column-gap: 10px;
+    margin-bottom: 12px;
+}
+
+.value {
+    border-bottom: 1px dotted #000;
+    padding-left: 4px;
+}
+
+.red {
+    color: red;
+    font-weight: bold;
+}
+
+/* SIGNATURES */
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 35px;
+    font-size: 14px;
+}
+
+/* PRINT */
+@media print {
+    .print-actions {
+        display: none !important;
+    }
+
+    body {
+        margin: 0;
+        background: white;
+    }
+
+    .admit-card {
+        page-break-inside: avoid;
+    }
+}

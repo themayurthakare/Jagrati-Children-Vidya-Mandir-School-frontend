@@ -1,0 +1,163 @@
+/* ------------------ COLORS ------------------- */
+
+:root {
+    --blue-primary: #004f9e;
+    --orange-secondary: #ff9c00;
+    --text-dark: #14213d;
+    --bg-light: #ffffff;
+}
+
+
+/* ------------------ NAVBAR ------------------- */
+
+.navbar {
+    background: var(--bg-light);
+    padding: 12px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--text-dark);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+
+/* ------------------ LOGO ------------------- */
+
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+}
+
+.logo-text {
+    font-size: 1.7rem;
+    font-weight: bold;
+    color: var(--text-dark);
+}
+
+
+/* ------------------ NAV LINKS ------------------- */
+
+.navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+    margin: 0;
+    align-items: center;
+}
+
+.navbar-links li a {
+    text-decoration: none;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    padding: 8px 14px;
+    border-radius: 4px;
+    transition: 0.3s;
+    font-weight: 500;
+}
+
+.navbar-links li a:hover {
+    background: var(--blue-primary);
+    color: white;
+}
+
+
+/* Contact Button */
+
+.contact-link {
+    background: var(--orange-secondary);
+    color: white !important;
+    font-weight: bold;
+}
+
+.contact-link:hover {
+    background: #cf7c00;
+}
+
+
+/* ------------------ SOCIAL ICONS ------------------- */
+
+.social-icons a {
+    font-size: 1.4rem;
+    margin: 0 6px;
+    color: var(--blue-primary);
+    transition: 0.3s;
+}
+
+.social-icons a:hover {
+    color: var(--orange-secondary);
+}
+
+.social-desktop {
+    display: flex;
+}
+
+.social-mobile {
+    display: none;
+    margin-top: 10px;
+}
+
+
+/* ------------------ MENU BUTTON ------------------- */
+
+.menu-button {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 2.3rem;
+    cursor: pointer;
+    color: var(--blue-primary);
+}
+/* ------------------ LOGIN / LOGOUT / DASHBOARD BUTTONS ------------------- */
+/* ------------------ LOGIN / LOGOUT / DASHBOARD BUTTONS ------------------- */
+
+.navbar-links li button.nav-action-btn {
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s ease;
+    display: inline-block;
+}
+
+/* Login */
+.login-btn {
+    background: var(--blue-primary) !important;
+    color: white !important;
+}
+.login-btn:hover {
+    background: #003b75 !important;
+}
+
+/* Dashboard */
+.dashboard-btn {
+    background: #198754 !important;
+    color: #fff !important;
+}
+.dashboard-btn:hover {
+    background: #10693d !important;
+}
+
+/* Logout */
+.logout-btn {
+    background: #dc3545 !important;
+    color: white !important;
+}
+.logout-btn:hover {
+    background: #b91f2e !important;
+}
+
+/* Remove transparent override issue */
+.navbar-links li button {
+    background: none;
+}

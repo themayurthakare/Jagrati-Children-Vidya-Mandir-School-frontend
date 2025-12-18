@@ -1,0 +1,173 @@
+/* AdminTeacherRegistration.css - matches student style, centered attractive card */
+
+:root {
+    --blue-primary: #004f9e;
+    --orange-secondary: #ff9c00;
+    --text-dark: #14213d;
+    --muted: #6b7280;
+    --card-bg: #ffffff;
+    --page-bg: #f3f6fb;
+    --input-border: #e6e9ef;
+    --shadow-sm: 0 6px 18px rgba(11, 28, 50, 0.06);
+    --shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+    --radius: 12px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* Center page */
+.tr-page {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    padding: 20px;
+    background: var(--page-bg);
+}
+
+/* Card */
+.tr-card {
+    width: 100%;
+    max-width: 720px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(20, 33, 61, 0.04);
+    box-sizing: border-box;
+}
+
+.tr-card h2 {
+    margin: 0 0 20px;
+    color: var(--text-dark);
+    font-size: 1.35rem;
+}
+
+.tr-card .muted {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+/* Alerts */
+.tr-error,
+.tr-success {
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.tr-error {
+    background: #fff5f5;
+    color: #b02020;
+    border: 1px solid rgba(224, 60, 60, 0.08);
+}
+
+.tr-success {
+    background: #f5fffb;
+    color: #0a7a44;
+    border: 1px solid rgba(22, 163, 74, 0.08);
+}
+
+/* Form grid */
+.tr-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+}
+
+/* full width */
+.tr-form .full {
+    grid-column: 1 / -1;
+}
+
+.tr-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+label input,
+label select {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--input-border);
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    outline: none;
+    transition: box-shadow .12s ease, border-color .12s ease, transform .08s ease;
+}
+
+label input:focus,
+label select:focus {
+    border-color: rgba(0, 79, 158, 0.25);
+    box-shadow: 0 8px 20px rgba(0, 79, 158, 0.06);
+    transform: translateY(-2px);
+}
+
+.field-error {
+    color: #d03030;
+    margin-top: 6px;
+    font-size: 0.85rem;
+}
+
+/* Actions */
+.tr-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-primary {
+    background: var(--orange-secondary);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background .25s ease, transform .12s ease, box-shadow .12s ease;
+}
+
+.btn-primary:hover {
+    background: var(--blue-primary);
+    box-shadow: 0 10px 26px rgba(0, 79, 158, 0.12);
+}
+
+.btn-primary[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-ghost {
+    background: var(--orange-secondary);
+    border: 1px solid var(--input-border);
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.btn-ghost:hover {
+    background: var(--blue-primary);
+    color: #fff;
+}
+
+/* Responsive */
+@media (max-width:720px) {
+    .tr-card {
+        padding: 16px;
+        max-width: 520px;
+    }
+
+    .tr-form {
+        grid-template-columns: 1fr;
+    }
+
+    .tr-page {
+        padding: 18px;
+    }
+}

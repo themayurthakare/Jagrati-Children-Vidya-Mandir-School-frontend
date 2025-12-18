@@ -1,0 +1,17 @@
+.class-card {
+  background-color: #e6f7f8;
+  padding: 20px;
+  width: 200px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.class-card h3 {
+  margin: 0 0 10px 0;
+  color: #1e7f7f;
+}
+
+.class-card p {
+  margin: 0;
+  color: #555;
+}

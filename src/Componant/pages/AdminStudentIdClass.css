@@ -1,0 +1,281 @@
+/* Main Container */
+.id-cards-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Header */
+.id-cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.id-cards-title {
+    color: #343a40;
+    font-size: 28px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.id-cards-refresh-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.id-cards-refresh-btn:hover:not(:disabled) {
+    background: #0056b3;
+}
+
+.id-cards-refresh-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Error Message */
+.id-cards-error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.id-cards-error p {
+    margin: 0;
+    font-size: 15px;
+    flex-grow: 1;
+}
+
+.error-retry-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-left: 15px;
+}
+
+.error-retry-btn:hover:not(:disabled) {
+    background: #c82333;
+}
+
+.error-retry-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Table Container */
+.id-cards-table-container {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Loading State */
+.loading-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.loading-state p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 80px 20px;
+    text-align: center;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 25px;
+    font-size: 16px;
+}
+
+/* Table */
+.id-cards-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.id-cards-table th {
+    background: #343a40;
+    color: white;
+    font-weight: 600;
+    padding: 18px 15px;
+    text-align: center;
+    font-size: 15px;
+    border-bottom: 3px solid #495057;
+}
+
+.id-cards-table td {
+    padding: 18px 15px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 15px;
+    color: #495057;
+}
+
+.id-cards-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.id-cards-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Class Name */
+.class-name1 {
+    font-weight: 600;
+    color: #343a40;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Action Buttons - CENTERED */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* ID Card Button */
+.idcard1-btn {
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 160px;
+}
+
+.idcard1-btn:hover {
+    background: #4a148c;
+}
+
+/* Admit Card Button */
+.admit-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 160px;
+}
+
+.admit-btn:hover {
+    background: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .id-cards-container {
+        padding: 15px;
+    }
+
+    .id-cards-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .id-cards-title {
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .id-cards-refresh-btn {
+        width: 100%;
+    }
+
+    .id-cards-table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+    }
+
+    .id-cards-table {
+        min-width: 500px;
+    }
+
+    .id-cards-error {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .error-retry-btn {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .idcard1-btn,
+    .admit-btn {
+        width: 100%;
+        max-width: 250px;
+        min-width: unset;
+    }
+}
+
+@media (max-width: 480px) {
+    .id-cards-title {
+        font-size: 22px;
+    }
+
+    .id-cards-table td {
+        padding: 15px 12px;
+    }
+
+    .empty-state {
+        padding: 60px 15px;
+    }
+
+    .loading-state {
+        padding: 50px 15px;
+    }
+}

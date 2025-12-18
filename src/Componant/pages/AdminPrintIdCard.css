@@ -1,0 +1,385 @@
+/* Main Container */
+.print-id-card-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* Header */
+.print-id-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.back-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-right: 250px;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+}
+
+.page-title {
+    color: #343a40;
+    font-size: 28px;
+    margin: 0;
+    font-weight: 600;
+}
+
+.total-students {
+    font-size: 16px;
+    color: #495057;
+    font-weight: 500;
+}
+
+.student-count {
+    font-weight: 700;
+    color: #28a745;
+    font-size: 18px;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.download-all-id-btn {
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    height: 36px;
+}
+
+.download-all-id-btn:hover:not(:disabled) {
+    background: #4a148c;
+}
+
+.download-all-id-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.download-all-admit-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 160px;
+    height: 36px;
+}
+
+.download-all-admit-btn:hover:not(:disabled) {
+    background: #218838;
+}
+
+.download-all-admit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
+.search-section {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px 16px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    height: 42px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Error */
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid #f5c6cb;
+}
+
+/* Table Container */
+.students-table-container {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Loading State - Reduced height */
+.loading-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+/* Empty State - Reduced height */
+.empty-state {
+    padding: 50px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+/* Table */
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.students-table th {
+    background: #343a40;
+    color: white;
+    font-weight: 600;
+    padding: 16px 15px;
+    text-align: center;
+    font-size: 15px;
+    border-bottom: 3px solid #495057;
+}
+
+.students-table td {
+    padding: 18px 15px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 15px;
+    color: #495057;
+}
+
+.students-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.students-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+/* ID Card Button */
+.idcard-btn {
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    height: 40px;
+}
+
+.idcard-btn:hover {
+    background: #4a148c;
+}
+
+/* Admit Card Button */
+.admit-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    height: 40px;
+}
+
+.admit-btn:hover {
+    background: #218838;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .print-id-card-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .header-left {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-right {
+        align-items: stretch;
+    }
+
+    .bulk-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .download-all-id-btn,
+    .download-all-admit-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .print-id-card-container {
+        padding: 15px;
+    }
+
+    .header-left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .back-btn {
+        align-self: flex-start;
+    }
+
+    .students-table-container {
+        overflow-x: auto;
+        border-radius: 8px;
+    }
+
+    .students-table {
+        min-width: 500px;
+    }
+
+    .search-input {
+        max-width: 100%;
+        height: 40px;
+        padding: 8px 14px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .idcard-btn,
+    .admit-btn {
+        width: 100%;
+        max-width: 250px;
+        min-width: unset;
+        padding: 8px 16px;
+        height: 38px;
+    }
+
+    /* Further reduce padding on mobile */
+    .loading-state {
+        padding: 30px 15px;
+    }
+
+    .empty-state {
+        padding: 40px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 22px;
+    }
+
+    .students-table td {
+        padding: 15px 10px;
+    }
+
+    .students-table th {
+        padding: 14px 12px;
+    }
+
+    .search-input {
+        padding: 7px 12px;
+        height: 38px;
+        font-size: 14px;
+    }
+
+    .idcard-btn,
+    .admit-btn {
+        padding: 7px 14px;
+        height: 36px;
+        font-size: 13px;
+    }
+
+    .download-all-id-btn,
+    .download-all-admit-btn {
+        min-width: unset;
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+}

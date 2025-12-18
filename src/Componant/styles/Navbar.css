@@ -1,0 +1,51 @@
+.navbar {
+  height: 70px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* LEFT */
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo {
+  height: 50px;
+}
+
+/* CENTER */
+.navbar-center {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.navbar-center a {
+  text-decoration: none;
+  color: #0b2c5d;
+  font-weight: 600;
+}
+
+.contact-btn {
+  background-color: orange;
+  border: none;
+  padding: 8px 16px;
+  color: white;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* RIGHT */
+.navbar-right {
+  display: flex;
+  gap: 15px;
+  font-size: 18px;
+  color: #0b2c5d;
+  cursor: pointer;
+}

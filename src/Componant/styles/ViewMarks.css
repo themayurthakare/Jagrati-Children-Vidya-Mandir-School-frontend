@@ -1,0 +1,276 @@
+.view-container {
+  padding: 24px;
+  background: #ffffff;
+}
+
+.view-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+/* Filters */
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-row select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+/* Table */
+.view-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.view-table thead {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.view-table th,
+.view-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.view-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* Status */
+.pass-text {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.fail-text {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Buttons */
+.edit-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.report-btn {
+  padding: 6px 12px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.report-btn:hover {
+  background: #1d4ed8;
+}
+
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-row select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+.loading {
+  text-align: center;
+  padding: 3rem 2rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #c33;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.retry-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.filter-row select {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  min-width: 150px;
+}
+
+.view-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.view-table th {
+  background: #007bff;
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.view-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.view-table tr:hover {
+  background: #f8f9fa;
+}
+
+.pass {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.fail {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.report-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.report-btn:hover {
+  background: #138496;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.report-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.report-content p {
+  margin: 1rem 0;
+  font-size: 1.1rem;
+}
+
+.remarks.pass {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.remarks.fail {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.print-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+.print-btn:hover {
+  background: #218838;
+}
+
+.no-data {
+  text-align: center;
+  color: #666;
+  padding: 3rem;
+  font-style: italic;
+}
+
+@media print {
+  .modal-overlay { background: none !important; }
+  .report-card { box-shadow: none; max-width: none; }
+  .filter-row, .view-table { display: none; }
+}

@@ -1,0 +1,220 @@
+/* AdminViewAttendance.css - Simple version */
+.ava-container {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Search Form */
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background: #246bfd;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Error Message */
+.error-msg {
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    border-left: 4px solid #c62828;
+}
+
+/* Student Info */
+.student-info {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.student-info h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+/* Date Filter */
+.date-filter {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.date-filter h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.date-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.date-inputs label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.date-inputs input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.filter-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.filter-btns button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filter-btns button:first-child {
+    background: #246bfd;
+    color: white;
+}
+
+.filter-btns button:last-child {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+}
+
+/* Summary */
+.summary {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.summary h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.summary-items {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.summary-items>div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.summary-items span {
+    color: #666;
+    font-size: 14px;
+}
+
+.summary-items strong {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Table */
+.table-container {
+    overflow-x: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-table th {
+    background: #f5f5f5;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #ddd;
+}
+
+.attendance-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.attendance-table tr:hover {
+    background: #f9f9f9;
+}
+
+/* Loading and No Data */
+.loading,
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 6px;
+    margin: 20px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-form {
+        flex-direction: column;
+    }
+
+    .date-inputs {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-btns {
+        flex-direction: column;
+    }
+
+    .summary-items {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

@@ -1,0 +1,522 @@
+/* ==================== GLOBAL VARIABLES ==================== */
+
+:root {
+    --primary-color: #6f42c1;
+    --secondary-color: #fd7e14;
+    --text-dark: #192f4f;
+    --bg-light: #ffffff;
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.home {
+    font-family: "Poppins", sans-serif;
+    color: var(--text-dark);
+}
+
+
+/* ==================== HERO SECTION (UPDATED) ==================== */
+
+.hero {
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background: url("../../media/homebg\ image.jpeg") no-repeat center center/cover;
+    position: relative;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1;
+    backdrop-filter: blur(2px);
+}
+
+
+/* Text above overlay */
+
+.hero-text {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-text p {
+    font-size: 1.3rem;
+    margin: 15px 0;
+    color: #f1f1f1;
+}
+
+.admission-btn {
+    background: var(--secondary-color);
+    color: var(--bg-light);
+    padding: 14px 32px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    border: none;
+    position: relative;
+    z-index: 3;
+}
+
+.admission-btn:hover {
+    background: #e76f00;
+}
+
+
+/* Background Zoom Animation */
+
+@keyframes zoomHero {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.1);
+    }
+}
+
+
+/* ==================== PRINCIPAL SECTION ==================== */
+
+
+/* Updated Horizontal Principal Section */
+
+.principal-section h2 {
+    text-align: center;
+    width: 100%;
+    display: block;
+    font-size: 2.2rem;
+    margin-bottom: 40px;
+    font-weight: 700;
+    margin-top: 30px;
+}
+
+.principal-horizontal {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 90%;
+    margin: auto;
+}
+
+.principal-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-md);
+    transition: 0.3s;
+}
+
+.principal-row:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+
+/* ==================== VICE PRINCIPAL SECTION ==================== */
+
+.vice-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    background: #ffffff;
+    box-shadow: var(--shadow-md);
+    padding: 22px;
+    border-radius: 12px;
+    margin-top: 20px;
+    max-width: 750px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    transition: 0.3s;
+}
+
+.vice-wrapper:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+
+/* Smaller image width */
+
+.vice-image-box {
+    width: 160px;
+}
+
+.vice-img {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: var(--shadow-md);
+}
+
+
+/* Text Formatting */
+
+.vice-info {
+    flex: 1;
+    text-align: left;
+}
+
+.vice-role {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    margin-bottom: 8px;
+}
+
+.vice-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+
+.vice-contact a {
+    color: var(--primary-color);
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.principal-photo {
+    width: 240px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: var(--shadow-lg);
+}
+
+.principal-info {
+    flex: 1;
+    text-align: left;
+}
+
+.principal-info h3 {
+    font-size: 1.6rem;
+    color: var(--text-dark);
+}
+
+.leader-role {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.leader-contact a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+/* ==================== IMAGE SLIDER ==================== */
+
+.card-slider-container {
+    overflow: hidden;
+    width: 100%;
+    margin: 50px 0;
+}
+
+.card-slider {
+    display: flex;
+    gap: 22px;
+    animation: slideCards 25s linear infinite;
+}
+
+.card-item {
+    min-width: 220px;
+    height: 160px;
+}
+
+.card-item img {
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: var(--shadow-md);
+}
+
+@keyframes slideCards {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-55%);
+    }
+}
+
+
+/* ==================== HIGHLIGHT SECTION ==================== */
+
+.highlights {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.highlight-cards {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.card {
+    background: #ccd8fa;
+    padding: 22px;
+    width: 270px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+
+/* ==================== CTA SECTION ==================== */
+
+.cta {
+    text-align: center;
+    padding: 70px 20px;
+    background: #ffffff;
+    clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%);
+}
+
+.cta h2 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+}
+
+
+/* ==================== POPUP FORM ==================== */
+
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.popup-content {
+    background: white;
+    padding: 35px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    animation: popIn 0.3s ease;
+}
+
+.popup-content input,
+.popup-content textarea {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin: 10px 0;
+}
+
+.popup-content button {
+    background: #004aad;
+    padding: 14px 30px;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.popup-content button:hover {
+    background: #0067df;
+}
+
+.close-btn {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 22px;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* ==================== RESPONSIVE BREAKPOINTS ==================== */
+
+@media (max-width: 992px) {
+    .hero-text h1 {
+        font-size: 2.3rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-item {
+        min-width: 150px;
+        height: 110px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-text h1 {
+        font-size: 1.9rem;
+    }
+    .highlight-cards .card {
+        width: 90%;
+    }
+}
+
+
+/* {unifrom section} */
+
+.uniform-section {
+    padding: 40px 10px;
+    /* smaller padding */
+    background: #f5f7ff;
+    text-align: center;
+}
+
+.uniform-section h2 {
+    font-size: 28px;
+    margin-bottom: 30px;
+    color: #222;
+    font-weight: bold;
+}
+
+.uniform-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.uniform-card {
+    background: #ffffff;
+    border-radius: 12px;
+    width: 500px;
+    /* smaller card width */
+    padding: 15px;
+    /* smaller padding */
+    box-shadow: 0 4px 10px rgba(245, 240, 240, 0.12);
+    transition: 0.3s ease-in-out;
+}
+
+.uniform-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.20);
+}
+
+.uniform-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #444;
+}
+
+.uniform-img {
+    width: 100%;
+    height: 280px;
+    /* smaller height */
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.uniform-desc {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    line-height: 1.4;
+}
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .uniform-card {
+        width: 90%;
+    }
+    .uniform-img {
+        height: auto;
+    }
+}
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .uniform-card {
+        width: 90%;
+    }
+    .uniform-img {
+        height: auto;
+    }
+}
+
+
+/* Responsive */
+
+@media (max-width: 768px) {
+    .principal-row {
+        flex-direction: column;
+        text-align: center;
+    }
+    .principal-photo {
+        width: 200px;
+        height: auto;
+    }
+    .principal-info {
+        text-align: center;
+    }
+    .vice-wrapper {
+        flex-direction: column;
+        text-align: center;
+    }
+    .vice-image-box {
+        width: 140px;
+    }
+    .vice-info {
+        text-align: center;
+    }
+}

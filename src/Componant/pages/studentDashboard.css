@@ -1,0 +1,90 @@
+/* ------------------ COLORS ------------------- */
+:root {
+    --blue-primary: #004f9e;
+    --orange-secondary: #ff9c00;
+    --text-dark: #14213d;
+    --page-bg: #f7f9fc;
+    --muted: #777;
+}
+
+/* ------------------ LAYOUT ------------------- */
+.student-page {
+    display: flex;
+    min-height: 100vh;
+    background: var(--page-bg);
+}
+
+/* ------------------ SIDEBAR ------------------- */
+.student-sidebar {
+    width: 240px;
+    padding: 20px;
+    background: #fff;
+    border-right: 1px solid #e6e6e6;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Menu */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.menu .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text-dark);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.menu .nav-item:hover,
+.menu .nav-item.active {
+    background: var(--blue-primary);
+    color: white;
+}
+
+/* Footer */
+.sidebar-footer {
+    margin-top: auto;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ------------------ CONTENT ------------------- */
+.student-content {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Page box */
+.page {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* ------------------ RESPONSIVE ------------------- */
+@media (max-width: 768px) {
+    .student-page {
+        flex-direction: column;
+    }
+
+    .student-sidebar {
+        width: 100%;
+        flex-direction: row;
+        gap: 15px;
+        overflow-x: auto;
+        padding: 15px;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+}

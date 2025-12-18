@@ -1,0 +1,120 @@
+/* --------------------
+   SPORTS MAIN SECTION
+----------------------- */
+
+.sports-page {
+    padding: 40px;
+    text-align: center;
+}
+
+.sports-page h2 {
+    font-size: 2.4rem;
+    margin-bottom: 10px;
+    color: #222;
+}
+
+.sports-subtitle {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+
+/* --------------------
+      GALLERY GRID
+----------------------- */
+
+.sports-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    padding: 10px;
+}
+
+.sports-gallery img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.sports-gallery img:hover {
+    transform: scale(1.05);
+}
+
+
+/* --------------------
+     SPORTS INFO BOXES
+----------------------- */
+
+.sports-info-section {
+    padding: 40px;
+    margin-top: 20px;
+    text-align: center;
+    background: #f8f8f8;
+}
+
+.sports-info-section h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.sports-info-box {
+    background: #fff;
+    padding: 20px;
+    margin: 20px auto;
+    width: min(90%, 800px);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.sports-info-box h4 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.sports-info-box p {
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.6;
+}
+
+
+/* Group titles */
+
+.group-title {
+    font-size: 1.8rem;
+    margin: 20px 0 10px;
+    text-align: center;
+    color: #333;
+    font-weight: 600;
+}
+
+.sports-group-section {
+    padding: 20px 30px;
+}
+
+
+/* Button About */
+
+.back-button {
+    background: linear-gradient(145deg, #ff9a9e, #fad0c4);
+    /* soft colorful gradient */
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.back-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}

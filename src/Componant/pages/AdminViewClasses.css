@@ -1,0 +1,207 @@
+/* AdminViewClasses.css */
+
+/* Container Styles */
+.vc-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header Styles */
+.vc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.vc-title {
+    color: #2c3e50;
+    font-size: 28px;
+    margin: 0;
+}
+
+.vc-add-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.vc-add-btn:hover {
+    background-color: #45a049;
+}
+
+/* Refresh Button */
+.vc-refresh-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.vc-refresh-btn:hover {
+    background-color: #0b7dda;
+}
+
+.vc-header-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Table Container */
+.vc-table-wrap {
+    overflow-x: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: white;
+}
+
+/* Table Styles */
+.vc-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.vc-table th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: 600;
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+    border-bottom: 2px solid #34495e;
+}
+
+.vc-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.vc-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.vc-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Fees Styling */
+.vc-table td:nth-child(3) {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Action Buttons */
+.vc-update-btn,
+.vc-delete-btn {
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+    min-width: 60px;
+}
+
+.vc-update-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.vc-update-btn:hover {
+    background-color: #0b7dda;
+}
+
+.vc-delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.vc-delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+/* Loading and Empty States */
+.vc-empty {
+    text-align: center;
+    padding: 40px !important;
+    color: #666;
+    font-style: italic;
+}
+
+/* Loading Spinner */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vc-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .vc-header-buttons {
+        width: 100%;
+    }
+
+    .vc-add-btn,
+    .vc-refresh-btn {
+        flex: 1;
+    }
+
+    .vc-table th,
+    .vc-table td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .vc-update-btn,
+    .vc-delete-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        min-width: 50px;
+    }
+}

@@ -1,0 +1,115 @@
+.ud-container {
+    padding: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.ud-card {
+    width: 720px;
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 9px #00000015;
+}
+
+.ud-card h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.ud-input-block {
+    margin-bottom: 18px;
+}
+
+.ud-input-block label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.ud-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.ud-form {
+    margin-top: 15px;
+}
+
+.ud-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.ud-file-block {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+}
+
+.ud-file-block input {
+    margin-top: 6px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.ud-btn {
+    margin-top: 18px;
+    padding: 12px 16px;
+    background: #ff9c00;
+    color: #fff;
+    border: none;
+    width: 100%;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.ud-btn:hover {
+    background: #0067d1;
+}
+
+.ud-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.ud-button-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+    align-items: center;
+}
+
+/* tweak button look - adjust to your theme */
+.ud-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    font-weight: 600;
+}
+
+.ud-back-btn {
+    background-color: #ff9c00;
+}
+
+.ud-save-btn {
+    background-color: #1677ff;
+}
+
+/* disabled state */
+.ud-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

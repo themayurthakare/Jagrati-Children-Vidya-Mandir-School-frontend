@@ -1,0 +1,53 @@
+.attendance-wrapper {
+  padding: 30px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.attendance-card {
+  max-width: 920px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* TABLE */
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.attendance-table th {
+  background: #f0f6ff;
+  padding: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+.attendance-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* STATUS COLORS */
+.present {
+  color: #008f4c;
+  font-weight: 600;
+}
+
+.absent {
+  color: #d62828;
+  font-weight: 600;
+}
+
+.loader {
+  padding: 20px;
+}

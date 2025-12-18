@@ -1,0 +1,90 @@
+.artcraft-page {
+    padding: 20px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+}
+
+.back-button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-radius: 25px;
+    transition: 0.3s;
+}
+
+.back-button:hover {
+    background-color: #ddd;
+}
+
+h2 {
+    color: #192f4f;
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+
+/* Gallery */
+
+.artcraft-gallery {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.artcraft-gallery img {
+    width: 250px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: transform 0.3s;
+}
+
+.artcraft-gallery img:hover {
+    transform: scale(1.05);
+}
+
+
+/* Video */
+
+.artcraft-video {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.artcraft-video video {
+    border-radius: 12px;
+    max-width: 100%;
+}
+
+
+/* Info section */
+
+.artcraft-info h3 {
+    color: #fd7e14;
+    margin-bottom: 10px;
+}
+
+.artcraft-info ul {
+    list-style: disc;
+    padding-left: 20px;
+    font-size: 1.1rem;
+}
+
+.artcraft-info ul li {
+    margin-bottom: 10px;
+}
+
+.artcraft-info {
+    margin-bottom: 30px;
+}

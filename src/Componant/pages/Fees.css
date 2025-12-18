@@ -1,0 +1,91 @@
+.fees-wrapper {
+  padding: 30px;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.fees-card {
+  max-width: 920px;
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 6px;
+  border: 1px solid #e5e5e5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+/* SUMMARY SECTION */
+.summary-box {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+  background: #f7faff;
+  padding: 15px 20px;
+  border-radius: 6px;
+  border: 1px solid #dce6f7;
+}
+
+.summary-box div label {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+.summary-box span {
+  font-weight: 500;
+  color: #333;
+}
+
+.summary-box .due {
+  color: #d62828;
+  font-weight: 700;
+}
+
+/* TABLE */
+.table-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.fees-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.fees-table th {
+  background: #f0f6ff;
+  padding: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+}
+
+.fees-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* STATUS STYLE */
+.paid {
+  color: #008f4c;
+  font-weight: 600;
+}
+
+.pending {
+  color: #d62828;
+  font-weight: 600;
+}
+
+.pay-btn {
+  margin-top: 12px;
+  background: #0066ff;
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -1,0 +1,184 @@
+/* MAIN CONTAINER */
+.academics-container {
+  padding: 40px 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+.academics-title {
+  text-align: center;
+  font-size: 42px;
+  font-weight: 700;
+  color: #1b3a57;
+}
+
+.academics-subtitle {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #555;
+  font-size: 18px;
+}
+
+/* ===========================
+   CLIP PATH SPECIAL SECTION
+   =========================== */
+/* ===========================
+   CLIP PATH SPECIAL SECTION
+   =========================== */
+.clip-section {
+  background: linear-gradient(135deg, #ff7f00, #ffae42); /* changed from blue to orange gradient */
+  color: white;
+  padding: 60px 20px;
+  margin: 50px 0;
+  clip-path: polygon(0 0, 100% 10%, 100% 90%, 0 100%);
+}
+
+
+.clip-content {
+  max-width: 900px;
+  margin: auto;
+  text-align: center;
+}
+
+.clip-content h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.clip-content p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.clip-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.clip-content ul li {
+  margin: 8px 0;
+  font-size: 17px;
+}
+
+/* NORMAL SECTION */
+.academics-section {
+  margin: 40px 0;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 28px;
+  margin-bottom: 18px;
+  color: #1b3a57;
+}
+
+.section-desc {
+  font-size: 17px;
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  color: #666;
+}
+
+.section-list {
+  list-style: none;
+  padding: 0;
+  font-size: 18px;
+  max-width: 850px;
+  margin: auto;
+  text-align: left;
+}
+
+.section-list li {
+  margin: 12px 0;
+  background: #f8faff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border-left: 5px solid orangered;
+}
+
+/* ---------------------
+   DEPARTMENTS CARDS
+   --------------------- */
+.cards-section {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.academics-card {
+  padding: 20px;
+  background: #f7faff;
+  border-radius: 10px;
+  border: 1px solid #dce6f7;
+  text-align: center;
+  transition: 0.3s ease;
+}
+
+.academics-card:hover {
+  box-shadow: 0px 6px 15px rgba(0, 0, 50, 0.1);
+  transform: translateY(-5px);
+}
+
+.academics-card h3 {
+  color: #004aad;
+  margin-bottom: 10px;
+}
+
+/* ===========================
+   MOBILE RESPONSIVE
+   =========================== */
+@media (max-width: 768px) {
+  .academics-title {
+    font-size: 32px;
+  }
+
+  .clip-section {
+    clip-path: polygon(0 0, 100% 5%, 100% 95%, 0 100%);
+    padding: 40px 20px;
+  }
+
+  .clip-content h2 {
+    font-size: 26px;
+  }
+
+  .clip-content p {
+    font-size: 16px;
+  }
+
+  .section-title {
+    font-size: 25px;
+  }
+
+  .section-list li {
+    font-size: 16px;
+  }
+
+  .academics-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .academics-title {
+    font-size: 28px;
+  }
+
+  .clip-content h2 {
+    font-size: 24px;
+  }
+
+  .academics-card h3 {
+    font-size: 20px;
+  }
+
+  .section-list {
+    text-align: left;
+    padding: 0 10px;
+  }
+}
