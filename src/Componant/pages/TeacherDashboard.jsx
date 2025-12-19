@@ -8,7 +8,7 @@ import {
   FaEdit,
   FaChartBar,
 } from "react-icons/fa";
-import "./AdminDashboard.css"; // Same CSS as AdminDashboard.css (copy the file)
+import "../styles/TeacherDashboard.css"; // Same CSS as AdminDashboard.css (copy the file)
 
 import TeacherViewAssignedClasses from "./TeacherViewAssignedClasses";
 import TeacherViewEnrolledStudents from "./TeacherViewEnrolledStudents";
