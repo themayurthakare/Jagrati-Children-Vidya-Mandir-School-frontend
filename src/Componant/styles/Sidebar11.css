@@ -32,7 +32,3 @@
 .sidebar a:hover {
   background-color: #3a4a5a; /* optional hover effect */
 }
-.teacher-sidebar {
-  opacity: 1 !important;
-  filter: none !important;
-}
