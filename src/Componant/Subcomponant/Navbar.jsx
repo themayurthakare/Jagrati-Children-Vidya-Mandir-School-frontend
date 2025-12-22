@@ -40,7 +40,7 @@ const Navbar = ({ logoText = "J.C.V.M" }) => {
 
   const goToDashboard = () => {
     if (role === "student" || role === "parent") navigate("/user-dashboard");
-    if (role === "teacher") navigate("/teacher-dashboard");
+    if (role === "teacher") navigate("/teacherdashboard");
     if (role === "admin") navigate("/admindashboard");
   };
 

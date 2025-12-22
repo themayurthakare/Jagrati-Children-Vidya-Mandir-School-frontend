@@ -7,38 +7,43 @@ export default function AddMarksList() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Get teacher ID from localStorage (set during login)
-  const teacherId = localStorage.getItem("teacherId");
-
   // Fetch students data from API
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated. Please login again.");
-      setLoading(false);
-      return;
-    }
     fetchStudents();
-  }, [teacherId]);
+  }, []);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/teachers/${teacherId}/students`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/teachers/${localStorage.getItem(
+          "userId"
+        )}/students`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
         throw new Error("Failed to fetch students");
       }
 
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        throw new Error("Server did not return JSON");
+      }
+
       const students = await response.json();
-      
+
       // Transform API data to match table structure
       const formattedRows = students.map((student, index) => ({
         id: student.id,
@@ -82,10 +87,7 @@ export default function AddMarksList() {
   };
 
   const handleSave = async () => {
-    if (!teacherId) {
-      setError("Teacher not authenticated");
-      return;
-    }
+    const teacherId = localStorage.getItem("userId");
 
     try {
       setSaving(true);
@@ -93,18 +95,22 @@ export default function AddMarksList() {
 
       // Filter out empty rows and validate
       const validRows = rows
-        .filter(row => row.id && row.id !== `new-${row.id}`) // Only existing students
-        .filter(row => {
-          const hasMarks = row.marathi || row.hindi || row.english || row.math || row.science;
-          return hasMarks && !isNaN(parseInt(row.marathi)) === false; // At least one mark
+        // only existing students: skip rows whose id starts with "new-"
+        .filter(
+          (row) => !(typeof row.id === "string" && row.id.startsWith("new-"))
+        )
+        .filter((row) => {
+          const hasMarks =
+            row.marathi || row.hindi || row.english || row.math || row.science;
+          return hasMarks;
         })
-        .map(row => ({
+        .map((row) => ({
           studentId: row.id,
-          marathi: parseInt(row.marathi) || 0,
-          hindi: parseInt(row.hindi) || 0,
-          english: parseInt(row.english) || 0,
-          math: parseInt(row.math) || 0,
-          science: parseInt(row.science) || 0,
+          marathi: parseInt(row.marathi, 10) || 0,
+          hindi: parseInt(row.hindi, 10) || 0,
+          english: parseInt(row.english, 10) || 0,
+          math: parseInt(row.math, 10) || 0,
+          science: parseInt(row.science, 10) || 0,
         }));
 
       if (validRows.length === 0) {
@@ -112,25 +118,33 @@ export default function AddMarksList() {
         return;
       }
 
-      const response = await fetch("/api/teachers/marks/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          teacherId,
-          marks: validRows,
-        }),
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/teachers/marks/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            teacherId,
+            marks: validRows,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to save marks");
+        let errorMessage = "Failed to save marks";
+        try {
+          const errorData = await response.json();
+          if (errorData.message) errorMessage = errorData.message;
+        } catch {
+          // ignore JSON parse errors and use default
+        }
+        throw new Error(errorMessage);
       }
 
       alert("Marks saved successfully ✅");
-      // Refresh data to show updated marks (optional)
+      // Optionally refresh:
       // fetchStudents();
     } catch (err) {
       setError(err.message);
@@ -183,25 +197,41 @@ export default function AddMarksList() {
                   <input
                     type="text"
                     value={row.name}
-                    onChange={(e) => handleChange(index, "name", e.target.value)}
-                    disabled={row.id && row.id.indexOf('new-') !== 0} // Disable for existing students
-                    className={row.id && row.id.indexOf('new-') !== 0 ? "disabled" : ""}
+                    onChange={(e) =>
+                      handleChange(index, "name", e.target.value)
+                    }
+                    disabled={
+                      row.id &&
+                      typeof row.id === "string" &&
+                      !row.id.startsWith("new-")
+                    } // Disable for existing students
+                    className={
+                      row.id &&
+                      typeof row.id === "string" &&
+                      !row.id.startsWith("new-")
+                        ? "disabled"
+                        : ""
+                    }
                   />
                 </td>
-                {["marathi", "hindi", "english", "math", "science"].map((sub) => (
-                  <td key={sub}>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={row[sub] || ""}
-                      onChange={(e) => handleChange(index, sub, e.target.value)}
-                      className="marks-input"
-                    />
-                  </td>
-                ))}
+                {["marathi", "hindi", "english", "math", "science"].map(
+                  (sub) => (
+                    <td key={sub}>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={row[sub] || ""}
+                        onChange={(e) =>
+                          handleChange(index, sub, e.target.value)
+                        }
+                        className="marks-input"
+                      />
+                    </td>
+                  )
+                )}
                 <td>
-                  <button 
+                  <button
                     className="delete-btn"
                     onClick={() => {
                       const updated = rows.filter((_, i) => i !== index);
@@ -223,9 +253,9 @@ export default function AddMarksList() {
           Add Student
         </button>
 
-        <button 
-          className="save-btn" 
-          onClick={handleSave} 
+        <button
+          className="save-btn"
+          onClick={handleSave}
           disabled={saving || rows.length === 0}
         >
           {saving ? "Saving..." : "Save Marks"}

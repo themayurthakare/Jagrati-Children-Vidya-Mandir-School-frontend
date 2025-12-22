@@ -49,7 +49,7 @@ const Login = () => {
 
       // ---------- TEACHER ----------
       response = await fetch(
-        "http://localhost:8080/api/teachers/teacher/login",
+        "http://localhost:8080/api/teachers/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -60,9 +60,9 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("userRole", "teacher");
-        localStorage.setItem("userId", data.userId);
+        localStorage.setItem("userId", data.teacherId);
         window.dispatchEvent(new Event("auth-change"));
-        navigate("/teacher-dashboard", { state: { userId: data.userId } });
+        navigate("/teacherdashboard", { state: { userId: data.teacherId } });
         return;
       }
 

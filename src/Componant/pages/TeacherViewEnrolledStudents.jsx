@@ -7,35 +7,42 @@ const Enrolledstudents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchParams] = useSearchParams();
-  
-  // Get teacher ID from localStorage
-  const teacherId = localStorage.getItem("teacherId");
 
   // Fetch students data from API
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated. Please login again.");
-      setLoading(false);
-      return;
-    }
     fetchStudents();
-  }, [teacherId]);
+  }, []);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/teachers/${teacherId}/students`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/teachers/${localStorage.getItem(
+          "userId"
+        )}/students`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
         throw new Error("Failed to fetch students");
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        throw new Error(
+          "Server did not return JSON. Please check API URL or authentication."
+        );
       }
 
       const studentsData = await response.json();
@@ -95,9 +102,7 @@ const Enrolledstudents = () => {
                   <td>{stu.gender}</td>
                   <td>{stu.phone || stu.contact || stu.mobile}</td>
                   <td>
-                    <button className="action-btn view-marks">
-                      Marks
-                    </button>
+                    <button className="action-btn view-marks">Marks</button>
                   </td>
                 </tr>
               ))}

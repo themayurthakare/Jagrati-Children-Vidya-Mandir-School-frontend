@@ -9,62 +9,52 @@ const Assignedclasses = () => {
   const navigate = useNavigate();
 
   // Get teacher ID from localStorage (set during login)
-  const teacherId = localStorage.getItem("teacherId");
+  const teacherId = localStorage.getItem("userId");
 
   // Fetch assigned classes from API
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated");
-      setLoading(false);
-      return;
-    }
-
-    const loadClasses = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const response = await fetch(`/api/teachers/${teacherId}/classes`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if (!response.ok) throw new Error("Failed to fetch classes");
-        const data = await response.json();
-        setClasses(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadClasses();
-  }, [teacherId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // ✅ FIXED: Extract loadClasses for retry button
-  const fetchAssignedClasses = () => {
-    const loadClasses = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const response = await fetch(`/api/teachers/${teacherId}/classes`, {
+  const loadClasses = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await fetch(
+        `http://localhost:8080/api/teachers/${teacherId}/classes`,
+        {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-        });
-        if (!response.ok) throw new Error("Failed to fetch classes");
-        const data = await response.json();
-        setClasses(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
+        throw new Error("Failed to fetch classes");
       }
-    };
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        throw new Error("Server did not return JSON");
+      }
+
+      const data = await response.json();
+      setClasses(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // For retry button
+  const fetchAssignedClasses = () => {
     loadClasses();
   };
 
@@ -88,7 +78,6 @@ const Assignedclasses = () => {
       {error && (
         <div className="error-message">
           {error}
-          {/* ✅ FIXED: Now uses correct function */}
           <button className="retry-btn" onClick={fetchAssignedClasses}>
             Retry
           </button>

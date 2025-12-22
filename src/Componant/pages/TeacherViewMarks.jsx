@@ -9,34 +9,37 @@ export default function ViewMarks() {
   const [examFilter, setExamFilter] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // Get teacher ID from localStorage
-  const teacherId = localStorage.getItem("teacherId");
-
   // Fetch marks data from API
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated. Please login again.");
-      setLoading(false);
-      return;
-    }
     fetchMarksData();
-  }, [teacherId]);
+  }, []);
 
   const fetchMarksData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/teachers/marks/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        "http://localhost:8080/api/teachers/marks/all",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
         throw new Error("Failed to fetch marks data");
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        throw new Error("Server did not return JSON");
       }
 
       const marksData = await response.json();
@@ -56,12 +59,12 @@ export default function ViewMarks() {
   );
 
   const getUniqueClasses = () => {
-    const classes = [...new Set(students.map(s => s.class))];
+    const classes = [...new Set(students.map((s) => s.class))];
     return classes.sort();
   };
 
   const getUniqueExams = () => {
-    const exams = [...new Set(students.map(s => s.exam))];
+    const exams = [...new Set(students.map((s) => s.exam))];
     return exams.sort();
   };
 
@@ -94,8 +97,10 @@ export default function ViewMarks() {
           onChange={(e) => setClassFilter(e.target.value)}
         >
           <option value="">All Classes</option>
-          {getUniqueClasses().map(cls => (
-            <option key={cls} value={cls}>{cls}</option>
+          {getUniqueClasses().map((cls) => (
+            <option key={cls} value={cls}>
+              {cls}
+            </option>
           ))}
         </select>
 
@@ -104,8 +109,10 @@ export default function ViewMarks() {
           onChange={(e) => setExamFilter(e.target.value)}
         >
           <option value="">All Exams</option>
-          {getUniqueExams().map(exam => (
-            <option key={exam} value={exam}>{exam}</option>
+          {getUniqueExams().map((exam) => (
+            <option key={exam} value={exam}>
+              {exam}
+            </option>
           ))}
         </select>
       </div>
@@ -136,7 +143,10 @@ export default function ViewMarks() {
                   {s.remarks || (s.percentage >= 40 ? "Pass" : "Fail")}
                 </td>
                 <td>
-                  <button className="report-btn" onClick={() => setSelectedStudent(s)}>
+                  <button
+                    className="report-btn"
+                    onClick={() => setSelectedStudent(s)}
+                  >
                     View Details
                   </button>
                 </td>
@@ -154,30 +164,46 @@ export default function ViewMarks() {
         </table>
       </div>
 
-      {/* SIMPLE REPORT CARD MODAL (No separate component needed) */}
+      {/* SIMPLE REPORT CARD MODAL */}
       {selectedStudent && (
-        <div className="modal-overlay" onClick={() => setSelectedStudent(null)}>
-          <div className="report-card" onClick={e => e.stopPropagation()}>
+        <div
+          className="modal-overlay"
+          onClick={() => setSelectedStudent(null)}
+        >
+          <div className="report-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{selectedStudent.name}</h3>
-              <button className="close-btn" onClick={() => setSelectedStudent(null)}>
+              <button
+                className="close-btn"
+                onClick={() => setSelectedStudent(null)}
+              >
                 ×
               </button>
             </div>
-            
+
             <div className="report-content">
-              <p><strong>Class:</strong> {selectedStudent.class}</p>
-              <p><strong>Exam:</strong> {selectedStudent.exam}</p>
-              <p><strong>Percentage:</strong> {selectedStudent.percentage}%</p>
-              <p className={`remarks ${selectedStudent.remarks?.toLowerCase()}`}>
-                <strong>Remarks:</strong> {selectedStudent.remarks || (selectedStudent.percentage >= 40 ? "Pass" : "Fail")}
+              <p>
+                <strong>Class:</strong> {selectedStudent.class}
+              </p>
+              <p>
+                <strong>Exam:</strong> {selectedStudent.exam}
+              </p>
+              <p>
+                <strong>Percentage:</strong> {selectedStudent.percentage}%
+              </p>
+              <p
+                className={`remarks ${
+                  selectedStudent.remarks?.toLowerCase() ||
+                  (selectedStudent.percentage >= 40 ? "pass" : "fail")
+                }`}
+              >
+                <strong>Remarks:</strong>{" "}
+                {selectedStudent.remarks ||
+                  (selectedStudent.percentage >= 40 ? "Pass" : "Fail")}
               </p>
             </div>
-            
-            <button 
-              className="print-btn" 
-              onClick={() => window.print()}
-            >
+
+            <button className="print-btn" onClick={() => window.print()}>
               Print Report Card
             </button>
           </div>

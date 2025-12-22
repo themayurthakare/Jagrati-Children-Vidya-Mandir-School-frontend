@@ -11,34 +11,37 @@ const Attendencereport = () => {
   });
   const [summary, setSummary] = useState({ present: 0, absent: 0 });
 
-  // Get teacher ID from localStorage
-  const teacherId = localStorage.getItem("teacherId");
-
-  // Fetch all attendance data
+  // Fetch students data from API
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated. Please login again.");
-      setLoading(false);
-      return;
-    }
     fetchAttendanceData();
-  }, [teacherId]);
+  }, []);
 
   const fetchAttendanceData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`/api/teachers/attendance/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/teachers/attendance/all`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch attendance data");
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
+        throw new Error("Request failed");
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON, got:", text);
+        throw new Error("Server did not return JSON");
       }
 
       const data = await response.json();
@@ -52,8 +55,8 @@ const Attendencereport = () => {
   };
 
   const calculateSummary = (data) => {
-    const present = data.filter(item => item.status === "Present").length;
-    const absent = data.filter(item => item.status === "Absent").length;
+    const present = data.filter((item) => item.status === "Present").length;
+    const absent = data.filter((item) => item.status === "Absent").length;
     setSummary({ present, absent });
   };
 
@@ -65,30 +68,39 @@ const Attendencereport = () => {
   };
 
   const handleSearch = () => {
-    // Filter data based on selected filters
     let filtered = reportData;
 
     if (filters.date) {
-      filtered = filtered.filter(item => 
-        new Date(item.date).toISOString().split('T')[0] === filters.date
+      filtered = filtered.filter(
+        (item) =>
+          new Date(item.date).toISOString().split("T")[0] === filters.date
       );
     }
 
     if (filters.className) {
-      filtered = filtered.filter(item => 
-        (item.className || `${item.class}-${item.section}`).includes(filters.className)
+      filtered = filtered.filter((item) =>
+        (item.className || `${item.class}-${item.section}`).includes(
+          filters.className
+        )
       );
     }
 
     calculateSummary(filtered);
   };
 
-  const filteredData = reportData.filter(item => {
-    if (filters.date && new Date(item.date).toISOString().split('T')[0] !== filters.date) {
+  const filteredData = reportData.filter((item) => {
+    if (
+      filters.date &&
+      new Date(item.date).toISOString().split("T")[0] !== filters.date
+    ) {
       return false;
     }
-    if (filters.className && 
-        !(item.className || `${item.class}-${item.section}`).includes(filters.className)) {
+    if (
+      filters.className &&
+      !(item.className || `${item.class}-${item.section}`).includes(
+        filters.className
+      )
+    ) {
       return false;
     }
     return true;
@@ -120,8 +132,8 @@ const Attendencereport = () => {
       <div className="filter-card">
         <div className="filter-group">
           <label>Date</label>
-          <input 
-            type="date" 
+          <input
+            type="date"
             name="date"
             value={filters.date}
             onChange={handleFilterChange}
@@ -130,8 +142,8 @@ const Attendencereport = () => {
 
         <div className="filter-group">
           <label>Class</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             name="className"
             placeholder="e.g., 10A"
             value={filters.className}
@@ -142,10 +154,13 @@ const Attendencereport = () => {
         <button className="filter-btn" onClick={handleSearch}>
           Search
         </button>
-        <button className="clear-btn" onClick={() => {
-          setFilters({ date: "", className: "" });
-          calculateSummary(reportData);
-        }}>
+        <button
+          className="clear-btn"
+          onClick={() => {
+            setFilters({ date: "", className: "" });
+            calculateSummary(reportData);
+          }}
+        >
           Clear
         </button>
       </div>
@@ -188,7 +203,11 @@ const Attendencereport = () => {
                   <td>{new Date(row.date).toLocaleDateString()}</td>
                   <td>{row.student || row.studentName}</td>
                   <td>{row.className || `${row.class}-${row.section}`}</td>
-                  <td className={row.status === "Present" ? "present-text" : "absent-text"}>
+                  <td
+                    className={
+                      row.status === "Present" ? "present-text" : "absent-text"
+                    }
+                  >
                     {row.status}
                   </td>
                 </tr>

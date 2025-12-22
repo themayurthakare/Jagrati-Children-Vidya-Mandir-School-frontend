@@ -9,18 +9,10 @@ const Attendance = () => {
   const [error, setError] = useState("");
   const [recentAttendance, setRecentAttendance] = useState([]);
 
-  // Get teacher ID from localStorage
-  const teacherId = localStorage.getItem("teacherId");
-
   // Fetch students and recent attendance
   useEffect(() => {
-    if (!teacherId) {
-      setError("Teacher not authenticated. Please login again.");
-      setLoading(false);
-      return;
-    }
     fetchData();
-  }, [teacherId]);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -28,12 +20,16 @@ const Attendance = () => {
       setError("");
 
       // Fetch students
-      const studentsRes = await fetch(`/api/teachers/${teacherId}/students`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const studentsRes = await fetch(
+        `http://localhost:8080/api/teachers/${localStorage.getItem(
+          "userId"
+        )}/students`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!studentsRes.ok) throw new Error("Failed to fetch students");
 
@@ -41,12 +37,16 @@ const Attendance = () => {
       setStudents(studentsData);
 
       // Fetch recent attendance
-      const attendanceRes = await fetch(`/api/teachers/${teacherId}/attendance`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const attendanceRes = await fetch(
+        `http://localhost:8080/api/teachers/${localStorage.getItem(
+          "userId"
+        )}/attendance`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (attendanceRes.ok) {
         const attendanceData = await attendanceRes.json();
@@ -68,23 +68,28 @@ const Attendance = () => {
       setSaving(true);
       setError("");
 
-      const attendanceData = Object.entries(attendance).map(([studentId, status]) => ({
-        studentId: parseInt(studentId),
-        status,
-        date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-        teacherId,
-      }));
+      const teacherId = localStorage.getItem("userId");
 
-      const response = await fetch("/api/teachers/mark", {
+      const attendanceData = Object.entries(attendance).map(
+        ([studentId, status]) => ({
+          studentId: parseInt(studentId, 10),
+          status,
+          date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+          teacherId,
+        })
+      );
+
+      const response = await fetch("http://localhost:8080/api/teachers/mark", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify(attendanceData),
       });
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error("Non-OK response body:", text);
         throw new Error("Failed to save attendance");
       }
 
@@ -164,8 +169,8 @@ const Attendance = () => {
             </tbody>
           </table>
         </div>
-        <button 
-          className="save-btn" 
+        <button
+          className="save-btn"
           onClick={handleSaveAttendance}
           disabled={saving || Object.keys(attendance).length === 0}
         >
@@ -198,7 +203,9 @@ const Attendance = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="no-data">No attendance records yet</td>
+                  <td colSpan="3" className="no-data">
+                    No attendance records yet
+                  </td>
                 </tr>
               )}
             </tbody>
