@@ -2,11 +2,23 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
+const EXPIRY_MS = 2 * 60 * 60 * 1000; // 2 hours
+
 const Login = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const setAuth = (role, userId) => {
+    const expiresAt = Date.now() + EXPIRY_MS;
+    localStorage.setItem("userRole", role);
+    if (userId != null) {
+      localStorage.setItem("userId", userId);
+    }
+    localStorage.setItem("authExpiresAt", String(expiresAt));
+    window.dispatchEvent(new Event("auth-change"));
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,9 +34,7 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("userRole", "student");
-        localStorage.setItem("userId", data.userId);
-        window.dispatchEvent(new Event("auth-change"));
+        setAuth("student", data.userId);
         navigate("/user-dashboard", {
           state: { userId: data.userId },
         });
@@ -40,28 +50,21 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("userRole", "parent");
-        localStorage.setItem("userId", data.userId);
-        window.dispatchEvent(new Event("auth-change"));
+        setAuth("parent", data.userId);
         navigate("/parent-dashboard", { state: { userId: data.userId } });
         return;
       }
 
       // ---------- TEACHER ----------
-      response = await fetch(
-        "http://localhost:8080/api/teachers/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone, password }),
-        }
-      );
+      response = await fetch("http://localhost:8080/api/teachers/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, password }),
+      });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("userRole", "teacher");
-        localStorage.setItem("userId", data.teacherId);
-        window.dispatchEvent(new Event("auth-change"));
+        setAuth("teacher", data.teacherId);
         navigate("/teacherdashboard", { state: { userId: data.teacherId } });
         return;
       }
@@ -75,9 +78,7 @@ const Login = () => {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("userRole", "admin");
-        // localStorage.setItem("userId", data.userId);
-        window.dispatchEvent(new Event("auth-change"));
+        setAuth("admin", data.userId);
         navigate("/admindashboard", { state: { userId: data.userId } });
         return;
       }

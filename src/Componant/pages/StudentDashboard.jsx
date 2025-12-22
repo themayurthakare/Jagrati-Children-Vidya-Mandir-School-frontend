@@ -46,21 +46,24 @@ export default function StudentDashboard() {
   const location = useLocation();
   const [student, setStudent] = useState(null);
 
-  // ✅ SAFE userId (state OR storage)
+  // SAFE userId (state OR storage)
   const userId = location.state?.userId || localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
 
-  // ✅ Hooks MUST run first
+  // Fetch student details
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || userRole !== "student") return;
 
     fetch(`http://localhost:8080/api/students/${userId}`)
       .then((res) => res.json())
       .then(setStudent)
       .catch(() => console.log("Backend on chai break ☕"));
-  }, [userId]);
+  }, [userId, userRole]);
 
-  // ✅ Redirect AFTER hooks
-  if (!userId) return <Navigate to="/login" replace />;
+  // Redirect AFTER hooks: must be logged in as student
+  if (!userId || userRole !== "student") {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="student-page">

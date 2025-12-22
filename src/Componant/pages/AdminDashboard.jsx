@@ -1,5 +1,5 @@
 // src/Componant/pages/AdminDashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { NavLink, Routes, Route } from "react-router-dom";
 import {
   FaUserPlus,
@@ -33,7 +33,6 @@ import AdminViewClassStudents from "./AdminViewClassStudents";
 import AdminStudentFeeDetails from "./AdminStudentFeeDetails";
 
 import { SessionProvider, SessionContext } from "./SessionContext";
-import { useContext } from "react";
 import AdminStudentIdClass from "./AdminStudentIdClass";
 import AdminPrintIdCard from "./AdminPrintIdCard";
 import AdminIdCardPrint from "./AdminIdCardPrint";
@@ -168,11 +167,25 @@ const Sidebar = () => {
 
 /* Main dashboard */
 const AdminDashboard = () => {
-  // local state examples (you already had these)
+  // Hooks must come first
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
+  const userRole = localStorage.getItem("userRole");
+
+  // Simple client-side auth using userRole
+  if (userRole !== "admin") {
+    return (
+      <div className="admin-page">
+        <div className="admin-content" style={{ padding: 20 }}>
+          <h3>Access denied</h3>
+          <p>You must be logged in as an admin to view this dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   const addTeacher = (t) => setTeachers((prev) => [t, ...prev]);
+
   const addStudent = (studentData) => {
     const newStudent = {
       id: Date.now(),
@@ -182,6 +195,7 @@ const AdminDashboard = () => {
     };
     setStudents((prev) => [newStudent, ...prev]);
   };
+
   const updatePoints = (id, val) =>
     setTeachers((prev) =>
       prev.map((t) =>
@@ -287,7 +301,6 @@ const AdminDashboard = () => {
                     Use the side menu to manage students and teachers.
                   </p>
 
-                  {/* Session selector is placed only on the index page */}
                   <div style={{ marginTop: 8 }}>
                     <SessionSelect />
                   </div>
