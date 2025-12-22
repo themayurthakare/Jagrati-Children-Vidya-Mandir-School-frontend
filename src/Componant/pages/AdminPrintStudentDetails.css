@@ -1,16 +1,15 @@
-/* AdminPrintStudentDetails.css */
-
-/* Page container - hidden in print */
+/* container */
 .ps-page {
     padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    max-width: 1200px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    /* slightly narrower page */
     margin: 0 auto;
     background: #f5f5f5;
     min-height: 100vh;
 }
 
-/* Header with controls - hidden in print */
+/* header (controls) */
 .ps-header {
     background: white;
     padding: 20px;
@@ -21,7 +20,6 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 15px;
 }
 
 .ps-header h1 {
@@ -91,7 +89,7 @@
     cursor: not-allowed;
 }
 
-/* Loading, error, empty states */
+/* states */
 .ps-loading,
 .ps-error,
 .ps-empty {
@@ -116,164 +114,227 @@
     color: #7f8c8d;
 }
 
-/* Print sheet - this is what gets printed */
+/* printable sheet – PAGE BORDER HERE */
 .ps-sheet {
     background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    padding: 10px 20px;
+    margin: 0 auto 20px;
+    border: 2px solid #000;
+    /* page border on screen */
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
 }
 
-/* School header in the sheet */
-.ps-sheet-header {
+/* ===== top header box ===== */
+
+.admission-header {
+    display: flex;
+    border-bottom: 3px solid #1e88e5;
+    /* blue underline like sample */
+    padding: 10px 10px 8px;
+}
+
+.admission-logo {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admission-title-block {
+    flex: 1;
+    text-align: center;
+}
+
+.admission-school-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.admission-school-address {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.admission-recognized {
+    font-size: 10px;
+    margin-top: 2px;
+    font-style: italic;
+}
+
+.admission-meta-box {
+    margin-top: 6px;
+    border: 1px solid #000;
+    padding: 6px 8px;
+    font-size: 11px;
+    display: inline-block;
+    text-align: left;
+}
+
+.meta-row {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+.meta-row:last-child {
+    margin-bottom: 0;
+}
+
+.meta-label {
+    min-width: 80px;
+    font-weight: 600;
+}
+
+.meta-value {
+    min-width: 90px;
+    padding: 0 4px;
+}
+
+/* photo box */
+.admission-photo-box {
+    width: 130px;
+    height: 140px;
+    border: 1px solid #000;
+    margin-left: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-photo-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.photo-caption {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    font-size: 8px;
+    text-align: center;
+}
+
+/* ===== title line ===== */
+
+.admission-form-title {
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    color: #c0392b;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.admission-form-title::after {
+    content: "";
+    display: block;
+    margin-top: 4px;
+    border-bottom: 3px solid #1e88e5;
+    /* blue line under red text */
+}
+
+/* ===== body (bigger font, but kept to one page) ===== */
+
+.admission-body {
+    padding: 14px 18px 18px;
+    font-size: 16px;
+    min-height: 700px;
+    /* reduced so it fits one page */
+    display: flex;
+    flex-direction: column;
+    row-gap: 14px;
+}
+
+.ad-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    line-height: 1.6;
+}
+
+.ad-label {
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+.ad-label.small {
+    font-size: 13px;
+}
+
+/* underline fields */
+.ad-underline {
+    border-bottom: 1px solid #000;
+    min-height: 20px;
+    padding: 0 2px;
+    margin-right: 8px;
+}
+
+.ad-underline.long {
+    flex: 1;
+}
+
+.ad-underline.small {
+    width: 110px;
+}
+
+/* DOB and phone boxes */
+
+.dob-boxes {
+    display: inline-flex;
+    gap: 7px;
+    margin-right: 10px;
+}
+
+.dob-box {
+    width: 30px;
+    height: 18px;
+    border: 1px solid #000;
+}
+
+.phone-box {
+    width: 170px;
+    height: 25px;
+    border: 1px solid #000;
+    margin-left: 8px;
+}
+
+/* declaration + signatures */
+
+.ad-declaration {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.ad-sign-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #2c3e50;
+    margin-top: 20px;
+    font-size: 13px;
 }
 
-.ps-school h2 {
-    margin: 0 0 5px 0;
-    color: #2c3e50;
-    font-size: 1.8em;
-}
-
-.ps-sub {
-    color: #7f8c8d;
-    font-size: 0.9em;
-}
-
-.ps-meta {
-    text-align: right;
-    font-size: 0.9em;
-}
-
-.ps-meta div {
-    margin-bottom: 5px;
-}
-
-/* Sections */
-.ps-section {
-    margin-bottom: 30px;
-}
-
-.ps-section h3 {
-    color: #2c3e50;
-    border-bottom: 1px solid #ecf0f1;
-    padding-bottom: 8px;
-    margin-bottom: 15px;
-    font-size: 1.2em;
-}
-
-/* Table for registration details */
-.ps-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.95em;
-}
-
-.ps-table tr {
-    border-bottom: 1px solid #eee;
-}
-
-.ps-table tr:last-child {
-    border-bottom: 2px solid #ddd;
-}
-
-.ps-table td {
-    padding: 10px;
-    vertical-align: top;
-}
-
-.ps-label {
-    font-weight: 600;
-    color: #2c3e50;
-    width: 180px;
-    background: #f8f9fa;
-    border-right: 2px solid #ecf0f1;
-}
-
-/* Documents table */
-.ps-doc-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9em;
-}
-
-.ps-doc-table thead {
-    background: #2c3e50;
-    color: white;
-}
-
-.ps-doc-table th {
-    padding: 12px 8px;
-    text-align: left;
-    font-weight: 600;
-}
-
-.ps-doc-table tbody tr {
-    border-bottom: 1px solid #eee;
-}
-
-.ps-doc-table tbody tr:hover {
-    background: #f8f9fa;
-}
-
-.ps-doc-table td {
-    padding: 10px 8px;
-    vertical-align: middle;
-}
-
-.ps-doc-table a {
-    color: #3498db;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.ps-doc-table a:hover {
-    text-decoration: underline;
-}
-
-.ps-empty-docs {
-    text-align: center;
-    padding: 30px;
-    color: #95a5a6;
-    font-style: italic;
-    background: #f8f9fa;
-    border-radius: 6px;
-}
-
-/* Footer with signature */
-.ps-footer {
-    margin-top: 50px;
-    padding-top: 30px;
-    border-top: 1px solid #ddd;
-}
-
-.ps-sign {
-    text-align: right;
-    font-size: 0.9em;
-    line-height: 2;
-}
-
-/* ========== PRINT STYLES ========== */
+/* ===== print ===== */
 @media print {
-
-    /* Hide everything except the printable sheet */
     body * {
         visibility: hidden;
     }
 
-    /* Only show the printable sheet and its contents */
     #print-area,
     #print-area * {
         visibility: visible;
     }
 
-    /* Position the printable sheet at the top left */
     #print-area {
         position: absolute;
         left: 0;
@@ -282,11 +343,9 @@
         margin: 0;
         padding: 0;
         box-shadow: none;
-        border: none;
         background: white;
     }
 
-    /* Hide non-printable elements */
     .ps-header,
     .ps-back,
     .ps-actions,
@@ -296,87 +355,25 @@
         display: none !important;
     }
 
-    /* Reset page margins for printing */
     @page {
         margin: 0.5in;
-        size: letter portrait;
+        size: A4 portrait;
     }
 
-    /* Improve print readability */
     .ps-sheet {
-        padding: 0;
+        padding: 10px 20px;
+        height: 100%;
+        min-height: auto;
+        border-radius: 0;
         box-shadow: none;
-        border: none;
-    }
-
-    .ps-sheet-header {
-        border-bottom: 2px solid #000;
-    }
-
-    .ps-school h2 {
-        font-size: 24pt;
-        color: black;
-    }
-
-    .ps-sub {
-        font-size: 12pt;
-        color: #666;
-    }
-
-    .ps-section h3 {
-        font-size: 14pt;
-        color: black;
-        border-bottom: 1px solid #000;
-    }
-
-    .ps-table,
-    .ps-doc-table {
-        font-size: 10pt;
-    }
-
-    .ps-table tr {
-        border-bottom: 1px solid #ccc;
-    }
-
-    .ps-doc-table thead {
-        background: #ddd !important;
-        color: black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    .ps-doc-table th {
-        border-bottom: 2px solid #000;
-    }
-
-    .ps-doc-table a {
-        color: #000;
-        text-decoration: underline;
-    }
-
-    /* Ensure proper page breaks */
-    .ps-section {
+        border: 2px solid #000;
+        box-sizing: border-box;
         page-break-inside: avoid;
-    }
-
-    .ps-doc-table {
-        page-break-inside: auto;
-    }
-
-    .ps-doc-table tr {
-        page-break-inside: avoid;
-        page-break-after: auto;
-    }
-
-    /* Hide links in print */
-    .ps-doc-table a[href]:after {
-        content: " (" attr(href) ")";
-        font-size: 8pt;
-        color: #666;
+        page-break-after: avoid;
     }
 }
 
-/* Responsive design */
+/* responsive */
 @media screen and (max-width: 768px) {
     .ps-header {
         flex-direction: column;
@@ -391,30 +388,166 @@
         width: 100%;
     }
 
-    .ps-sheet-header {
+    .admission-header {
         flex-direction: column;
-        gap: 15px;
+        align-items: center;
     }
 
-    .ps-meta {
-        text-align: left;
+    .admission-photo-box {
+        margin-left: 0;
+        margin-top: 10px;
     }
+}
 
-    .ps-table td {
-        display: block;
-        width: 100%;
-        border-right: none;
-    }
+/* Keep all your existing CSS and add these below */
 
-    .ps-label {
-        width: 100%;
-        border-bottom: 1px solid #ddd;
-        border-right: none;
-    }
+/* Page breaker for print */
+.doc-page {
+    page-break-before: always;
+    margin-top: 20px;
+}
 
-    .ps-table tr {
-        border-bottom: 2px solid #ddd;
-        margin-bottom: 10px;
-        display: block;
+.doc-page-title {
+    text-align: center;
+    color: red;
+    text-decoration: underline;
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+.doc-section {
+    margin-bottom: 20px;
+}
+
+.doc-section-head {
+    text-decoration: underline;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.doc-detail-box {
+    margin-left: 20px;
+}
+
+.doc-icon {
+    color: #3498db;
+    margin-right: 5px;
+}
+
+.doc-input-row {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doc-input-line {
+    border: 1px solid #000;
+    height: 25px;
+    min-width: 300px;
+    padding: 0 5px;
+}
+
+.doc-input-line.wide {
+    min-width: 400px;
+}
+
+.doc-input-line.mid {
+    min-width: 150px;
+}
+
+.doc-checklist-container {
+    margin-top: 15px;
+    margin-left: 20px;
+}
+
+.doc-checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    margin-top: 5px;
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.check-item .box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #000;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.doc-instruction {
+    margin-top: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.doc-sign-area {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    padding: 0 20px;
+}
+
+.office-use-section {
+    margin-top: 4px;
+    border-top: 1px dashed #000;
+    padding-top: 20px;
+    font-family: serif;
+}
+
+.office-title {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 5px;
+    font-size: 18px;
+}
+
+.office-row {
+    display: flex;
+    margin-top: 10px;
+    font-size: 15px;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.office-row .fill-line {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    margin-bottom: 3px;
+    min-width: 50px;
+}
+
+.office-row .fill-line.short {
+    flex: 0 1 100px;
+}
+
+.office-row .fill-line.date-line {
+    flex: 0 1 250px;
+}
+
+.office-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+@media print {
+    .doc-page {
+        page-break-before: always;
+        border: 2px solid #000;
+        padding: 30px;
+        height: 100%;
+        box-sizing: border-box;
     }
 }

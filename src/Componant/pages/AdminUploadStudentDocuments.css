@@ -5,7 +5,8 @@
 }
 
 .ud-card {
-    width: 720px;
+    width: 100%;
+    /* Increased from 720px to accommodate 11 documents */
     background: #fff;
     padding: 25px;
     border-radius: 8px;
@@ -17,6 +18,16 @@
     margin-bottom: 18px;
     font-size: 1.5rem;
     font-weight: 700;
+}
+
+.ud-info {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    border-left: 4px solid #2196f3;
 }
 
 .ud-input-block {
@@ -43,7 +54,8 @@
 
 .ud-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    /* Changed to 3 columns for 11 docs */
     gap: 15px;
 }
 
@@ -60,21 +72,31 @@
     border-radius: 6px;
 }
 
+.ud-file-name {
+    margin-top: 8px;
+    min-height: 50px;
+}
+
+.ud-empty {
+    color: #95a5a6;
+    font-style: italic;
+}
+
 .ud-btn {
     margin-top: 18px;
     padding: 12px 16px;
     background: #ff9c00;
     color: #fff;
     border: none;
-    width: 100%;
     border-radius: 6px;
     font-size: 1.1rem;
     cursor: pointer;
     font-weight: 600;
+    transition: background-color 0.3s;
 }
 
-.ud-btn:hover {
-    background: #0067d1;
+.ud-btn:hover:not(:disabled) {
+    background: #e68900;
 }
 
 .ud-btn:disabled {
@@ -90,26 +112,46 @@
     align-items: center;
 }
 
-/* tweak button look - adjust to your theme */
-.ud-btn {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    color: white;
-    font-weight: 600;
+.ud-back-btn {
+    background-color: #6c757d;
+    flex: 1;
+    max-width: 120px;
 }
 
-.ud-back-btn {
-    background-color: #ff9c00;
+.ud-clear-btn {
+    background-color: #dc3545;
+    flex: 1;
+    max-width: 120px;
 }
 
 .ud-save-btn {
-    background-color: #1677ff;
+    background-color: #007bff;
+    flex: 2;
 }
 
-/* disabled state */
-.ud-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/* Responsive adjustments for new layout */
+@media (max-width: 900px) {
+    .ud-card {
+        width: 100%;
+        max-width: 800px;
+        padding: 20px;
+    }
+
+    .ud-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .ud-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ud-button-row {
+        flex-direction: column;
+    }
+
+    .ud-btn {
+        margin-bottom: 10px;
+    }
 }

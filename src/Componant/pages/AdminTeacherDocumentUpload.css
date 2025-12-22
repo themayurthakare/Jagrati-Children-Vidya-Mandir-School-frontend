@@ -1,0 +1,178 @@
+:root {
+    --blue-primary: #004f9e;
+    --orange-secondary: #ff9c00;
+    --text-dark: #14213d;
+    --success: #10b981;
+    --error: #ef4444;
+    --card-bg: #ffffff;
+    --page-bg: #f3f6fb;
+    --input-border: #e6e9ef;
+    --shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
+    --radius: 12px;
+}
+
+.doc-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: var(--page-bg);
+}
+
+.doc-card {
+    width: 100%;
+    max-width: 800px;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(20, 33, 61, 0.05);
+}
+
+.doc-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.doc-header h2 {
+    margin: 0 0 12px;
+    color: var(--text-dark);
+    font-size: 1.6rem;
+}
+
+.teacher-info {
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.doc-error,
+.doc-success {
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.doc-error {
+    background: #fef2f2;
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.doc-success {
+    background: #f0fdf4;
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.doc-item {
+    background: #fafbfc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px dashed var(--input-border);
+    transition: all 0.2s ease;
+}
+
+.doc-item:hover {
+    border-color: rgba(0, 79, 158, 0.3);
+    background: #f8fafc;
+}
+
+.doc-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.file-upload {
+    position: relative;
+    display: block;
+}
+
+.file-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.file-label {
+    display: block;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, var(--blue-primary), #0066cc);
+    color: white;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.file-label:hover:not(:disabled) {
+    background: linear-gradient(135deg, #005bb5, #0073e6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 79, 158, 0.3);
+}
+
+.file-label:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background: #9ca3af;
+}
+
+.upload-success {
+    display: block;
+    color: var(--success);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+.doc-actions {
+    text-align: center;
+}
+
+.btn-finish {
+    background: var(--orange-secondary);
+    color: white;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 200px;
+}
+
+.btn-finish:hover:not(:disabled) {
+    background: var(--blue-primary);
+    box-shadow: 0 8px 25px rgba(0, 79, 158, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-finish:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .doc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-card {
+        padding: 24px;
+    }
+}

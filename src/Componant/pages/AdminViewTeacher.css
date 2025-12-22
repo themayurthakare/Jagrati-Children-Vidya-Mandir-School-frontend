@@ -1,10 +1,13 @@
 /* AdminViewTeacher.css */
+
+/* Container */
 .vt-container {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
+/* Header */
 .vt-header {
     display: flex;
     justify-content: space-between;
@@ -25,8 +28,9 @@
     margin: 0;
 }
 
+/* Header buttons */
 .vt-add-btn {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -42,7 +46,7 @@
 }
 
 .vt-refresh-btn {
-    background-color: #2196F3;
+    background-color: #2196f3;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -57,6 +61,7 @@
     background-color: #0b7dda;
 }
 
+/* Table wrapper */
 .vt-table-wrap {
     overflow-x: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -64,57 +69,103 @@
     background: white;
 }
 
+/* Table base */
 .vt-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    min-width: 900px;
 }
 
+.vt-table th,
+.vt-table td {
+    vertical-align: top;
+    /* align all cells from top */
+}
+
+/* Table header */
 .vt-table th {
     background-color: #2c3e50;
     color: white;
     font-weight: 600;
-    padding: 15px;
+    padding: 15px 12px;
     text-align: left;
     font-size: 14px;
     border-bottom: 2px solid #34495e;
 }
 
+.vt-table th:nth-child(3) {
+    /* Assigned Classes header */
+    min-width: 200px;
+}
+
+/* Table cells */
 .vt-table td {
     padding: 12px 15px;
     border-bottom: 1px solid #e0e0e0;
     font-size: 14px;
+    line-height: 1.4;
 }
 
+/* Assigned Classes column */
+.vt-classes-cell {
+    min-width: 200px;
+    max-width: 260px;
+}
+
+.vt-class-item {
+    margin-bottom: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.vt-class-item::before {
+    content: "• ";
+    color: #2196f3;
+    font-weight: 600;
+}
+
+/* Row hover */
 .vt-table tbody tr:hover {
-    background-color: #f5f5f5;
+    background-color: #f8f9ff;
 }
 
 .vt-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+/* Actions column */
 .actions-column {
     display: flex;
-    gap: 8px;
-    padding: 10px !important;
+    flex-direction: row;
+    align-items: flex-start;
+    /* top-align buttons inside tall cell */
+    gap: 6px;
+    padding: 8px 12px !important;
+    white-space: nowrap;
 }
 
+/* Action buttons */
 .vt-view-btn,
 .vt-update-btn,
 .vt-delete-btn {
     border: none;
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
     transition: all 0.2s;
     min-width: 60px;
+    height: 32px;
+    /* consistent height */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .vt-view-btn {
-    background-color: #4CAF50;
+    background-color: #4caf50;
     color: white;
 }
 
@@ -123,7 +174,7 @@
 }
 
 .vt-update-btn {
-    background-color: #2196F3;
+    background-color: #2196f3;
     color: white;
 }
 
@@ -140,6 +191,7 @@
     background-color: #d32f2f;
 }
 
+/* Loading state */
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -168,6 +220,7 @@
     }
 }
 
+/* Error state */
 .error-container {
     text-align: center;
     padding: 40px;
@@ -182,7 +235,7 @@
 }
 
 .error-container button {
-    background-color: #2196F3;
+    background-color: #2196f3;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -191,6 +244,7 @@
     margin-top: 20px;
 }
 
+/* No teachers state */
 .no-teachers {
     text-align: center;
     padding: 40px;
@@ -204,37 +258,14 @@
     font-size: 16px;
 }
 
-.vt-footer {
-    margin-top: 30px;
-    padding-top: 15px;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #666;
-}
-
-.legend {
-    display: flex;
-    gap: 20px;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-/* Responsive design */
+/* Responsive */
 @media (max-width: 768px) {
+    .vt-container {
+        padding: 15px;
+    }
+
     .vt-header {
+        flex-direction: vertical;
         flex-direction: column;
         gap: 15px;
         align-items: flex-start;
@@ -242,25 +273,55 @@
 
     .vt-header-buttons {
         width: 100%;
+        justify-content: space-between;
     }
 
     .vt-add-btn,
     .vt-refresh-btn {
         flex: 1;
+        min-width: 120px;
+    }
+
+    .vt-table {
+        min-width: 700px;
+    }
+
+    .vt-table th,
+    .vt-table td {
+        padding: 10px 8px;
+        font-size: 13px;
+    }
+
+    .vt-classes-cell {
+        min-width: 160px;
+        max-width: 200px;
     }
 
     .actions-column {
         flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
-    .vt-footer {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
+    .vt-view-btn,
+    .vt-update-btn,
+    .vt-delete-btn {
+        min-width: 70px;
+        padding: 8px 12px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vt-table {
+        font-size: 12px;
     }
 
-    .legend {
-        flex-direction: column;
-        gap: 10px;
+    .vt-classes-cell {
+        max-width: 180px;
+    }
+
+    .actions-column {
+        flex-wrap: wrap;
     }
 }

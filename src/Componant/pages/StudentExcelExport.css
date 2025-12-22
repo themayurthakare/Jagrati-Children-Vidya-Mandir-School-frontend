@@ -1,0 +1,286 @@
+/* Student Excel Export - Complete Styles */
+* {
+    box-sizing: border-box;
+}
+
+.student-excel-export {
+    padding: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #1f2937;
+    background: white;
+    min-height: 100vh;
+}
+
+.student-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 32px;
+    color: #1e293b;
+    text-align: center;
+    background: white;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Class Filter Section */
+.class-filter {
+    margin-bottom: 28px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #bae6fd;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.filter-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #0369a1;
+}
+
+.class-select {
+    padding: 12px 16px;
+    border: 2px solid #0ea5e9;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 220px;
+    font-size: 15px;
+    background: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.class-select:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    transform: translateY(-1px);
+}
+
+.filter-count {
+    font-size: 14px;
+    color: #475569;
+    margin-top: 8px;
+    font-weight: 500;
+}
+
+/* Column Selection Section */
+.column-selection {
+    margin-bottom: 24px;
+    padding: 24px;
+    background: white;
+    border-radius: 12px;
+    border: 2px solid #bfdbfe;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.column-selection-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #93c5fd;
+}
+
+.select-all-checkbox {
+    margin-right: 12px;
+    width: 20px;
+    height: 20px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.select-all-label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #1e40af;
+    cursor: pointer;
+    margin: 0;
+}
+
+.column-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.column-checkboxes::-webkit-scrollbar {
+    width: 8px;
+}
+
+.column-checkboxes::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.column-checkboxes::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.column-checkboxes::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.column-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px solid transparent;
+}
+
+.column-item:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-color: #60a5fa;
+    transform: translateX(4px);
+}
+
+.column-item input:checked+span {
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.column-checkbox {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.column-item span {
+    color: #475569;
+    user-select: none;
+}
+
+/* Export Stats */
+.export-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border-left: 5px solid #10b981;
+}
+
+.export-stats span {
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Download Button */
+.download-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    text-decoration: none;
+    width: 100%;
+    justify-content: center;
+}
+
+.download-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 30px rgba(16, 185, 129, 0.4);
+}
+
+.download-btn:active:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.download-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.7;
+}
+
+.btn-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .student-excel-export {
+        padding: 16px;
+    }
+
+    .student-title {
+        font-size: 26px;
+    }
+
+    .column-checkboxes {
+        grid-template-columns: 1fr;
+        max-height: 240px;
+    }
+
+    .class-select {
+        max-width: 100%;
+    }
+
+    .export-stats {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .student-excel-export {
+        padding: 12px;
+    }
+
+    .class-filter,
+    .column-selection {
+        padding: 16px;
+    }
+
+    .download-btn {
+        padding: 14px 24px;
+        font-size: 15px;
+    }
+}
+
+/* Firefox Scrollbar */
+.column-checkboxes {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+/* Focus visible for accessibility */
+.column-item:focus-within,
+.class-select:focus-visible,
+.select-all-checkbox:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}

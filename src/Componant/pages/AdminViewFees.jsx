@@ -36,6 +36,10 @@ const AdminViewFees = () => {
       .finally(() => setLoading(false));
   };
 
+  const handleTransactionReport = () => {
+    navigate("/admindashboard/transactions");
+  };
+
   useEffect(() => {
     loadClasses();
   }, []);
@@ -49,13 +53,21 @@ const AdminViewFees = () => {
     <div className="fees-container">
       <div className="fees-header">
         <h2 className="fees-title">Class Fees Details</h2>
-        <button
-          className="fees-refresh-btn"
-          onClick={loadClasses}
-          disabled={loading}
-        >
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
+        <div className="header-buttons">
+          <button
+            className="fees-refresh-btn"
+            onClick={loadClasses}
+            disabled={loading}
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
+          <button
+            className="transaction-report-btn"
+            onClick={handleTransactionReport}
+          >
+            Transaction Report
+          </button>
+        </div>
       </div>
 
       {error && (

@@ -1,19 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./AdminPrintStudentDetails.css";
-
-/**
- * PrintStudent
- * - reads studentId from location.state.studentId or query param ?studentId=
- * - fetches user details and documents
- * - renders a printable sheet with registration info + list of uploaded documents (with links if provided)
- *
- * Backend expectations:
- * - GET /api/users/{id}  OR /api/users/get/{id}  OR /api/users/getById/{id}
- * - GET /api/documents/{id}  (DocumentController.getDocuments)
- *
- * If your endpoints differ, adjust the `userEndpoints` array or the documents URL.
- */
+import logo from "../../media/logo.jpeg";
 
 const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
@@ -28,7 +16,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [className, setClassName] = useState("");
-  // Try several possible user endpoints (choose the first that returns 200 + valid JSON)
+
   const userEndpoints = [
     (id) => `${apiBase}/api/users/${id}`,
     (id) => `${apiBase}/api/users/get/${id}`,
@@ -37,13 +25,13 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   ];
 
   useEffect(() => {
-    // prefill id from query param if not passed in state
     if (!studentId) {
       const q = new URLSearchParams(window.location.search);
       const qId = q.get("studentId");
       if (qId) setStudentId(qId);
     }
-  }, []);
+  }, [studentId]);
+
   const fetchClassName = async (classId) => {
     if (!classId) {
       setClassName("-");
@@ -80,7 +68,6 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
         });
         if (!res.ok) continue;
         const json = await res.json();
-        // basic sanity check: must be object with name or admissionNo or userId
         if (json && typeof json === "object") return json;
       } catch (err) {
         // try next
@@ -93,7 +80,6 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     const url = `${apiBase}/api/documents/${id}`;
     const res = await fetch(url, { headers: { Accept: "application/json" } });
     if (!res.ok) {
-      // if 404 or error, return empty array
       return [];
     }
     const json = await res.json();
@@ -131,8 +117,9 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     window.print();
   };
 
-  const fmtDate = (iso) => {
-    if (!iso) return "-";
+  // Normalise date string to YYYY-MM-DD if possible
+  const normalizeDate = (iso) => {
+    if (!iso) return "";
     if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
     try {
       const d = new Date(iso);
@@ -143,8 +130,23 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     }
   };
 
+  const fmtDate = (iso) => normalizeDate(iso);
+
+  // Split DOB into DD / MM / YYYY for the three boxes
+  const parseDobParts = (dob) => {
+    const str = normalizeDate(dob);
+    if (!str || !str.includes("-")) {
+      return { dd: "", mm: "", yyyy: "" };
+    }
+    const [yyyy, mm, dd] = str.split("-");
+    return { dd: dd || "", mm: mm || "", yyyy: yyyy || "" };
+  };
+
+  const { dd, mm, yyyy } = parseDobParts(user?.dob);
+
   return (
     <div className="ps-page">
+      {/* header – do not change */}
       <div className="ps-header">
         <button className="ps-back" onClick={() => navigate(-1)}>
           ← Back
@@ -190,127 +192,351 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
           No student loaded. Enter an ID and click Load.
         </div>
       ) : (
-        <div className="ps-sheet" id="print-area">
-          {/* Header Row */}
-          <div className="ps-sheet-header">
-            <div className="ps-school">
-              <h2>Jagrati Children Vidya Mandir</h2>
-              <div className="ps-sub">Student Registration & Documents</div>
-            </div>
-            <div className="ps-meta">
-              <div>
-                <strong>ID:</strong> {user.userId ?? user.id ?? studentId}
+        <div id="print-area">
+          {/* PAGE 1: ADMISSION FORM */}
+          <div className="ps-sheet">
+            {/* ==== top header box ==== */}
+            <div className="admission-header">
+              <div className="admission-logo">
+                <img src={logo} alt="School logo" />
               </div>
-              <div>
-                <strong>Date:</strong> {new Date().toLocaleDateString()}
+
+              <div className="admission-title-block">
+                <h1 className="admission-school-name">
+                  JAGRATI CHILDREN VIDHIYA MANDIR SCHOOL
+                </h1>
+                <div className="admission-school-address">
+                  GOL PAHADIYA, SHANKAR COLONY, GWALIOR (M.P.)
+                </div>
+                <div className="admission-recognized">
+                  (recognized by M.P Govt.)
+                </div>
+
+                <div className="admission-meta-box">
+                  <div className="meta-row">
+                    <div className="meta-label">Admission No.</div>
+                    <div className="meta-value">{user.admissionNo ?? ""}</div>
+                    <div className="meta-label">Date</div>
+                    <div className="meta-value">
+                      {fmtDate(user.admissionDate)}
+                    </div>
+                  </div>
+
+                  <div className="meta-row">
+                    <div className="meta-label">Class</div>
+                    <div className="meta-value">{className || ""}</div>
+                    <div className="meta-label">Session</div>
+                    <div className="meta-value">2025-2026</div>
+                  </div>
+
+                  <div className="meta-row">
+                    <div className="meta-label">Medium</div>
+                    <div className="meta-value">ENGLISH [ ] / HINDI [ ]</div>
+                  </div>
+
+                  <div className="meta-row">
+                    <div className="meta-label">SSSM ID</div>
+                    <div className="meta-value">{user.ssmId ?? ""}</div>
+                  </div>
+
+                  <div className="meta-row">
+                    <div className="meta-label">Aadhaar No.</div>
+                    <div className="meta-value">
+                      {user.studentAadharNo ?? ""}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="admission-photo-box">
+                <img
+                  src={`http://localhost:8080/api/documents/download/${
+                    user.userId ?? user.id ?? ""
+                  }/STUDENT_PHOTO`}
+                  alt="Student"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* red + blue line */}
+            <div className="admission-form-title">
+              APPLICATION FOR ADMISSION
+            </div>
+
+            {/* ==== body ==== */}
+            <div className="admission-body">
+              <div className="ad-row">
+                <span className="ad-label">Name of the student</span>
+                <span className="ad-underline long">{user.name ?? ""}</span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Father/Guardian&apos;s Name</span>
+                <span className="ad-underline long">
+                  {user.fatherName ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Mother&apos;s Name</span>
+                <span className="ad-underline long">
+                  {user.motherName ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Date of Birth</span>
+                <span className="dob-boxes">
+                  <span className="dob-box">{dd}</span>
+                  <span className="dob-box">{mm}</span>
+                  <span className="dob-box">{yyyy}</span>
+                </span>
+                <span className="ad-label small">In words</span>
+                <span className="ad-underline long">
+                  {user.dobInWords ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Language</span>
+                <span className="ad-underline small">
+                  {user.language ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Cast</span>
+                <span className="ad-underline small">{user.caste ?? ""}</span>
+                <span className="ad-label">Sub Cast</span>
+                <span className="ad-underline small">
+                  {user.subCaste ?? ""}
+                </span>
+                <span className="ad-label">Religion</span>
+                <span className="ad-underline small">
+                  {user.religion ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">
+                  Father&apos;s/Guardian&apos;s Occupation
+                </span>
+                <span className="ad-underline long">
+                  {user.fatherOccupation ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Permanent Add.</span>
+                <span className="ad-underline long">
+                  {user.permanentAddress ?? user.address ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Local Address</span>
+                <span className="ad-underline long">
+                  {user.localAddress ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Father mobile No.</span>
+                <span className="phone-box">{user.parentPhone ?? ""}</span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Other mobile No.</span>
+                <span className="phone-box">{user.studentPhone ?? ""}</span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Class of Admission</span>
+                <span className="ad-underline long">{className || ""}</span>
+              </div>
+
+              <div className="ad-row">
+                <span className="ad-label">Name of Last Year School</span>
+                <span className="ad-underline long">
+                  {user.passoutClass ?? ""}
+                </span>
+              </div>
+
+              <div className="ad-declaration">
+                मैं ____________________ पुत्री / पुत्र ____________________
+                घोषणा कर हूं कि मेरे द्वारा दी गई सारी जानकारी सही है। मेरे
+                द्वारा दिए गए दस्तावेजों में किसी भी प्रकार की गलती होती है तो
+                उसका मैं स्वयं जिम्मेदार रहूंगा / रहूंगी। मैं स्कूल के सारे
+                नियमों का पालन करूंगा / करूंगी।
+              </div>
+
+              <div className="ad-sign-row">
+                <div>Student signature</div>
+                <div>Parents Signature</div>
               </div>
             </div>
           </div>
 
-          {/* Registration details */}
-          <section className="ps-section">
-            <h3>Registration Details</h3>
-            <table className="ps-table">
-              <tbody>
-                <tr>
-                  <td className="ps-label">Name</td>
-                  <td>{user.name ?? "-"}</td>
-                  <td className="ps-label">Admission No</td>
-                  <td>{user.admissionNo ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Admission Date</td>
-                  <td>{fmtDate(user.admissionDate)}</td>
-                  <td className="ps-label">DOB</td>
-                  <td>{fmtDate(user.dob)}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Class Name</td>
-                  <td>{className || "-"}</td>
-                  <td className="ps-label">Phone Number</td>
-                  <td>{user.studentPhone ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Email Id</td>
-                  <td>{user.email ?? "-"}</td>
-                  <td className="ps-label">Parent Phone</td>
-                  <td>{user.parentPhone ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Father Name</td>
-                  <td>{user.fatherName ?? "-"}</td>
-                  <td className="ps-label">Mother Name</td>
-                  <td>{user.motherName ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Aadhar (Student)</td>
-                  <td>{user.studentAadharNo ?? "-"}</td>
-                  <td className="ps-label">Aadhar (Parent)</td>
-                  <td>{user.parentAadharNo ?? "-"}</td>
-                </tr>
-                <tr>
-                  <td className="ps-label">Address</td>
-                  <td colSpan="3">{user.address ?? "-"}</td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
+          {/* PAGE 2: IMPORTANT DOCUMENT LIST (AS PER IMAGE) */}
+          <div className="ps-sheet doc-page">
+            <h2 className="doc-page-title">IMPORTANT DOCUMENT</h2>
 
-          {/* Documents */}
-          <section className="ps-section">
-            <h3>Uploaded Documents</h3>
-
-            {!docs || docs.length === 0 ? (
-              <div className="ps-empty-docs">
-                No documents uploaded for this student.
+            {/* Nursery to UKG Section */}
+            <div className="doc-section">
+              <h3 className="doc-section-head">
+                Only for class Nur. TO U.K.G:
+              </h3>
+              <div className="doc-detail-box">
+                <span className="doc-icon">❖</span>{" "}
+                <strong>Document detail:</strong>
+                <div className="doc-input-row">
+                  SSSMID{" "}
+                  <div className="doc-input-line">{user.ssmId ?? ""}</div>
+                </div>
+                <div className="doc-input-row">
+                  Aadhaar No.{" "}
+                  <div className="doc-input-line">
+                    {user.studentAadharNo ?? ""}
+                  </div>
+                </div>
               </div>
-            ) : (
-              <table className="ps-doc-table">
-                <thead>
-                  <tr>
-                    <th>Sr No</th>
-                    <th>Type</th>
-                    <th>Filename / Info</th>
-                    <th>Uploaded At</th>
-                    <th>Link</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {docs.map((d, idx) => {
-                    // document DTO may have fields: id, type, fileName, url, uploadedAt, createdAt
-                    const type = d.type || d.docType || d.documentType || "-";
-                    const name = d.fileName || d.filename || d.name || "-";
-                    const uploadedAt =
-                      d.uploadedAt || d.createdAt || d.timestamp || "-";
-                    const url = d.url || d.fileUrl || d.path || null;
-                    return (
-                      <tr key={d.id ?? idx}>
-                        <td>{idx + 1}</td>
-                        <td>{type}</td>
-                        <td>{name}</td>
-                        <td>{fmtDate((uploadedAt || "").toString())}</td>
-                        <td>
-                          {url ? (
-                            <a href={url} target="_blank" rel="noreferrer">
-                              Open
-                            </a>
-                          ) : (
-                            <span style={{ color: "#666" }}>—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </section>
 
-          {/* Footer / Sign */}
-          <div className="ps-footer">
-            <div className="ps-sign">
-              <div>Signature: ____________________</div>
-              <div>Date: ____________________</div>
+              <div className="doc-checklist-container">
+                <span className="doc-icon">❖</span>{" "}
+                <strong>Document submitted:</strong>
+                <div className="doc-checklist">
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of birth certificate
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Passport size photographs of
+                    student
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Transfer Certificate
+                    (Original)
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Report card
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of SSSMID
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Aadhaar card
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 1st to 8th Section */}
+            <div className="doc-section">
+              <h3 className="doc-section-head">
+                Only for class 1<sup>st</sup> TO 8<sup>th</sup>:
+              </h3>
+              <div className="doc-detail-box">
+                <span className="doc-icon">❖</span>{" "}
+                <strong>Document detail:</strong>
+                <div className="doc-input-row">
+                  SSSMID{" "}
+                  <div className="doc-input-line">{user.ssmId ?? ""}</div>
+                </div>
+                <div className="doc-input-row">
+                  Aadhaar No.{" "}
+                  <div className="doc-input-line wide">
+                    {user.studentAadharNo ?? ""}
+                  </div>
+                </div>
+                <div className="doc-input-row">
+                  Bank Account <div className="doc-input-line mid"></div>
+                  IFSC Code <div className="doc-input-line mid"></div>
+                </div>
+              </div>
+
+              <div className="doc-checklist-container">
+                <span className="doc-icon">❖</span>{" "}
+                <strong>Document submitted:</strong>
+                <div className="doc-checklist">
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of birth certificate
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Passport size photographs of
+                    student
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Transfer Certificate
+                    (Original)
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Report card
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of SSSMID
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Aadhaar card
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Domicile
+                    Certificate
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Cast Certificate
+                  </div>
+                  <div className="check-item">
+                    <span className="box"></span> Photocopy of Income
+                    Certificate
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="doc-instruction">
+              निर्देश :- ऊपर दिए गए दस्तावेजों की कमी के कारण अगर मेरे बच्चों की
+              स्कॉलरशिप स्कूल की अन्य सुविधाओं से वंचित होता है तो उसके लिए मैं
+              स्वयं जिम्मेदार हूं।
+            </div>
+
+            <div className="doc-sign-area">
+              <span>Student signature</span>
+              <span>Parents Signature</span>
+            </div>
+
+            <div className="office-use-section">
+              <div className="office-title">FOR OFFICE USE ONLY</div>
+
+              <div className="office-row">
+                <span>Student Name :</span>
+                <span className="fill-line">{user.name ?? ""}</span>
+                <span>S/o , D/o :</span>
+                <span className="fill-line"></span>
+              </div>
+
+              <div className="office-row">
+                <span>Is admitted in class :</span>
+                <span className="fill-line short">{className || ""}</span>
+                <span>section :</span>
+                <span className="fill-line short"></span>
+                <span>His Registration No :</span>
+                <span className="fill-line"></span>
+              </div>
+
+              <div className="office-row">
+                <span>Date :</span>
+
+                <span className="fill-line date-line">
+                  {fmtDate(user.admissionDate)}
+                </span>
+              </div>
+
+              <div className="office-footer">
+                <span>Class Teacher Signature</span>
+                <span>Principal Signature</span>
+              </div>
             </div>
           </div>
         </div>

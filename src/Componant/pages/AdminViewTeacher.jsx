@@ -7,14 +7,14 @@ const AdminViewTeacher = () => {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [classNames, setClassNames] = useState({});
+  const [teacherClasses, setTeacherClasses] = useState({});
 
   // Fetch teachers from API
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8080/api/teachers/all");
+        const response = await fetch("http://localhost:8080/api/teachers");
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -23,11 +23,8 @@ const AdminViewTeacher = () => {
         const data = await response.json();
         setTeachers(data);
 
-        // Extract unique class IDs and fetch class names
-        const uniqueClassIds = [
-          ...new Set(data.map((teacher) => teacher.classId).filter((id) => id)),
-        ];
-        await fetchClassNames(uniqueClassIds);
+        // Fetch classes for all teachers using new API
+        await fetchAllTeachersClasses(data);
       } catch (err) {
         console.error("Error fetching teachers:", err);
         setError(err.message);
@@ -39,37 +36,43 @@ const AdminViewTeacher = () => {
     fetchTeachers();
   }, []);
 
-  // Fetch class names for the class IDs
-  const fetchClassNames = async (classIds) => {
-    if (classIds.length === 0) return;
-
+  // Fetch classes for all teachers using new API
+  const fetchAllTeachersClasses = async (teachersData) => {
     try {
-      const classPromises = classIds.map(async (classId) => {
+      const classPromises = teachersData.map(async (teacher) => {
         try {
           const response = await fetch(
-            `http://localhost:8080/api/classes/${classId}`
+            `http://localhost:8080/api/teachers/${teacher.teacherId}/classes`
           );
           if (response.ok) {
-            const classData = await response.json();
+            const classes = await response.json();
+            const classList = Array.isArray(classes)
+              ? classes.map(
+                  (c) => c.className || c.name || `Class ${c.classId}`
+                )
+              : [];
             return {
-              id: classId,
-              name: classData.className || `Class ${classId}`,
+              teacherId: teacher.teacherId,
+              classes: classList,
             };
           }
         } catch (error) {
-          console.error(`Error fetching class ${classId}:`, error);
+          console.error(
+            `Error fetching classes for teacher ${teacher.teacherId}:`,
+            error
+          );
         }
-        return { id: classId, name: `Class ${classId}` };
+        return { teacherId: teacher.teacherId, classes: [] };
       });
 
-      const classResults = await Promise.all(classPromises);
-      const classMap = {};
-      classResults.forEach((result) => {
-        classMap[result.id] = result.name;
+      const results = await Promise.all(classPromises);
+      const map = {};
+      results.forEach((r) => {
+        map[r.teacherId] = r.classes;
       });
-      setClassNames(classMap);
+      setTeacherClasses(map);
     } catch (error) {
-      console.error("Error fetching class names:", error);
+      console.error("Error fetching teacher classes:", error);
     }
   };
 
@@ -91,7 +94,6 @@ const AdminViewTeacher = () => {
       );
 
       if (response.ok) {
-        // Remove from state
         setTeachers(
           teachers.filter((teacher) => teacher.teacherId !== teacherId)
         );
@@ -108,10 +110,10 @@ const AdminViewTeacher = () => {
     }
   };
 
-  // Handle view details
+  // Handle view details – no id in URL, pass whole teacher
   const viewDetails = (teacher) => {
-    navigate(`/admindashboard/view-teacher/${teacher.teacherId}`, {
-      state: { teacher },
+    navigate("/admindashboard/view-teacher-details", {
+      state: { teacherId: teacher.teacherId },
     });
   };
 
@@ -171,7 +173,7 @@ const AdminViewTeacher = () => {
               <tr>
                 <th>Sr. No.</th>
                 <th>Name</th>
-                <th>Class</th>
+                <th>Assigned Classes</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Experience</th>
@@ -180,51 +182,63 @@ const AdminViewTeacher = () => {
             </thead>
 
             <tbody>
-              {teachers.map((teacher, index) => (
-                <tr key={teacher.teacherId}>
-                  <td>{index + 1}</td>
-                  <td>{teacher.name}</td>
-                  <td>
-                    {teacher.classId
-                      ? classNames[teacher.classId] ||
-                        `Class ${teacher.classId}`
-                      : "Not Assigned"}
-                  </td>
-                  <td>{teacher.email}</td>
-                  <td>{teacher.phone}</td>
-                  <td>
-                    {teacher.yearOfExperience
-                      ? `${teacher.yearOfExperience} years`
-                      : "-"}
-                  </td>
-                  <td className="actions-column">
-                    <button
-                      className="vt-view-btn"
-                      onClick={() => viewDetails(teacher)}
-                    >
-                      View
-                    </button>
-                    <button
-                      className="vt-update-btn"
-                      onClick={() =>
-                        navigate(
-                          `/admindashboard/update-teacher/${teacher.teacherId}`
-                        )
-                      }
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="vt-delete-btn"
-                      onClick={() =>
-                        deleteTeacher(teacher.teacherId, teacher.name)
-                      }
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {teachers.map((teacher, index) => {
+                const classes = teacherClasses[teacher.teacherId] || [];
+                return (
+                  <tr key={teacher.teacherId}>
+                    <td>{index + 1}</td>
+                    <td>{teacher.name}</td>
+                    <td className="vt-classes-cell">
+                      {classes.length === 0 ? (
+                        <span className="vt-class-item">Not Assigned</span>
+                      ) : (
+                        classes.map((cls, idx) => (
+                          <div key={idx} className="vt-class-item">
+                            {cls}
+                          </div>
+                        ))
+                      )}
+                    </td>
+                    <td>{teacher.email}</td>
+                    <td>{teacher.phone}</td>
+                    <td>
+                      {teacher.yearOfExperience
+                        ? `${teacher.yearOfExperience} years`
+                        : "-"}
+                    </td>
+                    <td className="actions-column">
+                      <button
+                        className="vt-view-btn"
+                        onClick={() => viewDetails(teacher)}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="vt-update-btn"
+                        onClick={() =>
+                          navigate("/admindashboard/update-teacher", {
+                            state: {
+                              teacherId: teacher.teacherId,
+                              teacher: teacher, // optional but useful
+                            },
+                          })
+                        }
+                      >
+                        Update
+                      </button>
+
+                      <button
+                        className="vt-delete-btn"
+                        onClick={() =>
+                          deleteTeacher(teacher.teacherId, teacher.name)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

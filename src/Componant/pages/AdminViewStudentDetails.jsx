@@ -423,8 +423,8 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
             color: #666;
             text-align: right;
           }
-          
-         @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .no-print { display: none; } .print-container { padding: 0; } }
+           
+           @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } .no-print { display: none; } .print-container { padding: 0; } }
         </style>
       </head>
       <body>
@@ -476,7 +476,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
             </div>
           </div>
           
-          <!-- Student Details Table -->
+          <!-- Student Details Table - ADDED ALL NEW FIELDS -->
           <div class="details-section">
             <h3 class="section-title">Student Information</h3>
             <table class="details-table">
@@ -496,7 +496,30 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                 <td class="field-label">Student Aadhar No</td>
                 <td class="field-value">${user?.studentAadharNo || "—"}</td>
               </tr>
-            
+              <tr>
+                <td class="field-label">Caste</td>
+                <td class="field-value">${user?.caste || "—"}</td>
+              </tr>
+              <tr>
+                <td class="field-label">Sub Caste</td>
+                <td class="field-value">${user?.subCaste || "—"}</td>
+              </tr>
+              <tr>
+                <td class="field-label">Religion</td>
+                <td class="field-value">${user?.religion || "—"}</td>
+              </tr>
+              <tr>
+                <td class="field-label">APAAR ID</td>
+                <td class="field-value">${user?.apaarId || "—"}</td>
+              </tr>
+              <tr>
+                <td class="field-label">PAN No</td>
+                <td class="field-value">${user?.panNo || "—"}</td>
+              </tr>
+              <tr>
+                <td class="field-label">RTE</td>
+                <td class="field-value">${user?.rte || "—"}</td>
+              </tr>
               <tr>
                 <td class="field-label">SSSM ID</td>
                 <td class="field-value">${user?.ssmId || "—"}</td>
@@ -654,6 +677,17 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
           <button className="btn-print" onClick={printPage} disabled={!user}>
             🖨️ Print Details
           </button>
+          <button
+            className="btn-print"
+            onClick={() =>
+              navigate("/admindashboard/print-student", {
+                state: { studentId },
+              })
+            }
+            disabled={!user}
+          >
+            🖨️ Print Admission Form
+          </button>
         </div>
       </div>
 
@@ -754,7 +788,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               </div>
             </div>
 
-            {/* Main Content Grid */}
+            {/* Main Content Grid - ADDED ALL NEW FIELDS */}
             <div className="vsd-content-grid">
               {/* Left Column - Personal Information */}
               <div className="vsd-info-section">
@@ -778,17 +812,19 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                     </span>
                   </div>
                   <div className="vsd-info-item">
-                    <span className="vsd-info-label">RTE Status</span>
-                    <span className="vsd-info-value">{user.rte || "-"}</span>
+                    <span className="vsd-info-label">Caste</span>
+                    <span className="vsd-info-value">{user.caste || "-"}</span>
                   </div>
                   <div className="vsd-info-item">
-                    <span className="vsd-info-label">SSSM ID</span>
-                    <span className="vsd-info-value">{user.ssmId || "-"}</span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Passout Class</span>
+                    <span className="vsd-info-label">Sub Caste</span>
                     <span className="vsd-info-value">
-                      {user.passoutClass || "-"}
+                      {user.subCaste || "-"}
+                    </span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">Religion</span>
+                    <span className="vsd-info-value">
+                      {user.religion || "-"}
                     </span>
                   </div>
                 </div>
@@ -828,17 +864,41 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                 </div>
               </div>
 
-              {/* Right Column - Additional Information */}
+              {/* Right Column - Additional Information - ADDED ALL NEW FIELDS */}
               <div className="vsd-info-section">
                 <h2 className="vsd-section-title">
-                  <span className="vsd-title-icon">🏠</span>
-                  Address & Other Details
+                  <span className="vsd-title-icon">📋</span>
+                  Additional Details
                 </h2>
                 <div className="vsd-info-grid">
-                  <div className="vsd-info-item vsd-address-item">
+                  <div className="vsd-info-item">
                     <span className="vsd-info-label">Address</span>
                     <span className="vsd-info-value">
                       {user.address || "-"}
+                    </span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">APAAR ID</span>
+                    <span className="vsd-info-value">
+                      {user.apaarId || "-"}
+                    </span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">PAN No</span>
+                    <span className="vsd-info-value">{user.panNo || "-"}</span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">RTE Status</span>
+                    <span className="vsd-info-value">{user.rte || "-"}</span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">SSSM ID</span>
+                    <span className="vsd-info-value">{user.ssmId || "-"}</span>
+                  </div>
+                  <div className="vsd-info-item">
+                    <span className="vsd-info-label">Passout Class</span>
+                    <span className="vsd-info-value">
+                      {user.passoutClass || "-"}
                     </span>
                   </div>
                   <div className="vsd-info-item">

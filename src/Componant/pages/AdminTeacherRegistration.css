@@ -1,4 +1,4 @@
-/* AdminTeacherRegistration.css - matches student style, centered attractive card */
+/* AdminTeacherRegistration.css */
 
 :root {
     --blue-primary: #004f9e;
@@ -11,163 +11,182 @@
     --shadow-sm: 0 6px 18px rgba(11, 28, 50, 0.06);
     --shadow: 0 10px 30px rgba(2, 6, 23, 0.2);
     --radius: 12px;
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
 }
 
-/* Center page */
+/* Page */
 .tr-page {
+    min-height: 100vh;
     display: flex;
+    justify-content: center;
     align-items: center;
-    /* justify-content: center; */
-    padding: 20px;
+    padding: 24px;
     background: var(--page-bg);
 }
 
 /* Card */
 .tr-card {
     width: 100%;
-    max-width: 720px;
+    max-width: 760px;
     background: var(--card-bg);
     border-radius: var(--radius);
-    padding: 24px;
+    padding: 26px;
     box-shadow: var(--shadow);
-    border: 1px solid rgba(20, 33, 61, 0.04);
-    box-sizing: border-box;
+    border: 1px solid rgba(20, 33, 61, 0.05);
 }
 
 .tr-card h2 {
-    margin: 0 0 20px;
+    margin: 0 0 18px;
     color: var(--text-dark);
-    font-size: 1.35rem;
-}
-
-.tr-card .muted {
-    margin: 0 0 12px;
-    color: var(--muted);
-    font-size: 0.92rem;
+    font-size: 1.4rem;
 }
 
 /* Alerts */
 .tr-error,
 .tr-success {
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-radius: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-size: 0.95rem;
 }
 
 .tr-error {
     background: #fff5f5;
     color: #b02020;
-    border: 1px solid rgba(224, 60, 60, 0.08);
+    border: 1px solid rgba(224, 60, 60, 0.12);
 }
 
 .tr-success {
     background: #f5fffb;
     color: #0a7a44;
-    border: 1px solid rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.12);
 }
 
-/* Form grid */
+/* Form */
 .tr-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px 16px;
+    gap: 14px 18px;
 }
 
-/* full width */
-.tr-form .full {
-    grid-column: 1 / -1;
-}
-
-.tr-form label {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.95rem;
-    color: var(--text-dark);
-}
-
-label input,
-label select {
-    margin-top: 8px;
-    padding: 10px 12px;
+/* Inputs */
+.tr-form input,
+.tr-form select,
+.tr-form textarea {
+    width: 100%;
+    padding: 11px 12px;
     border-radius: 10px;
     border: 1px solid var(--input-border);
     background: #fff;
     font-size: 0.95rem;
     color: var(--text-dark);
     outline: none;
-    transition: box-shadow .12s ease, border-color .12s ease, transform .08s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-label input:focus,
-label select:focus {
-    border-color: rgba(0, 79, 158, 0.25);
-    box-shadow: 0 8px 20px rgba(0, 79, 158, 0.06);
-    transform: translateY(-2px);
+.tr-form textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
+/* Multi-select */
+.tr-form select[multiple] {
+    min-height: 110px;
+    padding: 10px;
+}
+
+/* Focus */
+.tr-form input:focus,
+.tr-form select:focus,
+.tr-form textarea:focus {
+    border-color: rgba(0, 79, 158, 0.35);
+    box-shadow: 0 6px 16px rgba(0, 79, 158, 0.12);
+}
+
+/* Field error */
 .field-error {
     color: #d03030;
-    margin-top: 6px;
     font-size: 0.85rem;
+    margin-top: 4px;
 }
 
-/* Actions */
-.tr-actions {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+/* Buttons */
+.tr-form button {
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-primary {
     background: var(--orange-secondary);
-    color: white;
-    padding: 10px 14px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background .25s ease, transform .12s ease, box-shadow .12s ease;
+    color: #fff;
+    transition: background 0.25s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary:hover {
     background: var(--blue-primary);
-    box-shadow: 0 10px 26px rgba(0, 79, 158, 0.12);
+    box-shadow: 0 8px 22px rgba(0, 79, 158, 0.2);
 }
 
-.btn-primary[disabled] {
+.btn-primary:disabled {
     opacity: 0.7;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
-.btn-ghost {
-    background: var(--orange-secondary);
-    border: 1px solid var(--input-border);
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.btn-ghost:hover {
-    background: var(--blue-primary);
-    color: #fff;
+/* Make button full width */
+.tr-form button {
+    grid-column: 1 / -1;
 }
 
 /* Responsive */
-@media (max-width:720px) {
+@media (max-width: 768px) {
     .tr-card {
-        padding: 16px;
-        max-width: 520px;
+        padding: 18px;
     }
 
     .tr-form {
         grid-template-columns: 1fr;
     }
+}
 
-    .tr-page {
-        padding: 18px;
-    }
+.class-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.field-info {
+    color: #28a745;
+    font-size: 12px;
+}
+
+.tr-actions {
+    display: flex;
+    gap: 12px;
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--input-border);
+}
+
+.tr-actions .btn-primary {
+    flex: 1;
+    min-width: 160px;
+}
+
+.tr-actions .btn-ghost {
+    flex: 0 0 auto;
+    min-width: 100px;
+    background: transparent;
+    color: var(--text-dark);
+    border: 1px solid black;
+}
+
+.tr-actions .btn-ghost:hover {
+    background: #f8fafc;
+    border-color: var(--blue-primary);
+    color: var(--blue-primary);
 }

@@ -1,69 +1,53 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import "./AdminUpdateStudent.css";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import "./AdminUpdateTeacher.css";
 
-const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
-  const location = useLocation();
+const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   const navigate = useNavigate();
-  const studentId = location.state?.studentId;
+  const { teacherId: paramTeacherId } = useParams();
+  const location = useLocation();
 
-  // Document types configuration - ADDED PAN and CASTE_CERTIFICATE
+  const teacherId =
+    paramTeacherId ||
+    location.state?.teacherId ||
+    location.state?.teacher?.teacherId ||
+    location.state?.teacher?.id;
+
+  // Document types configuration for teachers - Updated based on your backend
   const DOC_TYPES = [
+    { key: "teacherPhoto", label: "Teacher Photo", endpoint: "TEACHER_PHOTO" },
     {
-      key: "studentAadhar",
-      label: "Student Aadhar",
-      endpoint: "STUDENT_AADHAR",
+      key: "teacherAadhar",
+      label: "Teacher Aadhar",
+      endpoint: "TEACHER_AADHAR",
     },
-    { key: "ssmId", label: "SSM ID", endpoint: "SSSMID_CARD" },
-    { key: "studentPhoto", label: "Student Photo", endpoint: "STUDENT_PHOTO" },
+    { key: "teacherPan", label: "PAN Card", endpoint: "TEACHER_PAN" },
     {
-      key: "birthCertificate",
-      label: "Birth Certificate",
-      endpoint: "BIRTH_CERTIFICATE",
+      key: "teacherDegree",
+      label: "Degree Certificate",
+      endpoint: "TEACHER_DEGREE",
     },
     {
-      key: "incomeCertificate",
-      label: "Income Certificate",
-      endpoint: "INCOME_CERTIFICATE",
+      key: "teacherCertificate",
+      label: "Experience / Other Certificate",
+      endpoint: "TEACHER_CERTIFICATE",
     },
-    { key: "tc", label: "Transfer Certificate (TC)", endpoint: "TC" },
-    { key: "bankPassbook", label: "Bank Passbook", endpoint: "BANK_PASSBOOK" },
-    { key: "domicile", label: "Domicile Certificate", endpoint: "DOMICILE" },
-    { key: "parentAadhar", label: "Parent Aadhar", endpoint: "PARENT_AADHAR" },
-    { key: "pan", label: "PAN Card", endpoint: "PAN" }, // NEW
-    {
-      key: "casteCertificate",
-      label: "Caste Certificate",
-      endpoint: "CASTE_CERTIFICATE",
-    }, // NEW
   ];
 
-  // Student form state - UNCHANGED
+  // Teacher form state - Updated to match your JSON structure
   const [form, setForm] = useState({
     name: "",
-    admissionNo: "",
-    admissionDate: "",
-    password: "",
-    fatherName: "",
-    motherName: "",
-    dob: "",
-    studentPhone: "",
     email: "",
-    parentPhone: "",
+    phone: "",
+    password: "",
+    dateOfBirth: "",
+    yearOfExperience: "",
+    educationalDetails: "",
+    aadharNo: "",
     address: "",
-    gender: "",
-    studentAadharNo: "",
-    parentAadharNo: "",
-    rte: "",
-    tcNumber: "",
-    ssmId: "",
-    passoutClass: "",
-    studentClassId: "",
-    caste: "",
-    subCaste: "",
-    religion: "",
-    apaarId: "",
-    panNo: "",
+    panNo: "", // Added as optional field
+    designation: "", // Added as optional field
+    subject: "", // Added as optional field
   });
 
   // Documents state
@@ -71,18 +55,17 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   const [docStatus, setDocStatus] = useState({});
   const [existingDocs, setExistingDocs] = useState([]);
 
-  const [classes, setClasses] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [uploadingDocs, setUploadingDocs] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState("details"); // "details" or "documents"
+  const [activeTab, setActiveTab] = useState("details");
 
-  // Fetch student data and documents
+  // Fetch teacher data and documents
   useEffect(() => {
-    if (!studentId) {
+    if (!teacherId) {
       setTimeout(() => navigate(-1), 2000);
       return;
     }
@@ -90,26 +73,19 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch classes
-        const classesRes = await fetch(`${apiBase}/api/classes/getAll`);
-        if (classesRes.ok) {
-          const classesData = await classesRes.json();
-          setClasses(Array.isArray(classesData) ? classesData : []);
-        }
-
-        // Fetch student data
+        // Try multiple teacher endpoints
         const endpoints = [
-          `${apiBase}/api/users/${studentId}`,
-          `${apiBase}/api/users/get/${studentId}`,
-          `${apiBase}/api/users/getById/${studentId}`,
+          `${apiBase}/api/teachers/${teacherId}`,
+          `${apiBase}/api/teachers/get/${teacherId}`,
+          `${apiBase}/api/teachers/getById/${teacherId}`,
         ];
 
-        let studentData = null;
+        let teacherData = null;
         for (const endpoint of endpoints) {
           try {
             const res = await fetch(endpoint);
             if (res.ok) {
-              studentData = await res.json();
+              teacherData = await res.json();
               break;
             }
           } catch (err) {
@@ -117,58 +93,47 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
           }
         }
 
-        if (!studentData) {
-          throw new Error("Student not found");
+        if (!teacherData) {
+          throw new Error("Teacher not found");
         }
 
-        // Update form with fetched data - UNCHANGED
+        // Update form with fetched data - Only fields from your JSON
         setForm({
-          name: studentData.name || "",
-          admissionNo: studentData.admissionNo || "",
-          admissionDate: studentData.admissionDate
-            ? studentData.admissionDate.split("T")[0]
-            : "",
+          name: teacherData.name || "",
+          email: teacherData.email || "",
+          phone: teacherData.phone || "",
           password: "",
-          fatherName: studentData.fatherName || "",
-          motherName: studentData.motherName || "",
-          dob: studentData.dob ? studentData.dob.split("T")[0] : "",
-          studentPhone: studentData.studentPhone || "",
-          email: studentData.email || "",
-          parentPhone: studentData.parentPhone || "",
-          address: studentData.address || "",
-          gender: studentData.gender || "",
-          studentAadharNo: studentData.studentAadharNo || "",
-          parentAadharNo: studentData.parentAadharNo || "",
-          rte: studentData.rte || "",
-          tcNumber: studentData.tcNumber || "",
-          ssmId: studentData.ssmId || "",
-          passoutClass: studentData.passoutClass || "",
-          studentClassId: studentData.studentClassId || "",
-          caste: studentData.caste || "",
-          subCaste: studentData.subCaste || "",
-          religion: studentData.religion || "",
-          apaarId: studentData.apaarId || "",
-          panNo: studentData.panNo || "",
+          dateOfBirth: teacherData.dateOfBirth
+            ? teacherData.dateOfBirth.split("T")[0]
+            : "",
+          yearOfExperience: teacherData.yearOfExperience || "",
+          educationalDetails: teacherData.educationalDetails || "",
+          aadharNo: teacherData.aadharNo || "",
+          address: teacherData.address || "",
+          panNo: teacherData.panNo || "", // Optional
+          designation: teacherData.designation || "", // Optional
+          subject: teacherData.subject || "", // Optional
         });
 
         // Fetch existing documents
         await fetchDocuments();
       } catch (err) {
         console.error("Error fetching data:", err);
-        window.alert(`Failed to load student data: ${err.message}`);
-        navigate("/admindashboard/view-students");
+        window.alert(`Failed to load teacher data: ${err.message}`);
+        navigate("/admindashboard/view-teachers");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [studentId, apiBase, navigate]);
+  }, [teacherId, apiBase, navigate]);
 
-  // Fetch existing documents
+  // Fetch existing documents - UPDATED ENDPOINT
   const fetchDocuments = async () => {
     try {
-      const res = await fetch(`${apiBase}/api/documents/${studentId}`);
+      // Using the correct endpoint for teacher documents
+      const res = await fetch(`${apiBase}/api/teacher-documents/${teacherId}`);
       if (res.ok) {
         const data = await res.json();
         const docsArray = Array.isArray(data) ? data : [];
@@ -195,40 +160,26 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     }
   };
 
-  // Validation function - UNCHANGED
+  // Validation function
   const validateForm = () => {
     const newErrors = {};
 
     // Required fields
     if (!form.name.trim()) newErrors.name = "Name is required";
-    if (!form.admissionNo.trim())
-      newErrors.admissionNo = "Admission No is required";
-    if (!form.admissionDate)
-      newErrors.admissionDate = "Admission date is required";
-    if (!form.studentPhone)
-      newErrors.studentPhone = "Student phone is required";
     if (!form.email) newErrors.email = "Email is required";
-    if (!form.studentClassId) newErrors.studentClassId = "Class is required";
+    if (!form.phone) newErrors.phone = "Phone is required";
 
     // Format validations
-    if (form.studentPhone && !/^[0-9]{10}$/.test(form.studentPhone)) {
-      newErrors.studentPhone = "Enter a valid 10-digit phone number";
+    if (form.phone && !/^[0-9]{10}$/.test(form.phone)) {
+      newErrors.phone = "Enter a valid 10-digit phone number";
     }
 
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
     }
 
-    if (form.studentAadharNo && !/^[0-9]{12}$/.test(form.studentAadharNo)) {
-      newErrors.studentAadharNo = "Aadhar must be 12 digits";
-    }
-
-    if (form.parentPhone && !/^[0-9]{10}$/.test(form.parentPhone)) {
-      newErrors.parentPhone = "Enter a valid 10-digit phone number";
-    }
-
-    if (form.parentAadharNo && !/^[0-9]{12}$/.test(form.parentAadharNo)) {
-      newErrors.parentAadharNo = "Parent Aadhar must be 12 digits";
+    if (form.aadharNo && !/^[0-9]{12}$/.test(form.aadharNo)) {
+      newErrors.aadharNo = "Aadhar must be 12 digits";
     }
 
     if (form.panNo && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.panNo)) {
@@ -275,7 +226,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     }));
   };
 
-  // Upload single document
+  // Upload single document - UPDATED ENDPOINT
   const uploadDocument = async (key) => {
     const docType = DOC_TYPES.find((d) => d.key === key);
     if (!docType || !docs[key]?.file) return;
@@ -286,10 +237,11 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     }));
 
     try {
-      const url = `${apiBase}/api/documents/update/${studentId}/${docType.endpoint}`;
+      // Using the correct endpoint: /api/teacher-documents/update/{teacherId}/{docType}
+      const url = `${apiBase}/api/teacher-documents/update/${teacherId}/${docType.endpoint}`;
       const formData = new FormData();
       formData.append("file", docs[key].file);
-      formData.append("docType", docType.endpoint);
+      // Note: Removed the extra docType append as it might not be needed
 
       const res = await fetch(url, {
         method: "PUT",
@@ -297,6 +249,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       });
 
       if (res.ok) {
+        const result = await res.json();
         setDocStatus((prev) => ({
           ...prev,
           [key]: { uploading: false, ok: true, error: null },
@@ -344,7 +297,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     return allSuccess;
   };
 
-  // Handle form submission (student details)
+  // Handle form submission (teacher details)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -357,33 +310,31 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     setUpdateSuccess(false);
 
     try {
-      // Find class name for the selected class ID
-      const selectedClass = classes.find(
-        (c) =>
-          String(c.classId) === String(form.studentClassId) ||
-          String(c.id) === String(form.studentClassId)
-      );
-
       const payload = {
-        ...form,
-        studentClass: selectedClass
-          ? selectedClass.className || selectedClass.name
-          : "",
-        studentClassId: Number(form.studentClassId),
-        id: studentId,
-        userId: studentId,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        dateOfBirth: form.dateOfBirth,
+        yearOfExperience: form.yearOfExperience,
+        educationalDetails: form.educationalDetails,
+        aadharNo: form.aadharNo,
+        address: form.address,
+        panNo: form.panNo,
+        designation: form.designation,
+        subject: form.subject,
+        teacherId: teacherId,
       };
 
       // Only include password if it was changed (non-empty)
-      if (!form.password) {
-        delete payload.password;
+      if (form.password && form.password.trim() !== "") {
+        payload.password = form.password;
       }
 
       // Try multiple update endpoints
       const updateEndpoints = [
-        `${apiBase}/api/users/update/${studentId}`,
-        `${apiBase}/api/users/${studentId}`,
-        `${apiBase}/api/users/update`,
+        `${apiBase}/api/teachers/update/${teacherId}`,
+        `${apiBase}/api/teachers/${teacherId}`,
+        `${apiBase}/api/teachers/update`,
       ];
 
       let success = false;
@@ -416,10 +367,10 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
         // Auto-navigate after 1.5 seconds
         setTimeout(() => {
-          navigate("/admindashboard/view-students");
+          navigate("/admindashboard/view-teachers");
         }, 1500);
       } else {
-        throw new Error("Failed to update student on all endpoints");
+        throw new Error("Failed to update teacher on all endpoints");
       }
     } catch (err) {
       console.error("Update error:", err);
@@ -431,41 +382,40 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
   // Handle save all (details + documents)
   const handleSaveAll = async () => {
-    // First save student details
+    // First save teacher details
     const formValid = validateForm();
     if (!formValid) {
-      window.alert("Please fix student details errors before saving.");
+      window.alert("Please fix teacher details errors before saving.");
       return;
     }
 
     setUpdating(true);
 
     try {
-      // Save student details
-      const selectedClass = classes.find(
-        (c) =>
-          String(c.classId) === String(form.studentClassId) ||
-          String(c.id) === String(form.studentClassId)
-      );
-
+      // Save teacher details
       const payload = {
-        ...form,
-        studentClass: selectedClass
-          ? selectedClass.className || selectedClass.name
-          : "",
-        studentClassId: Number(form.studentClassId),
-        id: studentId,
-        userId: studentId,
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        dateOfBirth: form.dateOfBirth,
+        yearOfExperience: form.yearOfExperience,
+        educationalDetails: form.educationalDetails,
+        aadharNo: form.aadharNo,
+        address: form.address,
+        panNo: form.panNo,
+        designation: form.designation,
+        subject: form.subject,
+        teacherId: teacherId,
       };
 
-      if (!form.password) {
-        delete payload.password;
+      if (form.password && form.password.trim() !== "") {
+        payload.password = form.password;
       }
 
       const updateEndpoints = [
-        `${apiBase}/api/users/update/${studentId}`,
-        `${apiBase}/api/users/${studentId}`,
-        `${apiBase}/api/users/update`,
+        `${apiBase}/api/teachers/update/${teacherId}`,
+        `${apiBase}/api/teachers/${teacherId}`,
+        `${apiBase}/api/teachers/update`,
       ];
 
       let detailsSuccess = false;
@@ -490,7 +440,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       }
 
       if (!detailsSuccess) {
-        throw new Error("Failed to update student details");
+        throw new Error("Failed to update teacher details");
       }
 
       // Then upload documents if any
@@ -508,7 +458,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
         setForm((prev) => ({ ...prev, password: "" }));
 
         setTimeout(() => {
-          navigate("/admindashboard/view-students");
+          navigate("/admindashboard/view-teachers");
         }, 1500);
       }
     } catch (err) {
@@ -545,14 +495,14 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     ) {
       return;
     }
-    navigate("/admindashboard/view-students");
+    navigate("/admindashboard/view-teachers");
   };
 
   if (loading) {
     return (
       <div className="loading-overlay">
         <div className="loading-spinner"></div>
-        Loading student data...
+        Loading teacher data...
       </div>
     );
   }
@@ -560,18 +510,18 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   return (
     <div className="update-container">
       <div className="update-header">
-        <h2>Update Student</h2>
+        <h2>Update Teacher</h2>
         <button
           className="update-back-btn"
           onClick={handleBackToList}
           disabled={updating || uploadingDocs}
         >
-          ← Back to Student List
+          ← Back to Teacher List
         </button>
       </div>
 
       <div className="info-message">
-        Updating student: <strong>{form.name}</strong> (ID: {studentId})
+        Updating teacher: <strong>{form.name}</strong> (ID: {teacherId})
         <br />
         <small style={{ color: "#7f8c8d", fontSize: "0.9em" }}>
           Leave password field empty to keep current password
@@ -585,7 +535,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
             className={`tab ${activeTab === "details" ? "active" : ""}`}
             onClick={() => setActiveTab("details")}
           >
-            Student Details
+            Teacher Details
           </button>
           <button
             className={`tab ${activeTab === "documents" ? "active" : ""}`}
@@ -596,7 +546,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
         </div>
       </div>
 
-      {/* Student Details Tab - UNCHANGED */}
+      {/* Teacher Details Tab - Simplified to match your JSON */}
       {activeTab === "details" && (
         <div className="update-form-container">
           <form className="update-form" onSubmit={handleSubmit}>
@@ -617,33 +567,35 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
               </div>
 
               <div className="form-group">
-                <label className="required">Admission No</label>
+                <label className="required">Email</label>
                 <input
-                  type="text"
-                  name="admissionNo"
+                  type="email"
+                  name="email"
                   className="form-input"
-                  value={form.admissionNo}
+                  value={form.email}
                   onChange={handleChange}
-                  placeholder="Enter admission number"
+                  placeholder="Enter email address"
                 />
-                {errors.admissionNo && (
-                  <div className="error-message">{errors.admissionNo}</div>
+                {errors.email && (
+                  <div className="error-message">{errors.email}</div>
                 )}
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label className="required">Admission Date</label>
+                <label className="required">Phone</label>
                 <input
-                  type="date"
-                  name="admissionDate"
+                  type="tel"
+                  name="phone"
                   className="form-input"
-                  value={form.admissionDate}
+                  value={form.phone}
                   onChange={handleChange}
+                  placeholder="Enter 10-digit phone"
+                  maxLength="10"
                 />
-                {errors.admissionDate && (
-                  <div className="error-message">{errors.admissionDate}</div>
+                {errors.phone && (
+                  <div className="error-message">{errors.phone}</div>
                 )}
               </div>
 
@@ -671,88 +623,57 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Father's Name</label>
-                <input
-                  type="text"
-                  name="fatherName"
-                  className="form-input"
-                  value={form.fatherName}
-                  onChange={handleChange}
-                  placeholder="Enter father's name"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Mother's Name</label>
-                <input
-                  type="text"
-                  name="motherName"
-                  className="form-input"
-                  value={form.motherName}
-                  onChange={handleChange}
-                  placeholder="Enter mother's name"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
                 <label>Date of Birth</label>
                 <input
                   type="date"
-                  name="dob"
+                  name="dateOfBirth"
                   className="form-input"
-                  value={form.dob}
+                  value={form.dateOfBirth}
                   onChange={handleChange}
                 />
               </div>
 
               <div className="form-group">
-                <label className="required">Student Phone</label>
+                <label>Year of Experience</label>
                 <input
-                  type="tel"
-                  name="studentPhone"
+                  type="number"
+                  name="yearOfExperience"
                   className="form-input"
-                  value={form.studentPhone}
+                  value={form.yearOfExperience}
                   onChange={handleChange}
-                  placeholder="Enter 10-digit phone"
-                  maxLength="10"
+                  placeholder="Years of experience"
+                  min="0"
+                  max="50"
                 />
-                {errors.studentPhone && (
-                  <div className="error-message">{errors.studentPhone}</div>
-                )}
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>Educational Details</label>
+              <textarea
+                name="educationalDetails"
+                className="form-textarea"
+                value={form.educationalDetails}
+                onChange={handleChange}
+                placeholder="Enter educational qualifications"
+                rows="2"
+              />
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label className="required">Email</label>
+                <label>Aadhar No</label>
                 <input
-                  type="email"
-                  name="email"
+                  type="text"
+                  name="aadharNo"
                   className="form-input"
-                  value={form.email}
+                  value={form.aadharNo}
                   onChange={handleChange}
-                  placeholder="Enter email address"
+                  placeholder="Enter 12-digit Aadhar"
+                  maxLength="12"
                 />
-                {errors.email && (
-                  <div className="error-message">{errors.email}</div>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label>Parent Phone</label>
-                <input
-                  type="tel"
-                  name="parentPhone"
-                  className="form-input"
-                  value={form.parentPhone}
-                  onChange={handleChange}
-                  placeholder="Enter parent phone"
-                  maxLength="10"
-                />
-                {errors.parentPhone && (
-                  <div className="error-message">{errors.parentPhone}</div>
+                {errors.aadharNo && (
+                  <div className="error-message">{errors.aadharNo}</div>
                 )}
               </div>
             </div>
@@ -765,208 +686,8 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
                 value={form.address}
                 onChange={handleChange}
                 placeholder="Enter complete address"
-                rows="3"
+                rows="2"
               />
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Gender</label>
-                <select
-                  name="gender"
-                  className="form-select"
-                  value={form.gender}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Student Aadhar No</label>
-                <input
-                  type="text"
-                  name="studentAadharNo"
-                  className="form-input"
-                  value={form.studentAadharNo}
-                  onChange={handleChange}
-                  placeholder="Enter 12-digit Aadhar"
-                  maxLength="12"
-                />
-                {errors.studentAadharNo && (
-                  <div className="error-message">{errors.studentAadharNo}</div>
-                )}
-              </div>
-            </div>
-
-            {/* NEW FIELDS - Caste, Subcaste, Religion */}
-            <div className="form-row">
-              <div className="form-group">
-                <label>Caste</label>
-                <input
-                  type="text"
-                  name="caste"
-                  className="form-input"
-                  value={form.caste}
-                  onChange={handleChange}
-                  placeholder="Enter caste (e.g., general)"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Sub Caste</label>
-                <input
-                  type="text"
-                  name="subCaste"
-                  className="form-input"
-                  value={form.subCaste}
-                  onChange={handleChange}
-                  placeholder="Enter sub caste (e.g., open)"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Religion</label>
-                <input
-                  type="text"
-                  name="religion"
-                  className="form-input"
-                  value={form.religion}
-                  onChange={handleChange}
-                  placeholder="Enter religion (e.g., hindu)"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>APAAR ID</label>
-                <input
-                  type="text"
-                  name="apaarId"
-                  className="form-input"
-                  value={form.apaarId}
-                  onChange={handleChange}
-                  placeholder="Enter APAAR ID (e.g., APAAR12234)"
-                />
-                {errors.apaarId && (
-                  <div className="error-message">{errors.apaarId}</div>
-                )}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Parent Aadhar No</label>
-                <input
-                  type="text"
-                  name="parentAadharNo"
-                  className="form-input"
-                  value={form.parentAadharNo}
-                  onChange={handleChange}
-                  placeholder="Enter parent Aadhar"
-                  maxLength="12"
-                />
-                {errors.parentAadharNo && (
-                  <div className="error-message">{errors.parentAadharNo}</div>
-                )}
-              </div>
-
-              <div className="form-group">
-                <label>PAN No</label>
-                <input
-                  type="text"
-                  name="panNo"
-                  className="form-input"
-                  value={form.panNo}
-                  onChange={handleChange}
-                  placeholder="Enter PAN (e.g., ECPPG4538J)"
-                  maxLength="10"
-                />
-                {errors.panNo && (
-                  <div className="error-message">{errors.panNo}</div>
-                )}
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>RTE</label>
-                <input
-                  type="text"
-                  name="rte"
-                  className="form-input"
-                  value={form.rte}
-                  onChange={handleChange}
-                  placeholder="Enter RTE status"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>TC Number</label>
-                <input
-                  type="text"
-                  name="tcNumber"
-                  className="form-input"
-                  value={form.tcNumber}
-                  onChange={handleChange}
-                  placeholder="Enter TC number"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>SSSM ID</label>
-                <input
-                  type="text"
-                  name="ssmId"
-                  className="form-input"
-                  value={form.ssmId}
-                  onChange={handleChange}
-                  placeholder="Enter SSM ID"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Passout Class</label>
-                <input
-                  type="text"
-                  name="passoutClass"
-                  className="form-input"
-                  value={form.passoutClass}
-                  onChange={handleChange}
-                  placeholder="Enter passout class"
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label className="required">Class</label>
-                <select
-                  name="studentClassId"
-                  className="form-select"
-                  value={form.studentClassId}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Class</option>
-                  {classes.map((cls) => (
-                    <option
-                      key={cls.classId || cls.id}
-                      value={cls.classId || cls.id}
-                    >
-                      {cls.className || cls.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.studentClassId && (
-                  <div className="error-message">{errors.studentClassId}</div>
-                )}
-              </div>
             </div>
 
             <div className="form-actions">
@@ -994,7 +715,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
                 ) : updateSuccess ? (
                   <>✓ Updated Successfully!</>
                 ) : (
-                  "Update Details"
+                  "Update Teacher"
                 )}
               </button>
             </div>
@@ -1002,7 +723,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
         </div>
       )}
 
-      {/* Documents Tab - NOW INCLUDES NEW DOCUMENTS */}
+      {/* Documents Tab */}
       {activeTab === "documents" && (
         <div className="documents-container">
           <div className="documents-info">
@@ -1065,6 +786,16 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
                         <span className="existing-file-name">
                           {existingDoc.fileName || existingDoc.filename}
                         </span>
+                        {existingDoc.url && (
+                          <a
+                            href={existingDoc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="view-existing-btn"
+                          >
+                            View
+                          </a>
+                        )}
                       </div>
                     ) : (
                       <span className="no-file">No file selected</span>
@@ -1133,4 +864,4 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   );
 };
 
-export default AdminUpdateStudent;
+export default AdminUpdateTeacher;

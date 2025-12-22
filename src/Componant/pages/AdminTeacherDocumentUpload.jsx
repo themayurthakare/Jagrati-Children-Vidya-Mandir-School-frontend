@@ -1,75 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import "./AdminUploadStudentDocuments.css";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import "./AdminTeacherDocumentUpload.css"; // Reuse student CSS with teacher naming
 
 const DOC_TYPES = [
-  { key: "adhar", label: "Student Aadhar", endpoint: "STUDENT_AADHAR" },
-  { key: "sssm", label: "SSSM ID", endpoint: "SSSMID_CARD" },
-  { key: "photo", label: "Student Photo", endpoint: "STUDENT_PHOTO" },
-  { key: "birth", label: "Birth Certificate", endpoint: "BIRTH_CERTIFICATE" },
+  { key: "photo", label: "Teacher Photo", endpoint: "TEACHER_PHOTO" },
+  { key: "aadhar", label: "Aadhaar Card", endpoint: "TEACHER_AADHAR" },
+  { key: "pan", label: "PAN Card", endpoint: "TEACHER_PAN" },
+  { key: "degree", label: "Degree Certificate", endpoint: "TEACHER_DEGREE" },
   {
-    key: "income",
-    label: "Income Certificate",
-    endpoint: "INCOME_CERTIFICATE",
+    key: "certificate",
+    label: "Other Certificate",
+    endpoint: "TEACHER_CERTIFICATE",
   },
-  { key: "tc", label: "Transfer Certificate (TC)", endpoint: "TC" },
-  { key: "bank", label: "Bank Passbook", endpoint: "BANK_PASSBOOK" },
-  { key: "domicile", label: "Domicile Certificate", endpoint: "DOMICILE" },
-  { key: "parentAdhar", label: "Parent Aadhar", endpoint: "PARENT_AADHAR" },
-  { key: "pan", label: "PAN Card", endpoint: "PAN" },
-  { key: "caste", label: "Caste Certificate", endpoint: "CASTE_CERTIFICATE" },
 ];
 
-const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
+const AdminTeacherDocumentUpload = ({
+  apiBase = "http://localhost:8080/api",
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const prefillId = location.state?.studentId ?? null;
+  const [searchParams] = useSearchParams();
 
-  const [studentId, setStudentId] = useState(
+  const prefillId = location.state?.teacherId || searchParams.get("teacherId");
+  const [teacherId, setTeacherId] = useState(
     prefillId ? String(prefillId) : ""
   );
+
   const [docs, setDocs] = useState({
-    adhar: null,
-    sssm: null,
     photo: null,
-    birth: null,
-    income: null,
-    tc: null,
-    bank: null,
-    domicile: null,
-    parentAdhar: null,
+    aadhar: null,
     pan: null,
-    caste: null,
+    degree: null,
+    certificate: null,
   });
 
   const [docStatus, setDocStatus] = useState({
-    adhar: null,
-    sssm: null,
     photo: null,
-    birth: null,
-    income: null,
-    tc: null,
-    bank: null,
-    domicile: null,
-    parentAdhar: null,
+    aadhar: null,
     pan: null,
-    caste: null,
+    degree: null,
+    certificate: null,
   });
 
   const [uploadingGlobal, setUploadingGlobal] = useState(false);
   const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    if (!studentId) {
-      const q = new URLSearchParams(window.location.search);
-      const qId = q.get("studentId");
-      if (qId) setStudentId(qId);
+    if (!teacherId) {
+      const qId = searchParams.get("teacherId");
+      if (qId) setTeacherId(qId);
     }
-  }, []);
+  }, [teacherId, searchParams]);
 
   const validateForm = () => {
-    if (!studentId || !/^\d+$/.test(studentId)) {
-      setValidationError("Please enter a valid numeric Student ID.");
+    if (!teacherId || !/^\d+$/.test(teacherId)) {
+      setValidationError("Please enter a valid numeric Teacher ID.");
       return false;
     }
 
@@ -83,11 +68,10 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
     return true;
   };
 
-  const uploadSingle = async (userId, endpoint, file) => {
-    const url = `${apiBase}/api/documents/upload/${userId}/${endpoint}`;
+  const uploadSingle = async (teacherId, endpoint, file) => {
+    const url = `${apiBase}/teacher-documents/upload/${teacherId}/${endpoint}`;
     const fd = new FormData();
     fd.append("file", file);
-    fd.append("docType", endpoint);
 
     try {
       const res = await fetch(url, {
@@ -128,17 +112,11 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
     setValidationError("");
 
     setDocStatus({
-      adhar: null,
-      sssm: null,
       photo: null,
-      birth: null,
-      income: null,
-      tc: null,
-      bank: null,
-      domicile: null,
-      parentAdhar: null,
+      aadhar: null,
       pan: null,
-      caste: null,
+      degree: null,
+      certificate: null,
     });
 
     const toUpload = DOC_TYPES.map((d) => ({ ...d, file: docs[d.key] })).filter(
@@ -152,7 +130,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
         [item.key]: { uploading: true, ok: false, error: null },
       }));
 
-      const r = await uploadSingle(studentId, item.endpoint, item.file);
+      const r = await uploadSingle(teacherId, item.endpoint, item.file);
 
       if (r.ok) {
         setDocStatus((s) => ({
@@ -174,11 +152,9 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
 
     if (failed.length === 0) {
       window.alert(
-        `All ${successCount} document(s) uploaded successfully for student ${studentId}.`
+        `All ${successCount} document(s) uploaded successfully for teacher ${teacherId}.`
       );
-      navigate("/admindashboard/print-student", {
-        state: { studentId },
-      });
+      navigate(`/admindashboard/teacher-receipt?teacherId=${teacherId}`);
     } else {
       const messages = failed.map((f) => `${f.label}: ${f.result.error}`);
       window.alert(
@@ -199,36 +175,24 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
     ) {
       return;
     }
-    navigate(-1);
+    navigate("/admin/teacher-registration");
   };
 
   const handleClearAll = () => {
     if (window.confirm("Clear all selected documents?")) {
       setDocs({
-        adhar: null,
-        sssm: null,
         photo: null,
-        birth: null,
-        income: null,
-        tc: null,
-        bank: null,
-        domicile: null,
-        parentAdhar: null,
+        aadhar: null,
         pan: null,
-        caste: null,
+        degree: null,
+        certificate: null,
       });
       setDocStatus({
-        adhar: null,
-        sssm: null,
         photo: null,
-        birth: null,
-        income: null,
-        tc: null,
-        bank: null,
-        domicile: null,
-        parentAdhar: null,
+        aadhar: null,
         pan: null,
-        caste: null,
+        degree: null,
+        certificate: null,
       });
       setValidationError("");
     }
@@ -237,23 +201,23 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
   return (
     <div className="ud-container">
       <div className="ud-card">
-        <h2>Upload Student Documents</h2>
+        <h2>Upload Teacher Documents</h2>
 
         {prefillId && (
           <div className="ud-info">
-            Preparing uploads for student id: <strong>{prefillId}</strong>
+            Preparing uploads for teacher id: <strong>{prefillId}</strong>
           </div>
         )}
 
         <div className="ud-input-block">
-          <label>Student ID *</label>
+          <label>Teacher ID *</label>
           <input
             type="text"
             className="ud-input"
-            placeholder="Enter Student ID"
-            value={studentId}
+            placeholder="Enter Teacher ID"
+            value={teacherId}
             onChange={(e) => {
-              setStudentId(e.target.value);
+              setTeacherId(e.target.value);
               if (validationError) setValidationError("");
             }}
           />
@@ -287,6 +251,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                   type="file"
                   onChange={(e) => handleFileChange(e, d.key)}
                   disabled={uploadingGlobal}
+                  accept={d.key === "photo" ? "image/*" : "image/*,.pdf"}
                 />
                 <div className="ud-file-name">
                   {docs[d.key] ? (
@@ -344,10 +309,6 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
               className="ud-btn ud-clear-btn"
               onClick={handleClearAll}
               disabled={uploadingGlobal}
-              style={{
-                backgroundColor: "#95a5a6",
-                color: "white",
-              }}
             >
               Clear All
             </button>
@@ -399,7 +360,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                     marginTop: "5px",
                   }}
                 >
-                  Student ID: {studentId || "Not entered"}
+                  Teacher ID: {teacherId || "Not entered"}
                 </div>
               </div>
             </div>
@@ -410,4 +371,4 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
   );
 };
 
-export default AdminUploadStudentDocuments;
+export default AdminTeacherDocumentUpload;

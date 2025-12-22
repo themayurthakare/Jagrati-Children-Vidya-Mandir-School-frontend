@@ -84,6 +84,7 @@ const AdminStudentFeeDetails = () => {
 
       if (transactionResponse.ok) {
         const transactionData = await transactionResponse.json();
+
         let transactionsList = [];
 
         if (Array.isArray(transactionData)) {
@@ -184,7 +185,9 @@ const AdminStudentFeeDetails = () => {
       }
 
       const savedFee = await response.json();
+
       setFees([savedFee]);
+
       return true;
     } catch (err) {
       console.error("Fee save error:", err);
@@ -202,6 +205,7 @@ const AdminStudentFeeDetails = () => {
       if (studentInfo && fees.length === 0 && !error) {
         console.log("Student has no fee structure. Creating automatically...");
         await createFeeStructure();
+
         fetchData();
       }
     };
@@ -240,6 +244,7 @@ const AdminStudentFeeDetails = () => {
     if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
+
       const day = String(date.getDate()).padStart(2, "0");
       const month = String(date.getMonth() + 1).padStart(2, "0");
       const year = date.getFullYear();
@@ -260,10 +265,12 @@ const AdminStudentFeeDetails = () => {
 
   const calculateFeeTotals = () => {
     let totalFees = 0;
+
     fees.forEach((fee) => {
       const amount = parseFloat(fee.amount) || 0;
       totalFees += amount;
     });
+
     return totalFees;
   };
 
@@ -356,11 +363,13 @@ const AdminStudentFeeDetails = () => {
         if (amount > 0 && amount <= remaining) {
           try {
             const sessionId = selectedSession.id;
+
             const transactionData = {
               amount: amount,
               paymentMode: "CASH",
               description: `Payment for Fee ID: ${fee.feesId} - Student: ${studentName}`,
               remarks: `Paid for ${studentName}'s fee (ID: ${studentId})`,
+
               userId: parseInt(studentId),
             };
 
@@ -377,6 +386,7 @@ const AdminStudentFeeDetails = () => {
 
             if (response.ok) {
               alert(`Payment of ${formatCurrency(amount)} saved successfully!`);
+
               fetchData();
             } else {
               const errorText = await response.text().catch(() => "");
@@ -397,131 +407,159 @@ const AdminStudentFeeDetails = () => {
       }
     }
   };
-
-  // Simple receipt with TWO per page
   const printReceipt = (transaction, studentName) => {
-    const printWindow = window.open("", "_blank");
+    const win = window.open("", "_blank");
 
-    printWindow.document.write(`
+    const totalFees = calculateFeeTotals();
+    const totalPaid = calculateTransactionTotal();
+    const totalRemaining = calculateRemainingAmount();
+    const paymentProgress = Math.round((totalPaid / totalFees) * 100) || 0;
+    const generatedDate = new Date().toLocaleString("en-IN");
+
+    const makeReceiptHtml = () => `
+    <div class="receipt">
+      <div class="center mt mb"><b>JAGRATI CHILDREN VIDYA MANDIR</b></div>
+      <div class="center mb"><b>FEE PAYMENT RECEIPT</b></div>
+      <div class="center mb">Session: ${
+        selectedSession.name || selectedSession.id
+      }</div>
+
+      <div class="mt">
+        <span class="label">Student:</span> ${studentName || "N/A"}
+      </div>
+      <div>
+        <span class="label">Admission No:</span> ${
+          studentInfo?.admissionNo || "N/A"
+        }
+      </div>
+      <div>
+        <span class="label">Class:</span> ${className || "N/A"}
+      </div>
+
+      <div class="line"></div>
+
+      <div>
+        <span class="label">Transaction ID:</span> ${
+          transaction.id || transaction.transactionId || "N/A"
+        }
+      </div>
+      <div>
+        <span class="label">Receipt No:</span> ${
+          transaction.receiptNumber || "N/A"
+        }
+      </div>
+      <div>
+        <span class="label">Date:</span> ${formatDate(transaction.paymentDate)}
+      </div>
+
+      <div class="line"></div>
+
+      <div class="mt mb"><span class="label">Payment Details:</span></div>
+
+      <div>
+        <span class="label">Amount:</span> ${formatCurrency(transaction.amount)}
+      </div>
+      <div>
+        <span class="label">Payment Mode:</span> ${
+          transaction.paymentMode || "CASH"
+        }
+      </div>
+     
+      <div>
+        <span class="label">Description:</span> ${
+          transaction.description || "School fees"
+        }
+      </div>
+      <div>
+        <span class="label">Status:</span> ${transaction.status || "SUCCESS"}
+      </div>
+      <div>
+        <span class="label">Remarks:</span> ${
+          transaction.remarks || "Paid at school counter"
+        }
+      </div>
+
+      <div class="line"></div>
+
+      <div class="mt">
+        <span class="label">Total Fees:</span>
+        <span class="right">${formatCurrency(totalFees)}</span>
+      </div>
+      <div>
+        <span class="label">Total Paid:</span>
+        <span class="right">${formatCurrency(totalPaid)}</span>
+      </div>
+      <div>
+        <span class="label">Remaining:</span>
+        <span class="right">${formatCurrency(totalRemaining)}</span>
+      </div>
+      <div>
+        <span class="label">Payment Progress:</span>
+        <span class="right">${paymentProgress}%</span>
+      </div>
+
+      <div class="center mt mb" style="margin-top:22px;">
+        Thank You for Your Payment!
+      </div>
+
+      <div class="center" style="font-size:10px; margin-top:10px;">
+        Generated on ${generatedDate}
+      </div>
+    </div>
+  `;
+
+    win.document.write(`
     <html>
       <head>
-        <title>Receipt</title>
+        <title>FEE PAYMENT RECEIPT</title>
         <style>
-          body { font-family: Arial; margin: 20px; }
-          .receipt { border: 2px solid black; padding: 20px; margin-bottom: 20px; }
-          .header { text-align: center; }
-          .row { display: flex; justify-content: space-between; margin: 10px 0; }
-          .amount { text-align: center; font-size: 20px; font-weight: bold; margin: 20px 0; }
-          .signature { display: flex; justify-content: space-between; margin-top: 40px; }
-          .signature div { text-align: center; width: 45%; }
-          .copy { text-align: center; margin-top: 10px; font-weight: bold; }
+          @page { margin: 10mm; }
+          body {
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            margin: 0;
+            padding: 0;
+          }
+          .page {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 10mm;              
+            padding: 10mm 12mm;    
+          }
+          .receipt {
+            width: 80mm;
+            min-height: 160mm;     
+            border: 1px solid black;
+            padding: 12px 12px;  
+            box-sizing: border-box;
+          }
+          .center { text-align: center; }
+          .line { border-top: 1px dashed #000; margin: 8px 0; }
+          .mt { margin-top: 8px; }  /* slightly more vertical spacing */
+          .mb { margin-bottom: 8px; }
+          .label { font-weight: bold; }
+          .right { float: right; }
         </style>
       </head>
       <body>
-        <!-- School Copy -->
-        <div class="receipt">
-          <div class="header">
-            <h3>JAGRATI CHILDREN VIDYA MANDIR</h3>
-            <h4>ORIGINAL FEE RECEIPT</h4>
-          </div>
-          
-          <div class="row">
-            <span><strong>Date:</strong> ${formatDate(
-              transaction.paymentDate
-            )}</span>
-            <span><strong>Receipt No:</strong> ${
-              transaction.receiptNumber || transaction.id || "N/A"
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Name:</strong> ${studentName}</span>
-            <span><strong>Admission No:</strong> ${
-              studentInfo?.admissionNo || "N/A"
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Class:</strong> ${className || "N/A"}</span>
-            <span><strong>Academic Year:</strong> ${
-              selectedSession.name || selectedSession.id
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Payment Mode:</strong> ${
-              transaction.paymentMode || "CASH"
-            }</span>
-          </div>
-          
-          <div class="amount">
-           <span><strong>Paid Ammount:</strong>
-            ${formatCurrency(transaction.amount)}
-          </div>
-          
-          <div class="signature">
-            <div>__________<br>Parent/Student</div>
-            <div>__________<br>School Authority</div>
-          </div>
-          
-        </div>
-
-        <!-- Parent Copy -->
-        <div class="receipt">
-          <div class="header">
-            <h3>JAGRATI CHILDREN VIDYA MANDIR</h3>
-            <h4>ORIRGINAL FEE RECEIPT</h4>
-          </div>
-          
-          <div class="row">
-            <span><strong>Date:</strong> ${formatDate(
-              transaction.paymentDate
-            )}</span>
-            <span><strong>Receipt No:</strong> ${
-              transaction.receiptNumber || transaction.id || "N/A"
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Name:</strong> ${studentName}</span>
-            <span><strong>Admission No:</strong> ${
-              studentInfo?.admissionNo || "N/A"
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Class:</strong> ${className || "N/A"}</span>
-            <span><strong>Academic Year:</strong> ${
-              selectedSession.name || selectedSession.id
-            }</span>
-          </div>
-          
-          <div class="row">
-            <span><strong>Payment Mode:</strong> ${
-              transaction.paymentMode || "CASH"
-            }</span>
-          </div>
-          
-          <div class="amount">
-           <span><strong>Paid Ammount:</strong>
-            ${formatCurrency(transaction.amount)}
-          </div>
-          
-          <div class="signature">
-            <div>__________<br>Parent/Student</div>
-            <div>__________<br>School Authority</div>
-          </div>
-          
+        <div class="page">
+          ${makeReceiptHtml()}
+          ${makeReceiptHtml()}
         </div>
       </body>
     </html>
   `);
 
-    printWindow.document.close();
-    printWindow.print();
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
   };
+
   const getStatusClass = (status) => {
     if (!status) return "pending";
+
     const statusLower = status.toLowerCase();
     if (
       statusLower === "success" ||
@@ -690,10 +728,12 @@ const AdminStudentFeeDetails = () => {
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {fees.map((fee) => {
                   const feeWithCalculations =
                     getFeeWithCalculatedPaidAmount(fee);
+
                   return (
                     <tr key={fee.feesId}>
                       <td className="text-center">{fee.feesId}</td>
@@ -767,6 +807,7 @@ const AdminStudentFeeDetails = () => {
                   <th>Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {transactions.map((transaction, index) => (
                   <tr key={transaction.id || transaction.transactionId}>

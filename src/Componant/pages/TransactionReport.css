@@ -1,0 +1,52 @@
+.report-container {
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.filter-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-box select,
+.filter-box input,
+.filter-box button {
+    padding: 8px;
+}
+
+.filter-box button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.excel-btn {
+    background: #28a745;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.report-table th,
+.report-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.report-table th {
+    background: #343a40;
+    color: white;
+}
+
+.total-box {
+    margin-top: 15px;
+    text-align: right;
+    font-size: 16px;
+}

@@ -17,11 +17,17 @@ const initialForm = {
   gender: "",
   studentAadharNo: "",
   parentAadharNo: "",
-  rte: "", // Changed to empty string
+  rte: "",
   tcNumber: "",
   ssmId: "",
   passoutClass: "",
   studentClassId: "",
+  // New Fields
+  caste: "",
+  subCaste: "",
+  religion: "",
+  apaarId: "",
+  panNo: "",
 };
 
 const AdminStudentRegistration = ({
@@ -73,11 +79,12 @@ const AdminStudentRegistration = ({
       e.password = "Password must be 6+ characters";
     if (!/^[0-9]{8,15}$/.test(form.studentPhone))
       e.studentPhone = "Enter 8–15 digit phone";
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
+    if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
       e.email = "Enter valid email";
     if (form.studentAadharNo && !/^[0-9]{12}$/.test(form.studentAadharNo))
       e.studentAadharNo = "Aadhar must be 12 digits";
     if (!form.studentClassId) e.studentClassId = "Select class";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -88,14 +95,11 @@ const AdminStudentRegistration = ({
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
-  // Try to extract id from saved object or Location header
   const detectIdFromResponse = (res, saved) => {
-    // prefer explicit id in response body
     if (saved) {
-      const id = saved.userId ?? saved.id ?? saved.user_id ?? saved.id;
+      const id = saved.userId ?? saved.id ?? saved.user_id;
       if (id != null) return id;
     }
-    // try Location header (e.g. /api/users/123)
     const loc = res?.headers ? res.headers.get("Location") : null;
     if (loc) {
       const parts = loc.split("/");
@@ -107,28 +111,8 @@ const AdminStudentRegistration = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) {
-      // re-calc messages from validate() because setErrors is async
-      const eObj = {};
-      if (!form.name.trim()) eObj.name = "Name is required";
-      if (!form.admissionNo.trim())
-        eObj.admissionNo = "Admission No is required";
-      if (!form.admissionDate) eObj.admissionDate = "Admission date required";
-      if (!form.password || form.password.length < 6)
-        eObj.password = "Password must be 6+ characters";
-      if (!/^[0-9]{8,15}$/.test(form.studentPhone))
-        eObj.studentPhone = "Enter 8–15 digit phone";
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
-        eObj.email = "Enter valid email";
-      if (form.studentAadharNo && !/^[0-9]{12}$/.test(form.studentAadharNo))
-        eObj.studentAadharNo = "Aadhar must be 12 digits";
-      if (!form.studentClassId) eObj.studentClassId = "Select class";
-
-      const messages = Object.values(eObj);
-      window.alert(
-        "Please fix the following errors:\n\n" + messages.join("\n")
-      );
+      window.alert("Please fix the errors highlighted in the form.");
       return;
     }
 
@@ -138,25 +122,8 @@ const AdminStudentRegistration = ({
         (c) => String(c.id) === String(form.studentClassId)
       );
       const payload = {
-        name: form.name,
-        admissionNo: form.admissionNo,
-        admissionDate: form.admissionDate,
-        password: form.password,
-        fatherName: form.fatherName,
-        motherName: form.motherName,
-        dob: form.dob,
-        studentPhone: form.studentPhone,
-        email: form.email,
-        parentPhone: form.parentPhone,
-        address: form.address,
-        gender: form.gender,
-        studentAadharNo: form.studentAadharNo,
-        parentAadharNo: form.parentAadharNo,
+        ...form,
         studentClass: cls ? String(cls.name) : String(form.studentClassId),
-        rte: form.rte, // Keep as string "Yes" or "No"
-        tcNumber: form.tcNumber,
-        ssmId: form.ssmId,
-        passoutClass: form.passoutClass,
         studentClassId: Number(form.studentClassId),
       };
 
@@ -173,33 +140,15 @@ const AdminStudentRegistration = ({
 
       if (res.ok || res.status === 201) {
         const id = detectIdFromResponse(res, saved);
-        if (id) {
-          window.alert(
-            `Student registered successfully (id: ${id}). Redirecting to upload page...`
-          );
-          // navigate to upload page and pass studentId in state
-          navigate("/admindashboard/upload-docs", { state: { studentId: id } });
-        } else {
-          // no id returned — navigate and let user enter id manually
-          window.alert(
-            "Student registered. Please enter the student ID on upload page to upload documents."
-          );
-          navigate("/admindashboard/upload-docs");
-        }
-
-        // reset form
+        window.alert(`Successfully registered! ID: ${id || "N/A"}`);
+        navigate("/admindashboard/upload-docs", { state: { studentId: id } });
         setForm(initialForm);
-        setErrors({});
         if (onAddStudent) onAddStudent(saved || payload);
       } else {
-        const message =
-          (saved && (saved.message || saved.error)) ||
-          `Registration failed (status ${res.status})`;
-        window.alert(message);
+        window.alert(saved?.message || "Registration failed");
       }
     } catch (err) {
-      console.error(err);
-      window.alert(err.message || "Network error");
+      window.alert("Network error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -208,132 +157,123 @@ const AdminStudentRegistration = ({
   return (
     <div className="sr-page">
       <div className="sr-card">
-        <h2>Student Registration</h2>
+        <h2>Student Admission</h2>
 
         <form className="sr-form" onSubmit={handleSubmit}>
-          <div className="row">
-            <label>
-              Full Name *
-              <input name="name" value={form.name} onChange={handleChange} />
-              {errors.name && (
-                <small className="field-error">{errors.name}</small>
-              )}
-            </label>
-
-            <label>
-              Admission No *
-              <input
-                name="admissionNo"
-                value={form.admissionNo}
-                onChange={handleChange}
-              />
-              {errors.admissionNo && (
-                <small className="field-error">{errors.admissionNo}</small>
-              )}
-            </label>
-          </div>
-
-          <div className="row">
-            <label>
-              Admission Date *
-              <input
-                type="date"
-                name="admissionDate"
-                value={form.admissionDate}
-                onChange={handleChange}
-              />
-              {errors.admissionDate && (
-                <small className="field-error">{errors.admissionDate}</small>
-              )}
-            </label>
-
-            <label>
-              Password *
-              <div className="password-wrap">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                />
-                <button
-                  type="button"
-                  className="show-btn"
-                  onClick={() => setShowPassword((s) => !s)}
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-              {errors.password && (
-                <small className="field-error">{errors.password}</small>
-              )}
-            </label>
-          </div>
-
-          <div className="row">
-            <label>
-              Father Name
-              <input
-                name="fatherName"
-                value={form.fatherName}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              Mother Name
-              <input
-                name="motherName"
-                value={form.motherName}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-
-          <div className="row">
-            <label>
-              DOB
-              <input
-                type="date"
-                name="dob"
-                value={form.dob}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              Student Phone *
-              <input
-                name="studentPhone"
-                value={form.studentPhone}
-                onChange={handleChange}
-              />
-              {errors.studentPhone && (
-                <small className="field-error">{errors.studentPhone}</small>
-              )}
-            </label>
-          </div>
-
-          <div className="row">
-            <label>
-              Email
-              <input name="email" value={form.email} onChange={handleChange} />
-              {errors.email && (
-                <small className="field-error">{errors.email}</small>
-              )}
-            </label>
-
-            <label>
-              Parent Phone
-              <input
-                name="parentPhone"
-                value={form.parentPhone}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-
+          {/* Row 1 */}
           <label>
+            Full Name *
+            <input name="name" value={form.name} onChange={handleChange} />
+            {errors.name && (
+              <small className="field-error">{errors.name}</small>
+            )}
+          </label>
+          <label>
+            Admission No *
+            <input
+              name="admissionNo"
+              value={form.admissionNo}
+              onChange={handleChange}
+            />
+            {errors.admissionNo && (
+              <small className="field-error">{errors.admissionNo}</small>
+            )}
+          </label>
+
+          {/* Row 2 */}
+          <label>
+            Admission Date *
+            <input
+              type="date"
+              name="admissionDate"
+              value={form.admissionDate}
+              onChange={handleChange}
+            />
+            {errors.admissionDate && (
+              <small className="field-error">{errors.admissionDate}</small>
+            )}
+          </label>
+          <label>
+            Password *
+            <div className="password-wrap">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+              />
+              <button
+                type="button"
+                className="show-btn"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            {errors.password && (
+              <small className="field-error">{errors.password}</small>
+            )}
+          </label>
+
+          {/* Row 3 */}
+          <label>
+            Father's Name
+            <input
+              name="fatherName"
+              value={form.fatherName}
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            Mother's Name
+            <input
+              name="motherName"
+              value={form.motherName}
+              onChange={handleChange}
+            />
+          </label>
+
+          {/* Row 4 */}
+          <label>
+            Date of Birth
+            <input
+              type="date"
+              name="dob"
+              value={form.dob}
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            Phone Number
+            <input
+              name="studentPhone"
+              value={form.studentPhone}
+              onChange={handleChange}
+            />
+            {errors.studentPhone && (
+              <small className="field-error">{errors.studentPhone}</small>
+            )}
+          </label>
+
+          {/* Row 5 */}
+          <label>
+            Email
+            <input name="email" value={form.email} onChange={handleChange} />
+            {errors.email && (
+              <small className="field-error">{errors.email}</small>
+            )}
+          </label>
+          <label>
+            Parent Phone Number
+            <input
+              name="parentPhone"
+              value={form.parentPhone}
+              onChange={handleChange}
+            />
+          </label>
+
+          {/* Full Width Row */}
+          <label className="full">
             Address
             <textarea
               name="address"
@@ -343,96 +283,130 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          <div className="row">
-            <label>
-              Gender
-              <select name="gender" value={form.gender} onChange={handleChange}>
-                <option value="">Select</option>
-                <option>Male</option>
-                <option>Female</option>
-                <option>Other</option>
-              </select>
-            </label>
+          {/* Row 6 */}
+          <label>
+            Gender
+            <select name="gender" value={form.gender} onChange={handleChange}>
+              <option value="">Select</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>
+            Student Aadhar No
+            <input
+              name="studentAadharNo"
+              value={form.studentAadharNo}
+              onChange={handleChange}
+            />
+            {errors.studentAadharNo && (
+              <small className="field-error">{errors.studentAadharNo}</small>
+            )}
+          </label>
 
-            <label>
-              Student Aadhar No
-              <input
-                name="studentAadharNo"
-                value={form.studentAadharNo}
-                onChange={handleChange}
-              />
-              {errors.studentAadharNo && (
-                <small className="field-error">{errors.studentAadharNo}</small>
-              )}
-            </label>
-          </div>
+          {/* Row 7 */}
+          <label>
+            Parent Aadhar No
+            <input
+              name="parentAadharNo"
+              value={form.parentAadharNo}
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            RTE
+            <select name="rte" value={form.rte} onChange={handleChange}>
+              <option value="">Select</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </label>
 
-          <div className="row">
-            <label>
-              Parent Aadhar No
-              <input
-                name="parentAadharNo"
-                value={form.parentAadharNo}
-                onChange={handleChange}
-              />
-            </label>
+          {/* Row 8 - New Fields */}
+          <label>
+            Caste
+            <input
+              name="caste"
+              value={form.caste}
+              onChange={handleChange}
+              placeholder="e.g. General, OBC"
+            />
+          </label>
+          <label>
+            Sub-Caste
+            <input
+              name="subCaste"
+              value={form.subCaste}
+              onChange={handleChange}
+            />
+          </label>
 
-            {/* CHANGED: RTE as dropdown with Yes/No */}
-            <label>
-              RTE
-              <select name="rte" value={form.rte} onChange={handleChange}>
-                <option value="">Select</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-            </label>
-          </div>
+          {/* Row 9 - New Fields */}
+          <label>
+            Religion
+            <input
+              name="religion"
+              value={form.religion}
+              onChange={handleChange}
+            />
+          </label>
+          <label>
+            APAAR ID
+            <input
+              name="apaarId"
+              value={form.apaarId}
+              onChange={handleChange}
+            />
+          </label>
 
-          <div className="row">
-            <label>
-              TC Number
-              <input
-                name="tcNumber"
-                value={form.tcNumber}
-                onChange={handleChange}
-              />
-            </label>
+          {/* Row 10 */}
+          <label>
+            PAN No
+            <input name="panNo" value={form.panNo} onChange={handleChange} />
+          </label>
+          <label>
+            TC Number
+            <input
+              name="tcNumber"
+              value={form.tcNumber}
+              onChange={handleChange}
+            />
+          </label>
 
-            <label>
-              SSSM ID
-              <input name="ssmId" value={form.ssmId} onChange={handleChange} />
-            </label>
-          </div>
+          {/* Row 11 */}
+          <label>
+            SSSM ID
+            <input name="ssmId" value={form.ssmId} onChange={handleChange} />
+          </label>
+          <label>
+            Passout Class
+            <input
+              name="passoutClass"
+              value={form.passoutClass}
+              onChange={handleChange}
+            />
+          </label>
 
-          <div className="row">
-            <label>
-              Passout Class
-              <input
-                name="passoutClass"
-                value={form.passoutClass}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              Class *
-              <select
-                name="studentClassId"
-                value={form.studentClassId}
-                onChange={handleChange}
-              >
-                <option value="">Select class</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              {errors.studentClassId && (
-                <small className="field-error">{errors.studentClassId}</small>
-              )}
-            </label>
-          </div>
+          {/* Row 12 */}
+          <label className="full">
+            Class *
+            <select
+              name="studentClassId"
+              value={form.studentClassId}
+              onChange={handleChange}
+            >
+              <option value="">Select class</option>
+              {classes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            {errors.studentClassId && (
+              <small className="field-error">{errors.studentClassId}</small>
+            )}
+          </label>
 
           <div className="sr-actions">
             <button type="submit" className="btn-primary" disabled={loading}>
@@ -441,10 +415,7 @@ const AdminStudentRegistration = ({
             <button
               type="button"
               className="btn-ghost"
-              onClick={() => {
-                setForm(initialForm);
-                setErrors({});
-              }}
+              onClick={() => setForm(initialForm)}
             >
               Reset
             </button>
