@@ -5,7 +5,6 @@ const Footer = () => {
   const role = localStorage.getItem("userRole");
   const year = new Date().getFullYear();
 
-  // 🛑 Admin logged in → minimal footer only
   if (role === "admin") {
     return (
       <footer className="footer footer-minimal">
@@ -16,7 +15,6 @@ const Footer = () => {
     );
   }
 
-  // ✅ Normal users → full footer
   return (
     <footer className="footer">
       <div className="footer-curve"></div>

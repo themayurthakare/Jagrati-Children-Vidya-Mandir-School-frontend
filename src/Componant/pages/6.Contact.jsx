@@ -1,71 +1,104 @@
 import React, { useState } from "react";
-import emailjs from "@emailjs/browser";
-import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
+import {
+  FaPhoneAlt,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaFacebook,
+  FaInstagram,
+  FaYoutube,
+} from "react-icons/fa";
 import "./Contact.css";
 
 const Contact = () => {
   const [form, setForm] = useState({
     name: "",
-    email: "",
     phone: "",
     message: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const sendEmail = (e) => {
+  const sendEnquiry = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
 
-    emailjs
-      .send(
-        "YOUR_SERVICE_ID",
-        "YOUR_TEMPLATE_ID",
-        {
-          from_name: form.name,
-          reply_to: form.email,
-          phone: form.phone,
-          message: form.message,
+    try {
+      // ISO date string "YYYY-MM-DD" for LocalDate
+      const today = new Date().toISOString().slice(0, 10);
+
+      const response = await fetch("http://localhost:8080/api/enquiries/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        "YOUR_PUBLIC_KEY"
-      )
-      .then(() => {
-          alert("Message Sent Successfully!");
-          setForm({ name: "", email: "", phone: "", message: "" });
-        })
-      .catch(() => alert("Message Failed, Try Again!"));
+        body: JSON.stringify({
+          parentName: form.name,
+          contactNo: form.phone,
+          enquiryDate: today, // LocalDate yyyy-MM-dd
+          enquiryMessage: form.message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit enquiry");
+      }
+
+      alert("Enquiry sent successfully!");
+      setForm({ name: "", phone: "", message: "" });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send enquiry. Please try again later.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="contact-section">
-      
       {/* Page Header */}
       <div className="contact-hero">
         <h1>Get in Touch</h1>
-        <p>Feel free to reach us for any queries related to admission or school information.</p>
+        <p>
+          Feel free to reach us for any queries related to admission or school
+          information.
+        </p>
       </div>
 
       {/* Main Content */}
       <div className="contact-wrapper">
-
         {/* Contact Info + Social Media */}
         <div className="contact-info">
           <h3>Contact Details</h3>
 
-          <p><FaPhoneAlt /> <a href="tel:+91 9827366274">+91 9827366274</a></p>
-          <p><FaEnvelope /> <a href="mailto:Jcvmschool@gmail.com">Jcvmschool@gmail.com</a></p>
-          <p><FaMapMarkerAlt /> Shankar Colony, Gol Phadiya, Lashkar, Gwalior, MP</p>
+          <p>
+            <FaPhoneAlt /> <a href="tel:+91 9827366274">+91 9827366274</a>
+          </p>
+          <p>
+            <FaEnvelope />{" "}
+            <a href="mailto:Jcvmschool@gmail.com">Jcvmschool@gmail.com</a>
+          </p>
+          <p>
+            <FaMapMarkerAlt /> Shankar Colony, Gol Phadiya, Lashkar, Gwalior, MP
+          </p>
 
           <div className="social-icons">
-            <a href="https://www.facebook.com/share/1C78EBCJNC/"><FaFacebook /></a>
-            <a href="https://www.instagram.com/j.c.v.mschool?utm_source=qr&igsh=Z3oxOTJsMmI4eDE1"><FaInstagram /></a>
-            <a href="http://www.youtube.com/@rajeshkushwah4224"><FaYoutube /></a>
+            <a href="https://www.facebook.com/share/1C78EBCJNC/">
+              <FaFacebook />
+            </a>
+            <a href="https://www.instagram.com/j.c.v.mschool?utm_source=qr&igsh=Z3oxOTJsMmI4eDE1">
+              <FaInstagram />
+            </a>
+            <a href="http://www.youtube.com/@rajeshkushwah4224">
+              <FaYoutube />
+            </a>
           </div>
         </div>
 
         {/* Form */}
-        <form className="contact-form" onSubmit={sendEmail}>
+        <form className="contact-form" onSubmit={sendEnquiry}>
           <h3>Send Us a Message</h3>
 
           <input
@@ -74,15 +107,6 @@ const Contact = () => {
             placeholder="Your Full Name"
             required
             value={form.name}
-            onChange={handleChange}
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Your Email"
-            required
-            value={form.email}
             onChange={handleChange}
           />
 
@@ -104,7 +128,9 @@ const Contact = () => {
             onChange={handleChange}
           ></textarea>
 
-          <button type="submit">Send Message</button>
+          <button type="submit" disabled={submitting}>
+            {submitting ? "Sending..." : "Send Message"}
+          </button>
         </form>
       </div>
 
@@ -118,7 +144,6 @@ const Contact = () => {
           allowFullScreen
         ></iframe>
       </div>
-
     </div>
   );
 };
