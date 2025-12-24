@@ -1,11 +1,30 @@
-import React from "react";
+// import React from "react";
+import React, { useState, useEffect } from "react";
+
 import "./Footer.css";
 
 const Footer = () => {
-  const role = localStorage.getItem("userRole");
+  const userRole = localStorage.getItem("useruserRole");
   const year = new Date().getFullYear();
+  const [role, setRole] = useState(null);
+  //  Sync role from localStorage
+  const syncRole = () => {
+    const storedRole = localStorage.getItem("userRole");
+    setRole(storedRole);
+  };
 
-  if (role === "admin") {
+  useEffect(() => {
+    syncRole(); // on first load
+
+    //  listen for login/logout
+    window.addEventListener("auth-change", syncRole);
+
+    return () => {
+      window.removeEventListener("auth-change", syncRole);
+    };
+  }, []);
+
+  if (userRole === "admin") {
     return (
       <footer className="footer footer-minimal">
         <div className="footer-bottom">
