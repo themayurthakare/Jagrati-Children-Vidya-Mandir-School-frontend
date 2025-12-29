@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminViewClassStudents.css";
 
 const AdminViewClassStudents = () => {
@@ -9,6 +11,9 @@ const AdminViewClassStudents = () => {
   // Get class ID from navigation state
   const classId = location.state?.classId;
   const className = location.state?.className || "Class";
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
 
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
@@ -78,7 +83,9 @@ const AdminViewClassStudents = () => {
     // Alternative: Fetch all students and filter by class
     const fetchAllStudentsAndFilter = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/users/getAll");
+        const response = await fetch(
+          `http://localhost:8080/api/users/${sessionId}/getAll`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch students");
         }
@@ -187,7 +194,7 @@ const AdminViewClassStudents = () => {
       )}
 
       {/* Students Table */}
-      <div className="students-table-container">
+      <div className="students-table-container1">
         {loading ? (
           <div className="loading-state">
             <p>Loading students...</p>
@@ -206,8 +213,8 @@ const AdminViewClassStudents = () => {
             )}
           </div>
         ) : (
-          <div className="table-wrapper">
-            <table className="students-table">
+          <div className="table-class-wrapper">
+            <table className="students-class-table">
               <thead>
                 <tr>
                   <th>Sr. No.</th>

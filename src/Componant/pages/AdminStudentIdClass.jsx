@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminStudentIdClass.css";
 
 const AdminStudentIdClass = () => {
@@ -8,10 +10,13 @@ const AdminStudentIdClass = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const loadClasses = () => {
     setLoading(true);
     setError("");
-    fetch("http://localhost:8080/api/classes/getAll")
+    fetch(`http://localhost:8080/api/classes/${sessionId}/getAll`)
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) {

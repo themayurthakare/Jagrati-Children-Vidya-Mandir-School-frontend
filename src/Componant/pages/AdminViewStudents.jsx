@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminViewStudents.css";
 
 const ViewStudents = () => {
@@ -8,13 +10,19 @@ const ViewStudents = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const navigate = useNavigate();
 
   // Fetch all classes
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/classes/getAll");
+        const res = await fetch(
+          `http://localhost:8080/api/classes/${sessionId}/getAll`
+        );
         if (res.ok) {
           const data = await res.json();
           setClasses(Array.isArray(data) ? data : []);
@@ -48,7 +56,7 @@ const ViewStudents = () => {
 
   const loadStudents = () => {
     setLoading(true);
-    fetch("http://localhost:8080/api/users/getAll")
+    fetch(`http://localhost:8080/api/users/${sessionId}/getAll`)
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();

@@ -20,6 +20,7 @@ import Login from "./Componant/pages/Login";
 import StudentDashboard from "./Componant/pages/StudentDashboard";
 import AdminDashboard from "./Componant/pages/AdminDashboard";
 import TeacherDashboard from "./Componant/pages/TeacherDashboard";
+import ComputerOperatorDashboard from "./Componant/pages/ComputerOperatorDashboard";
 
 function App() {
   return (
@@ -41,8 +42,10 @@ function App() {
             <Route path="/admindashboard/*" element={<AdminDashboard />} />
             <Route path="/user-dashboard/*" element={<StudentDashboard />} />
             <Route path="/teacherdashboard/*" element={<TeacherDashboard />} />
-
-            
+            <Route
+              path="/computeroperator/*"
+              element={<ComputerOperatorDashboard />}
+            />
           </Routes>{" "}
         </div>
         {/* Footer placed correctly outside Routes */} <Footer />

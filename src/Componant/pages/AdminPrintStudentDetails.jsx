@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./AdminPrintStudentDetails.css";
 import logo from "../../media/logo.jpeg";
+import { SessionContext } from "./SessionContext";
 
 const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const prefillId = location.state?.studentId ?? null;
 
   const [studentId, setStudentId] = useState(
@@ -17,12 +22,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const [error, setError] = useState(null);
   const [className, setClassName] = useState("");
 
-  const userEndpoints = [
-    (id) => `${apiBase}/api/users/${id}`,
-    (id) => `${apiBase}/api/users/get/${id}`,
-    (id) => `${apiBase}/api/users/getById/${id}`,
-    (id) => `${apiBase}/api/users/getUser/${id}`,
-  ];
+  const userEndpoints = [(id) => `${apiBase}/api/users/${sessionId}/${id}`];
 
   useEffect(() => {
     if (!studentId) {
@@ -39,7 +39,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     }
 
     try {
-      const res = await fetch(`${apiBase}/api/classes/getAll`);
+      const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
       if (!res.ok) {
         setClassName(classId);
         return;
@@ -381,7 +381,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
           </div>
 
           {/* PAGE 2: IMPORTANT DOCUMENT LIST (AS PER IMAGE) */}
-          <div className="ps-sheet doc-page">
+          <div className="ps-sheet pdf-doc-page">
             <h2 className="doc-page-title">IMPORTANT DOCUMENT</h2>
 
             {/* Nursery to UKG Section */}

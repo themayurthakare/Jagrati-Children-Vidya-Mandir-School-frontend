@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
 import "./AdminStudentRegistration.css";
 
 const initialForm = {
@@ -22,7 +23,6 @@ const initialForm = {
   ssmId: "",
   passoutClass: "",
   studentClassId: "",
-  // New Fields
   caste: "",
   subCaste: "",
   religion: "",
@@ -38,38 +38,38 @@ const AdminStudentRegistration = ({
   const base = apiBase || "http://localhost:8080";
   const navigate = useNavigate();
 
+  // 🔥 SESSION CONTEXT
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [classes, setClasses] = useState(classesProp || []);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // ================= LOAD CLASSES BY SESSION =================
   useEffect(() => {
-    if (!classesProp) {
-      fetch(`${base}/api/classes/getAll`)
-        .then((r) => r.json())
-        .then((data) => {
-          const arr = Array.isArray(data) ? data : [];
-          setClasses(
-            arr.map((c) =>
-              c.classId != null
-                ? { id: c.classId, name: c.className }
-                : { id: c.id ?? c.value, name: c.name ?? c.label }
-            )
-          );
-        })
-        .catch(() => setClasses([]));
-    } else {
-      setClasses(
-        (classesProp || []).map((c) =>
-          c.classId != null
-            ? { id: c.classId, name: c.className }
-            : { id: c.id ?? c.value, name: c.name ?? c.label }
-        )
-      );
+    if (!sessionId) {
+      setClasses([]);
+      return;
     }
-  }, [classesProp, base]);
 
+    fetch(`${base}/api/classes/${sessionId}/getAll`)
+      .then((r) => r.json())
+      .then((data) => {
+        const arr = Array.isArray(data) ? data : [];
+        setClasses(
+          arr.map((c) => ({
+            id: c.classId,
+            name: c.className,
+          }))
+        );
+      })
+      .catch(() => setClasses([]));
+  }, [sessionId, base]);
+
+  // ================= VALIDATION =================
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
@@ -77,13 +77,8 @@ const AdminStudentRegistration = ({
     if (!form.admissionDate) e.admissionDate = "Admission date required";
     if (!form.password || form.password.length < 6)
       e.password = "Password must be 6+ characters";
-    if (!/^[0-9]{8,15}$/.test(form.studentPhone))
-      e.studentPhone = "Enter 8–15 digit phone";
-    if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email))
-      e.email = "Enter valid email";
-    if (form.studentAadharNo && !/^[0-9]{12}$/.test(form.studentAadharNo))
-      e.studentAadharNo = "Aadhar must be 12 digits";
     if (!form.studentClassId) e.studentClassId = "Select class";
+    if (!sessionId) e.session = "Please select academic session";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -95,22 +90,10 @@ const AdminStudentRegistration = ({
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
-  const detectIdFromResponse = (res, saved) => {
-    if (saved) {
-      const id = saved.userId ?? saved.id ?? saved.user_id;
-      if (id != null) return id;
-    }
-    const loc = res?.headers ? res.headers.get("Location") : null;
-    if (loc) {
-      const parts = loc.split("/");
-      const last = parts[parts.length - 1];
-      if (/^\d+$/.test(last)) return Number(last);
-    }
-    return null;
-  };
-
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) {
       window.alert("Please fix the errors highlighted in the form.");
       return;
@@ -118,16 +101,12 @@ const AdminStudentRegistration = ({
 
     setLoading(true);
     try {
-      const cls = classes.find(
-        (c) => String(c.id) === String(form.studentClassId)
-      );
       const payload = {
         ...form,
-        studentClass: cls ? String(cls.name) : String(form.studentClassId),
         studentClassId: Number(form.studentClassId),
       };
 
-      const res = await fetch(`${base}/api/users/save`, {
+      const res = await fetch(`${base}/api/users/${sessionId}/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,9 +118,11 @@ const AdminStudentRegistration = ({
       const saved = await res.json().catch(() => null);
 
       if (res.ok || res.status === 201) {
-        const id = detectIdFromResponse(res, saved);
+        const id = saved?.userId ?? saved?.id;
         window.alert(`Successfully registered! ID: ${id || "N/A"}`);
-        navigate("/admindashboard/upload-docs", { state: { studentId: id } });
+        navigate("/admindashboard/upload-docs", {
+          state: { studentId: id },
+        });
         setForm(initialForm);
         if (onAddStudent) onAddStudent(saved || payload);
       } else {
@@ -154,13 +135,17 @@ const AdminStudentRegistration = ({
     }
   };
 
+  // ================= UI =================
   return (
     <div className="sr-page">
       <div className="sr-card">
         <h2>Student Admission</h2>
 
+        {!sessionId && (
+          <p style={{ color: "red" }}>Please select academic session first.</p>
+        )}
+
         <form className="sr-form" onSubmit={handleSubmit}>
-          {/* Row 1 */}
           <label>
             Full Name *
             <input name="name" value={form.name} onChange={handleChange} />
@@ -168,6 +153,7 @@ const AdminStudentRegistration = ({
               <small className="field-error">{errors.name}</small>
             )}
           </label>
+
           <label>
             Admission No *
             <input
@@ -180,7 +166,6 @@ const AdminStudentRegistration = ({
             )}
           </label>
 
-          {/* Row 2 */}
           <label>
             Admission Date *
             <input
@@ -193,6 +178,7 @@ const AdminStudentRegistration = ({
               <small className="field-error">{errors.admissionDate}</small>
             )}
           </label>
+
           <label>
             Password *
             <div className="password-wrap">
@@ -215,7 +201,6 @@ const AdminStudentRegistration = ({
             )}
           </label>
 
-          {/* Row 3 */}
           <label>
             Father's Name
             <input
@@ -224,6 +209,7 @@ const AdminStudentRegistration = ({
               onChange={handleChange}
             />
           </label>
+
           <label>
             Mother's Name
             <input
@@ -233,7 +219,6 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Row 4 */}
           <label>
             Date of Birth
             <input
@@ -243,8 +228,9 @@ const AdminStudentRegistration = ({
               onChange={handleChange}
             />
           </label>
+
           <label>
-            Phone Number
+            Student Phone
             <input
               name="studentPhone"
               value={form.studentPhone}
@@ -255,16 +241,13 @@ const AdminStudentRegistration = ({
             )}
           </label>
 
-          {/* Row 5 */}
           <label>
             Email
             <input name="email" value={form.email} onChange={handleChange} />
-            {errors.email && (
-              <small className="field-error">{errors.email}</small>
-            )}
           </label>
+
           <label>
-            Parent Phone Number
+            Parent Phone
             <input
               name="parentPhone"
               value={form.parentPhone}
@@ -272,18 +255,15 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Full Width Row */}
           <label className="full">
             Address
             <textarea
               name="address"
               value={form.address}
               onChange={handleChange}
-              rows="2"
             />
           </label>
 
-          {/* Row 6 */}
           <label>
             Gender
             <select name="gender" value={form.gender} onChange={handleChange}>
@@ -293,46 +273,39 @@ const AdminStudentRegistration = ({
               <option>Other</option>
             </select>
           </label>
+
           <label>
-            Student Aadhar No
+            Student Aadhar
             <input
               name="studentAadharNo"
               value={form.studentAadharNo}
               onChange={handleChange}
             />
-            {errors.studentAadharNo && (
-              <small className="field-error">{errors.studentAadharNo}</small>
-            )}
           </label>
 
-          {/* Row 7 */}
           <label>
-            Parent Aadhar No
+            Parent Aadhar
             <input
               name="parentAadharNo"
               value={form.parentAadharNo}
               onChange={handleChange}
             />
           </label>
+
           <label>
             RTE
             <select name="rte" value={form.rte} onChange={handleChange}>
               <option value="">Select</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
+              <option>Yes</option>
+              <option>No</option>
             </select>
           </label>
 
-          {/* Row 8 - New Fields */}
           <label>
             Caste
-            <input
-              name="caste"
-              value={form.caste}
-              onChange={handleChange}
-              placeholder="e.g. General, OBC"
-            />
+            <input name="caste" value={form.caste} onChange={handleChange} />
           </label>
+
           <label>
             Sub-Caste
             <input
@@ -342,7 +315,6 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Row 9 - New Fields */}
           <label>
             Religion
             <input
@@ -351,6 +323,7 @@ const AdminStudentRegistration = ({
               onChange={handleChange}
             />
           </label>
+
           <label>
             APAAR ID
             <input
@@ -360,11 +333,11 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Row 10 */}
           <label>
             PAN No
             <input name="panNo" value={form.panNo} onChange={handleChange} />
           </label>
+
           <label>
             TC Number
             <input
@@ -374,11 +347,11 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Row 11 */}
           <label>
             SSSM ID
             <input name="ssmId" value={form.ssmId} onChange={handleChange} />
           </label>
+
           <label>
             Passout Class
             <input
@@ -388,7 +361,6 @@ const AdminStudentRegistration = ({
             />
           </label>
 
-          {/* Row 12 */}
           <label className="full">
             Class *
             <select

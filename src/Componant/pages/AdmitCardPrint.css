@@ -11,20 +11,20 @@
     margin-bottom: 15px;
 }
 
-.back-btn,
-.print-btn {
+.back-admit-btn,
+.print-admit-btn {
     padding: 8px 14px;
     border: none;
     cursor: pointer;
     font-weight: bold;
 }
 
-.back-btn {
+.back-admit-btn {
     background: #6c757d;
     color: white;
 }
 
-.print-btn {
+.print-admit-btn {
     background: #198754;
     color: white;
 }

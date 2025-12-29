@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -9,6 +10,7 @@ import "./TransactionReport.css";
 const TransactionReport = () => {
   const { selectedSession } = useContext(SessionContext);
   const sessionId = selectedSession?.id;
+  const navigate = useNavigate();
 
   const [transactions, setTransactions] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -16,6 +18,10 @@ const TransactionReport = () => {
   const [filterType, setFilterType] = useState("day");
   const [day, setDay] = useState("");
   const [month, setMonth] = useState("");
+
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   const fetchTransactions = useCallback(() => {
     if (!sessionId) {
@@ -149,9 +155,15 @@ const TransactionReport = () => {
 
   return (
     <div className="report-container">
-      <h2>
-        Transaction Report {selectedSession ? `(${selectedSession.name})` : ""}
-      </h2>
+      <div className="header-section">
+        <button className="back-btn" onClick={handleBack}>
+          ← Back
+        </button>
+        <h2>
+          Transaction Report{" "}
+          {selectedSession ? `(${selectedSession.name})` : ""}
+        </h2>
+      </div>
 
       {!sessionId && (
         <p style={{ color: "red", marginBottom: 10 }}>
@@ -205,7 +217,7 @@ const TransactionReport = () => {
         </button>
       </div>
 
-      <table className="report-table">
+      <table className="report-table1">
         <thead>
           <tr>
             <th>#</th>

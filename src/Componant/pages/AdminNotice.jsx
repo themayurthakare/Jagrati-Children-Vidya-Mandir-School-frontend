@@ -495,20 +495,20 @@ const AdminNotice = () => {
 
                   <div className="footer-right">
                     <button
-                      className="icon-btn edit-btn"
+                      className="icon-btn2 edit-btn1"
                       onClick={() => editNotice(notice)}
                       disabled={loading}
                     >
                       Edit
                     </button>
                     <button
-                      className="icon-btn print-btn"
+                      className="icon-btn2 print-btn2"
                       onClick={() => printNotice(notice)}
                     >
                       Print
                     </button>
                     <button
-                      className="icon-btn delete-btn"
+                      className="icon-btn2 delete-btn1"
                       onClick={() => deleteNotice(notice.noticeId)}
                       disabled={loading}
                     >

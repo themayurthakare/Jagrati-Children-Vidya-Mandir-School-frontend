@@ -14,10 +14,10 @@ const AdminAdmitCardPrint = () => {
   return (
     <div className="print-root">
       <div className="print-actions">
-        <button onClick={() => navigate(-1)} className="back-btn">
+        <button onClick={() => navigate(-1)} className="back-admit-btn">
           ← Back
         </button>
-        <button onClick={() => window.print()} className="print-btn">
+        <button onClick={() => window.print()} className="print-admit-btn">
           🖨 Print Admit Card
         </button>
       </div>

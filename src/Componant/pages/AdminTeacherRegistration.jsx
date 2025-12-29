@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
 import "./AdminTeacherRegistration.css";
 
 const initialForm = {
@@ -26,11 +27,15 @@ const AdminTeacherRegistration = ({
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!classesProp && apiBase) {
-      fetch(`${apiBase}/classes/getAll`)
+      fetch(`${apiBase}/classes/${sessionId}/getAll`)
         .then((r) => r.json())
         .then((data) => setClasses(data || []))
         .catch(() => setClasses([]));

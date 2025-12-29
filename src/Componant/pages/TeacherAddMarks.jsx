@@ -218,7 +218,7 @@ export default function AddMarksList() {
                   (sub) => (
                     <td key={sub}>
                       <input
-                        type="number"
+                        type="number1"
                         min="0"
                         max="100"
                         value={row[sub] || ""}

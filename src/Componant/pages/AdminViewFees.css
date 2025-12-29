@@ -224,7 +224,7 @@
     flex-wrap: wrap;
 }
 
-.view-btn {
+.view-btn1 {
     background: #007bff;
     color: white;
     border: none;
@@ -235,9 +235,10 @@
     font-weight: 400;
     transition: all 0.3s ease;
     min-width: 120px;
+    align-items: center;
 }
 
-.view-btn:hover {
+.view-btn1:hover {
     background: #0056b3;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);

@@ -1,3 +1,6 @@
+/* =====================================================
+   GLOBAL
+===================================================== */
 /* container */
 .ps-page {
     padding: 20px;
@@ -195,7 +198,9 @@
 
 .meta-value {
     min-width: 90px;
+    border-bottom: 1px solid #000;
     padding: 0 4px;
+
 }
 
 /* photo box */
@@ -297,15 +302,16 @@
 }
 
 .dob-box {
-    width: 30px;
-    height: 18px;
+    width: 40px;
+    height: 25px;
     border: 1px solid #000;
 }
 
 .phone-box {
     width: 170px;
-    height: 25px;
+    height: 24px;
     border: 1px solid #000;
+    padding-left: 10px;
     margin-left: 8px;
 }
 
@@ -343,6 +349,8 @@
         margin: 0;
         padding: 0;
         box-shadow: none;
+        border: none;
+        /* no border on wrapper */
         background: white;
     }
 
@@ -360,6 +368,7 @@
         size: A4 portrait;
     }
 
+    /* keep page border only on ps-sheet, and keep it on one page */
     .ps-sheet {
         padding: 10px 20px;
         height: 100%;
@@ -367,6 +376,7 @@
         border-radius: 0;
         box-shadow: none;
         border: 2px solid #000;
+        /* page border in print */
         box-sizing: border-box;
         page-break-inside: avoid;
         page-break-after: avoid;
@@ -399,155 +409,237 @@
     }
 }
 
-/* Keep all your existing CSS and add these below */
-
-/* Page breaker for print */
-.doc-page {
-    page-break-before: always;
-    margin-top: 20px;
+body {
+    margin: 0;
+    padding: 0;
 }
 
-.doc-page-title {
-    text-align: center;
-    color: red;
-    text-decoration: underline;
-    font-size: 18px;
-    margin-bottom: 15px;
+.ps-page {
+    background: #f2f2f2;
+    padding: 20px;
 }
 
-.doc-section {
+/* =====================================================
+   SCREEN HEADER (NOT PRINTED)
+===================================================== */
+.ps-header {
+    background: #fff;
+    padding: 12px;
     margin-bottom: 20px;
-}
-
-.doc-section-head {
-    text-decoration: underline;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.doc-detail-box {
-    margin-left: 20px;
-}
-
-.doc-icon {
-    color: #3498db;
-    margin-right: 5px;
-}
-
-.doc-input-row {
-    margin: 10px 0;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.doc-input-line {
-    border: 1px solid #000;
-    height: 25px;
-    min-width: 300px;
-    padding: 0 5px;
+.ps-header h1 {
+    font-size: 18px;
+    margin: 0;
+    flex: 1;
 }
 
-.doc-input-line.wide {
-    min-width: 400px;
+.ps-back,
+.ps-load,
+.ps-print {
+    padding: 6px 12px;
+    cursor: pointer;
 }
 
-.doc-input-line.mid {
-    min-width: 150px;
+.ps-id-input {
+    padding: 6px;
 }
 
-.doc-checklist-container {
-    margin-top: 15px;
-    margin-left: 20px;
+/* =====================================================
+   COMMON PAGE STYLE
+===================================================== */
+.ps-sheet {
+    background: #fff;
+    border: 2px solid #000;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
 }
 
-.doc-checklist {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3px;
-    margin-top: 5px;
-}
-
-.check-item {
-    display: flex;
-    align-items: center;
+/* =====================================================
+   PAGE-1 (ADMISSION) – KEEP SIMPLE
+===================================================== */
+.ps-sheet:not(.pdf-doc-page) {
+    font-family: Arial, sans-serif;
     font-size: 14px;
 }
 
-.check-item .box {
-    width: 18px;
-    height: 18px;
-    border: 1px solid #000;
-    display: inline-block;
-    margin-right: 10px;
+/* =====================================================
+   PAGE-2 – IMPORTANT DOCUMENT (EXACT PDF)
+===================================================== */
+.pdf-doc-page {
+    font-family: "Times New Roman", serif;
+    font-size: 16px;
+    line-height: 1.75;
+    padding: 18px 20px;
+    ;
 }
 
-.doc-instruction {
-    margin-top: 5px;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.doc-sign-area {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
-    padding: 0 20px;
-}
-
-.office-use-section {
-    margin-top: 4px;
-    border-top: 1px dashed #000;
-    padding-top: 20px;
-    font-family: serif;
-}
-
-.office-title {
+/* TITLE */
+.pdf-doc-page .doc-page-title {
     text-align: center;
     color: red;
     font-weight: bold;
+    font-size: large;
     text-decoration: underline;
-    margin-bottom: 5px;
-    font-size: 18px;
+    margin: 4px 0 10px;
 }
 
-.office-row {
+/* SECTION HEADING */
+.pdf-doc-page .doc-section-head {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: medium;
+    margin: 10px 0 4px;
+}
+
+/* DOCUMENT DETAIL BLOCK */
+.pdf-doc-page .doc-detail-box {
+    margin-left: 14px;
+}
+
+.pdf-doc-page .doc-input-row {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+}
+
+.pdf-doc-page .doc-input-line {
+    flex: none;
+    /* IMPORTANT */
+    width: 220px;
+    /* PDF-like width */
+    height: 25px;
+    border: 1px solid #000;
+    padding: 0 6px;
+    box-sizing: border-box;
+}
+
+.pdf-doc-page .doc-input-line.mid {
+    width: 150px;
+    flex: none;
+}
+
+/* CHECKLIST */
+.pdf-doc-page .doc-checklist-container {
+    margin-left: 14px;
+    margin-top: 4px;
+}
+
+.pdf-doc-page .doc-checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 30px;
+    row-gap: 4px;
+}
+
+.pdf-doc-page .check-item {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+}
+
+.pdf-doc-page .check-item .box {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #000;
+    margin-right: 8px;
+}
+
+/* INSTRUCTION (HINDI LINE) */
+.pdf-doc-page .doc-instruction {
     margin-top: 10px;
     font-size: 15px;
-    align-items: flex-end;
-    gap: 5px;
 }
 
-.office-row .fill-line {
-    flex: 1;
-    border-bottom: 1px solid #000;
-    margin-bottom: 3px;
-    min-width: 50px;
-}
-
-.office-row .fill-line.short {
-    flex: 0 1 100px;
-}
-
-.office-row .fill-line.date-line {
-    flex: 0 1 250px;
-}
-
-.office-footer {
+/* SIGNATURE LINE */
+.pdf-doc-page .doc-sign-area {
     display: flex;
     justify-content: space-between;
     margin-top: 20px;
-    font-weight: bold;
-    font-size: 14px;
+    font-size: 15px;
 }
 
+/* OFFICE USE */
+.pdf-doc-page .office-use-section {
+    border-top: 1px dashed #000;
+    padding-top: 8px;
+    margin-top: 12px;
+}
+
+.pdf-doc-page .office-title {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    font-size: large;
+    text-decoration: underline;
+    margin-bottom: 10px;
+}
+
+.pdf-doc-page .office-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+    font-size: 15px;
+}
+
+.pdf-doc-page .fill-line {
+    flex: 1;
+    height: 20px;
+    border-bottom: 1px solid #000;
+}
+
+.pdf-doc-page .fill-line.short {
+    width: 120px;
+    flex: none;
+}
+
+.pdf-doc-page .office-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+    font-size: 14.5px;
+}
+
+/* =====================================================
+   PRINT (CRITICAL)
+===================================================== */
 @media print {
-    .doc-page {
+    body * {
+        visibility: hidden;
+    }
+
+    #print-area,
+    #print-area * {
+        visibility: visible;
+    }
+
+    #print-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .ps-header {
+        display: none;
+    }
+
+    @page {
+        size: A4;
+        margin: 0.5in;
+    }
+
+    .ps-sheet {
+        page-break-inside: avoid;
+    }
+
+    .pdf-doc-page {
         page-break-before: always;
-        border: 2px solid #000;
-        padding: 30px;
-        height: 100%;
-        box-sizing: border-box;
     }
 }

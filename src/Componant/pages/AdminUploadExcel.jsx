@@ -1,5 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useContext, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminUploadExcel.css";
 
 const AdminUploadExcel = ({ apiBase = "http://localhost:8080" }) => {
@@ -12,6 +14,9 @@ const AdminUploadExcel = ({ apiBase = "http://localhost:8080" }) => {
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState(null);
   const [errors, setErrors] = useState([]);
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
 
   // Handle file selection
   const handleFileSelect = (e) => {
@@ -93,10 +98,13 @@ const AdminUploadExcel = ({ apiBase = "http://localhost:8080" }) => {
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await fetch(`${apiBase}/api/users/uploadExcel`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${apiBase}/api/users/${sessionId}/uploadExcel`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Upload failed with status ${response.status}`);

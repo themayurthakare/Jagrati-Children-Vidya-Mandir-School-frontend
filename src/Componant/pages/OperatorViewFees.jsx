@@ -1,22 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SessionContext } from "./SessionContext";
-
 import "./AdminViewFees.css";
 
-const AdminViewFees = () => {
+const OperatorViewFees = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const { selectedSession } = useContext(SessionContext);
-  const sessionId = selectedSession?.id;
-
   const loadClasses = () => {
     setLoading(true);
     setError("");
-    fetch(`http://localhost:8080/api/classes/${sessionId}/getAll`)
+    fetch("http://localhost:8080/api/classes/getAll")
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) {
@@ -41,10 +36,6 @@ const AdminViewFees = () => {
       .finally(() => setLoading(false));
   };
 
-  const handleTransactionReport = () => {
-    navigate("/admindashboard/transactions");
-  };
-
   useEffect(() => {
     loadClasses();
   }, []);
@@ -65,12 +56,6 @@ const AdminViewFees = () => {
             disabled={loading}
           >
             {loading ? "Refreshing..." : "Refresh"}
-          </button>
-          <button
-            className="transaction-report-btn"
-            onClick={handleTransactionReport}
-          >
-            Transaction Report
           </button>
         </div>
       </div>
@@ -129,7 +114,7 @@ const AdminViewFees = () => {
                   <td className="text-center">
                     <div className="action-buttons">
                       <button
-                        className="view-btn1"
+                        className="view-btn"
                         onClick={() =>
                           navigate("/admindashboard/view-class-student", {
                             state: {
@@ -153,4 +138,4 @@ const AdminViewFees = () => {
   );
 };
 
-export default AdminViewFees;
+export default OperatorViewFees;

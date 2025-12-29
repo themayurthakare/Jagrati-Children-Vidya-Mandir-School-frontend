@@ -307,12 +307,12 @@
     border-bottom: none;
 }
 
-.text-center {
+.text-center1 {
     text-align: left !important;
 }
 
 .text-right {
-    text-align: left;
+    text-align: left !important;
 }
 
 /* Amount Columns */
@@ -378,7 +378,7 @@
 }
 
 /* Button Styles */
-.print-btn {
+.print-btn1 {
     background: #007bff;
     color: white;
     border: none;
@@ -391,7 +391,7 @@
     transition: all 0.3s ease;
 }
 
-.print-btn:hover {
+.print-btn1:hover {
     background: #0056b3;
     transform: translateY(-1px);
 }
@@ -551,7 +551,7 @@
         min-width: 70px;
     }
 
-    .print-btn,
+    .print-btn1,
     .pay-fees-btn {
         padding: 6px 12px;
         font-size: 12px;

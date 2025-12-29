@@ -139,7 +139,7 @@
 }
 
 /* Students Table Container */
-.students-table-container {
+.students-class-table-container1 {
     background: white;
     border-radius: 8px;
     overflow: hidden;
@@ -184,18 +184,18 @@
 }
 
 /* Table Wrapper */
-.table-wrapper {
+.table-class-wrapper {
     overflow-x: auto;
 }
 
 /* Students Table */
-.students-table {
+.students-class-table {
     width: 100%;
     border-collapse: collapse;
     min-width: 600px;
 }
 
-.students-table th {
+.students-class-table th {
     background: #343a40;
     color: white;
     font-weight: 600;
@@ -205,17 +205,17 @@
     border-bottom: 2px solid #495057;
 }
 
-.students-table td {
+.students-class-table td {
     padding: 15px;
     border-bottom: 1px solid #dee2e6;
     font-size: 14px;
 }
 
-.students-table tbody tr:hover {
+.students-class-table tbody tr:hover {
     background-color: #f8f9fa;
 }
 
-.students-table tbody tr:last-child td {
+.students-class-table tbody tr:last-child td {
     border-bottom: none;
 }
 
@@ -272,7 +272,7 @@
         align-self: flex-start;
     }
 
-    .students-table {
+    .students-class-table {
         min-width: 500px;
     }
 

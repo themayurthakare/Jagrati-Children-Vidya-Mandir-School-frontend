@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./AdminPrintIdCard.css";
+
+import { SessionContext } from "./SessionContext";
 
 const AdminPrintIdCard = () => {
   const location = useLocation();
@@ -16,6 +18,9 @@ const AdminPrintIdCard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAdmitCards, setShowAdmitCards] = useState(false); // NEW STATE
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   useEffect(() => {
     if (!classId) {
       setError("No class selected. Please select a class.");
@@ -29,7 +34,7 @@ const AdminPrintIdCard = () => {
         setError("");
 
         const response = await fetch(
-          `http://localhost:8080/api/classes/${classId}/students`
+          `http://localhost:8080/api/classes/${sessionId}/${classId}/students`
         );
 
         if (response.ok) {
@@ -39,7 +44,9 @@ const AdminPrintIdCard = () => {
           setFilteredStudents(list);
         } else {
           // fallback: fetch all students
-          const allRes = await fetch("http://localhost:8080/api/users/getAll");
+          const allRes = await fetch(
+            `http://localhost:8080/api/users/${sessionId}/getAll`
+          );
           const allStudents = await allRes.json();
           const filtered = allStudents.filter(
             (s) => s.studentClassId === classId
@@ -95,10 +102,10 @@ const AdminPrintIdCard = () => {
       <div className="print-root">
         {/* ACTION BUTTONS (NOT PRINTED) */}
         <div className="print-actions">
-          <button onClick={handleCloseAdmitCards} className="back-btn">
+          <button onClick={handleCloseAdmitCards} className="back-admitall-btn">
             ← Back to List
           </button>
-          <button onClick={() => window.print()} className="print-btn">
+          <button onClick={() => window.print()} className="print-admitall-btn">
             🖨 Print All Admit Cards
           </button>
         </div>
@@ -207,7 +214,7 @@ const AdminPrintIdCard = () => {
         ) : filteredStudents.length === 0 ? (
           <div className="empty-state">No students found.</div>
         ) : (
-          <table className="students-table">
+          <table className="students-id-table">
             <thead>
               <tr>
                 <th>Sr. No.</th>

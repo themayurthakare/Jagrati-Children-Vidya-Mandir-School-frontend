@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./AdminViewAttendance.css";
+import { SessionContext } from "./SessionContext";
 
 const AdminViewAttendance = () => {
   const [userId, setUserId] = useState("");
@@ -10,6 +11,9 @@ const AdminViewAttendance = () => {
   const [studentInfo, setStudentInfo] = useState(null);
   const [classes, setClasses] = useState([]); // Store all classes
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   // date filter state
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -18,7 +22,9 @@ const AdminViewAttendance = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("http://localhost:8080/api/classes/getAll");
+        const res = await fetch(
+          `http://localhost:8080/api/classes/${sessionId}/getAll`
+        );
         if (res.ok) {
           const data = await res.json();
           setClasses(Array.isArray(data) ? data : []);
@@ -62,7 +68,9 @@ const AdminViewAttendance = () => {
     setLoading(true);
     try {
       // First get student info
-      const studentRes = await fetch(`http://localhost:8080/api/users/${id}`);
+      const studentRes = await fetch(
+        `http://localhost:8080/api/users/${sessionId}/${id}`
+      );
       if (studentRes.ok) {
         const studentData = await studentRes.json();
         setStudentInfo({

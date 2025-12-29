@@ -175,7 +175,7 @@ const AdminTeacherDocumentUpload = ({
     ) {
       return;
     }
-    navigate("/admin/teacher-registration");
+    navigate("/admin/add-teacher");
   };
 
   const handleClearAll = () => {

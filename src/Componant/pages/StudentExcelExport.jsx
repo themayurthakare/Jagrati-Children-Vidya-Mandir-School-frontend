@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { SessionContext } from "./SessionContext";
+
 import "./StudentExcelExport.css";
 
-/* ============================
-   COLUMN LABELS (JSON → UI)
-============================ */
 const COLUMN_LABELS = {
   userId: "User ID",
   name: "Student Name",
@@ -41,162 +42,138 @@ const StudentPdfExport = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* ============================
-     FETCH STUDENTS
-  ============================ */
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
+  /* ================= FETCH STUDENTS ================= */
   useEffect(() => {
-    fetch("http://localhost:8080/api/users/getAll")
+    fetch(`http://localhost:8080/api/users/${sessionId}/getAll`)
       .then((res) => res.json())
       .then((data) => {
         setStudents(data || []);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Student API error", err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, []);
 
-  /* ============================
-     FETCH CLASSES
-  ============================ */
+  /* ================= FETCH CLASSES ================= */
   useEffect(() => {
-    fetch("http://localhost:8080/api/classes/getAll")
+    fetch(`http://localhost:8080/api/classes/${sessionId}/getAll`)
       .then((res) => res.json())
       .then((data) => setClasses(data || []))
-      .catch((err) => console.error("Class API error", err));
+      .catch(() => {});
   }, []);
 
-  /* ============================
-     FILTER STUDENTS BY CLASS
-  ============================ */
+  /* ================= FILTER ================= */
   const filteredStudents = useMemo(() => {
     if (selectedClass === "All") return students;
-
     return students.filter(
       (s) => String(s.studentClassId) === String(selectedClass)
     );
   }, [students, selectedClass]);
 
-  /* ============================
-     AVAILABLE COLUMNS
-  ============================ */
+  /* ================= COLUMNS ================= */
   const allColumns = useMemo(() => {
     if (!students.length) return [];
-    return Object.keys(students[0]).filter(
-      (key) => key !== "password" // hide sensitive data
-    );
+    return Object.keys(students[0]).filter((k) => k !== "password");
   }, [students]);
 
-  /* ============================
-     SELECT ALL LOGIC
-  ============================ */
+  /* ================= SELECT ALL ================= */
   const handleSelectAll = () => {
-    const val = !selectAll;
-    setSelectAll(val);
-
-    const updated = {};
-    allColumns.forEach((c) => (updated[c] = val));
-    setSelectedColumns(updated);
+    const v = !selectAll;
+    setSelectAll(v);
+    const obj = {};
+    allColumns.forEach((c) => (obj[c] = v));
+    setSelectedColumns(obj);
   };
 
-  const handleColumnChange = (col) => {
-    setSelectedColumns((prev) => ({ ...prev, [col]: !prev[col] }));
-  };
+  const handleColumnChange = (c) =>
+    setSelectedColumns((p) => ({ ...p, [c]: !p[c] }));
 
   useEffect(() => {
-    const checked = allColumns.filter((c) => selectedColumns[c]).length;
-    setSelectAll(checked === allColumns.length && allColumns.length > 0);
+    const cnt = allColumns.filter((c) => selectedColumns[c]).length;
+    setSelectAll(cnt === allColumns.length && allColumns.length > 0);
   }, [selectedColumns, allColumns]);
 
-  /* ============================
-     PDF GENERATION
-  ============================ */
-  const generatePdf = () => {
-    const selectedCols = allColumns.filter((c) => selectedColumns[c]);
-
-    if (selectedCols.length === 0) {
-      alert("Please select at least one column");
-      return;
-    }
-
-    const doc = new jsPDF("l", "pt", "a4");
-
-    doc.setFontSize(18);
-    doc.text("Student Master Report", 40, 40);
-
-    doc.setFontSize(11);
-    doc.text(`Class : ${getClassName(selectedClass)}`, 40, 62);
-    doc.text(`Total Students : ${filteredStudents.length}`, 40, 78);
-
-    const tableHead = selectedCols.map((c) => COLUMN_LABELS[c] || c);
-
-    const tableBody = filteredStudents.map((s) =>
-      selectedCols.map((c) => String(s[c] ?? ""))
-    );
-
-    autoTable(doc, {
-      head: [tableHead],
-      body: tableBody,
-      startY: 100,
-      styles: { fontSize: 9 },
-      headStyles: {
-        fillColor: [37, 99, 235],
-        textColor: 255,
-        halign: "center",
-      },
-      alternateRowStyles: { fillColor: [241, 245, 249] },
-    });
-
-    doc.save(
-      `Students_${getClassName(selectedClass)}_${new Date()
-        .toISOString()
-        .slice(0, 10)}.pdf`
-    );
-  };
-
-  /* ============================
-     GET CLASS NAME BY ID
-  ============================ */
+  /* ================= CLASS NAME ================= */
   const getClassName = (id) => {
     if (id === "All") return "All";
-    const found = classes.find((c) => String(c.classId) === String(id));
-    return found ? found.className : id;
+    const f = classes.find((c) => String(c.classId) === String(id));
+    return f ? f.className : id;
+  };
+
+  /* ================= PDF EXPORT ================= */
+  const exportPdf = () => {
+    const cols = allColumns.filter((c) => selectedColumns[c]);
+    if (!cols.length) return alert("Select at least one column");
+
+    const doc = new jsPDF("l", "pt", "a4");
+    doc.setFontSize(16);
+    doc.text("Student Master Report", 40, 40);
+    doc.setFontSize(11);
+    doc.text(`Class : ${getClassName(selectedClass)}`, 40, 60);
+
+    autoTable(doc, {
+      head: [cols.map((c) => COLUMN_LABELS[c] || c)],
+      body: filteredStudents.map((s) => cols.map((c) => String(s[c] ?? ""))),
+      startY: 80,
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+    });
+
+    doc.save(`Students_${getClassName(selectedClass)}.pdf`);
+  };
+
+  /* ================= EXCEL EXPORT ================= */
+  const exportExcel = () => {
+    const cols = allColumns.filter((c) => selectedColumns[c]);
+    if (!cols.length) return alert("Select at least one column");
+
+    const data = filteredStudents.map((s) => {
+      const row = {};
+      cols.forEach((c) => {
+        row[COLUMN_LABELS[c] || c] = s[c];
+      });
+      return row;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Students");
+
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    saveAs(
+      new Blob([excelBuffer], { type: "application/octet-stream" }),
+      `Students_${getClassName(selectedClass)}.xlsx`
+    );
   };
 
   const selectedCount = Object.values(selectedColumns).filter(Boolean).length;
 
-  if (loading) {
-    return <p style={{ padding: 20 }}>Loading students...</p>;
-  }
+  if (loading) return <p style={{ padding: 20 }}>Loading students...</p>;
 
   return (
     <div className="student-excel-export">
-      <h2 className="student-title">Student PDF Export</h2>
+      <h2 className="student-title">Student Export (PDF / Excel)</h2>
 
-      {/* CLASS FILTER */}
+      {/* FILTER */}
       <div className="class-filter">
         <label className="filter-label">Filter by Class</label>
-
         <select
           className="class-select"
           value={selectedClass}
           onChange={(e) => setSelectedClass(e.target.value)}
         >
           <option value="All">All</option>
-          {classes.map((cls) => (
-            <option key={cls.classId} value={cls.classId}>
-              {cls.className}
+          {classes.map((c) => (
+            <option key={c.classId} value={c.classId}>
+              {c.className}
             </option>
           ))}
         </select>
-
-        <p className="filter-count">
-          Showing <strong>{filteredStudents.length}</strong> students
-        </p>
       </div>
 
-      {/* COLUMN SELECTION */}
+      {/* COLUMNS */}
       <div className="column-selection">
         <div className="column-selection-header">
           <input
@@ -205,38 +182,47 @@ const StudentPdfExport = () => {
             onChange={handleSelectAll}
           />
           <label>
-            Select All Columns ({selectedCount}/{allColumns.length})
+            Select All ({selectedCount}/{allColumns.length})
           </label>
         </div>
 
         <div className="column-checkboxes">
-          {allColumns.map((col) => (
-            <label key={col} className="column-item">
+          {allColumns.map((c) => (
+            <label key={c} className="column-item">
               <input
                 type="checkbox"
-                checked={selectedColumns[col] || false}
-                onChange={() => handleColumnChange(col)}
+                checked={selectedColumns[c] || false}
+                onChange={() => handleColumnChange(c)}
               />
-              <span>{COLUMN_LABELS[col] || col}</span>
+              <span>{COLUMN_LABELS[c] || c}</span>
             </label>
           ))}
         </div>
       </div>
 
-      {/* STATS */}
+      {/* ACTIONS */}
       <div className="export-stats">
-        <span>{selectedCount} columns selected</span>
         <span>{filteredStudents.length} students</span>
+        <span>{selectedCount} columns</span>
       </div>
 
-      {/* DOWNLOAD */}
-      <button
-        className="download-btn"
-        disabled={selectedCount === 0}
-        onClick={generatePdf}
-      >
-        📄 Download PDF
-      </button>
+      <div style={{ display: "flex", gap: 12 }}>
+        <button
+          className="download-btn"
+          disabled={!selectedCount}
+          onClick={exportPdf}
+        >
+          📄 Download PDF
+        </button>
+
+        <button
+          className="download-btn"
+          disabled={!selectedCount}
+          onClick={exportExcel}
+        >
+          📊 Download Excel
+        </button>
+      </div>
     </div>
   );
 };

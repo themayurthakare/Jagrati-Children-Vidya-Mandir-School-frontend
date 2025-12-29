@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./IdCardPrint.css";
 
 const AdminIdCardPrint = () => {
@@ -10,11 +12,14 @@ const AdminIdCardPrint = () => {
   const [student, setStudent] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const navigate = useNavigate();
   useEffect(() => {
     if (!studentId) return;
 
-    fetch(`http://localhost:8080/api/users/${studentId}`)
+    fetch(`http://localhost:8080/api/users/${sessionId}/${studentId}`)
       .then((res) => res.json())
       .then((data) => {
         setStudent(data);
@@ -31,12 +36,12 @@ const AdminIdCardPrint = () => {
 
   return (
     <div className="print-page">
-      <div className="print-actions">
-        <button className="back-btn" onClick={() => navigate(-1)}>
+      <div className="print-id-actions">
+        <button className="back-id-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
 
-        <button className="print-btn" onClick={() => window.print()}>
+        <button className="print-id-btn" onClick={() => window.print()}>
           🖨 Print ID Card
         </button>
       </div>

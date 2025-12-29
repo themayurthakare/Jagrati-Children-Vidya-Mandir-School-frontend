@@ -10,6 +10,7 @@ const AdminStudentFeeDetails = () => {
   const { selectedSession } = useContext(
     SessionContext || { selectedSession: null }
   );
+  const sessionId = selectedSession.id;
 
   const studentId = location.state?.studentId;
   const studentName = location.state?.studentName || "Student";
@@ -54,7 +55,7 @@ const AdminStudentFeeDetails = () => {
       setError("");
 
       const studentResponse = await fetch(
-        `http://localhost:8080/api/users/${studentId}`
+        `http://localhost:8080/api/users/${sessionId}/${studentId}`
       );
       if (studentResponse.ok) {
         const studentData = await studentResponse.json();
@@ -77,7 +78,6 @@ const AdminStudentFeeDetails = () => {
         setFees([]);
       }
 
-      const sessionId = selectedSession.id;
       const transactionResponse = await fetch(
         `http://localhost:8080/api/transactions/${sessionId}/getAllUsingSessionId`
       );
@@ -131,16 +131,10 @@ const AdminStudentFeeDetails = () => {
       const response = await fetch(
         `http://localhost:8080/api/classes/${classId}`
       );
+
       if (response.ok) {
         const classData = await response.json();
-
-        const feesAmount =
-          classData.fees ||
-          classData.feeAmount ||
-          classData.classFees ||
-          classData.annualFees ||
-          0;
-        setClassFees(parseFloat(feesAmount));
+        setClassFees(Number(classData.fees)); // ✅ ensure number
       }
     } catch (err) {
       console.error("Error fetching class fees:", err);
@@ -154,28 +148,28 @@ const AdminStudentFeeDetails = () => {
       return false;
     }
 
+    if (classFees === null || isNaN(classFees)) {
+      setError("Class fees not available yet");
+      return false;
+    }
+
     try {
       setCreatingFees(true);
       setError("");
 
-      let feeAmount = Number(classFees);
-      if (!feeAmount || feeAmount <= 0) {
-        feeAmount = 10000;
-      }
+      const feeAmount = Number(classFees); // ✅ FROM CLASS FEES ONLY
 
       const feePayload = {
-        amount: feeAmount,
-        paidAmount: 0.0,
-        remainingAmount: feeAmount,
+        amount: feeAmount, // ✅ class fees
+        paidAmount: 0,
+        remainingAmount: feeAmount, // ✅ class fees
         paymentStatus: "UNPAID",
         userId: Number(studentId),
       };
 
       const response = await fetch("http://localhost:8080/api/fees/save", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(feePayload),
       });
 
@@ -185,8 +179,7 @@ const AdminStudentFeeDetails = () => {
       }
 
       const savedFee = await response.json();
-
-      setFees([savedFee]);
+      setFees([savedFee]); // ✅ set created fee
 
       return true;
     } catch (err) {
@@ -750,7 +743,7 @@ const AdminStudentFeeDetails = () => {
                           feeWithCalculations.calculatedRemaining
                         )}
                       </td>
-                      <td className="text-center">
+                      <td className="text-center1">
                         <span
                           className={`status-badge ${getFeeStatusClass(
                             feeWithCalculations.calculatedStatus
@@ -759,7 +752,7 @@ const AdminStudentFeeDetails = () => {
                           {feeWithCalculations.calculatedStatus}
                         </span>
                       </td>
-                      <td className="text-center">
+                      <td className="text-center1">
                         <button
                           className="pay-fees-btn"
                           onClick={() => handlePayFees(fee)}
@@ -811,14 +804,14 @@ const AdminStudentFeeDetails = () => {
               <tbody>
                 {transactions.map((transaction, index) => (
                   <tr key={transaction.id || transaction.transactionId}>
-                    <td className="text-center">{index + 1}</td>
+                    <td className="text-center1">{index + 1}</td>
                     <td className="text-right amount">
                       {formatCurrency(transaction.amount)}
                     </td>
-                    <td className="text-center">
+                    <td className="text-center1">
                       {formatDate(transaction.paymentDate)}
                     </td>
-                    <td className="text-center">
+                    <td className="text-center1">
                       {transaction.description || "Fee Payment"}
                     </td>
                     <td className="text-center">
@@ -832,7 +825,7 @@ const AdminStudentFeeDetails = () => {
                     </td>
                     <td className="text-center">
                       <button
-                        className="print-btn"
+                        className="print-btn1"
                         onClick={() => printReceipt(transaction, studentName)}
                       >
                         Print Receipt

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./IdCardPrint.css";
 
 const AdminIdCardPrintAll = () => {
@@ -11,10 +13,13 @@ const AdminIdCardPrintAll = () => {
 
   const [students, setStudents] = useState([]);
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   useEffect(() => {
     if (!classId) return;
 
-    fetch("http://localhost:8080/api/users/getAll")
+    fetch(`http://localhost:8080/api/users/${sessionId}/getAll`)
       .then((res) => res.json())
       .then((data) =>
         setStudents(data.filter((s) => s.studentClassId === classId))
@@ -25,11 +30,11 @@ const AdminIdCardPrintAll = () => {
     <div className="print-page">
       {/* ACTION BUTTONS */}
       <div className="print-actions">
-        <button className="back-btn" onClick={() => navigate(-1)}>
+        <button className="back-id-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
 
-        <button className="print-btn" onClick={() => window.print()}>
+        <button className="print-id-btn" onClick={() => window.print()}>
           🖨 Print All ID Cards
         </button>
       </div>

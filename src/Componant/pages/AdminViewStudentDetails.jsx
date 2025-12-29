@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
 import "./AdminViewStudentDetails.css";
 
 const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const studentId = location.state?.studentId ?? null;
 
   const [user, setUser] = useState(null);
@@ -26,7 +31,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
 
     setLoadingClass(true);
     try {
-      const res = await fetch(`${apiBase}/api/classes/getAll`);
+      const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
       if (res.ok) {
         const classes = await res.json();
         const classObj = Array.isArray(classes)
@@ -158,7 +163,9 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       setLoadingUser(true);
       setError(null);
       try {
-        const res = await fetch(`${apiBase}/api/users/${studentId}`);
+        const res = await fetch(
+          `${apiBase}/api/users/${sessionId}/${studentId}`
+        );
 
         if (res.status === 404) {
           throw new Error("Student not found");

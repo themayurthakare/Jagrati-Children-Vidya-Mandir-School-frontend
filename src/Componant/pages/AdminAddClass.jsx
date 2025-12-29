@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminAddClass.css";
 
 const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
@@ -14,6 +16,9 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
 
   const validateForm = () => {
     const newErrors = {};
@@ -79,11 +84,7 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
         fees: Number(form.fees),
       };
 
-      const endpoints = [
-        `${apiBase}/api/classes/add`,
-        `${apiBase}/api/classes/create`,
-        `${apiBase}/api/classes/save`,
-      ];
+      const endpoints = [`${apiBase}/api/classes/${sessionId}/save`];
 
       let success = false;
       let responseData = null;

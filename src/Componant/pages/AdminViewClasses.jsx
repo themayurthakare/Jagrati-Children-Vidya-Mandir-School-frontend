@@ -1,29 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
 import "./AdminViewClasses.css";
 
 const AdminViewClasses = () => {
+  const { selectedSession } = useContext(SessionContext);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const loadClasses = () => {
-    fetch("http://localhost:8080/api/classes/getAll")
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
-      .then((data) => setClasses(Array.isArray(data) ? data : []))
-      .catch((err) => {
-        console.error("Failed to load classes:", err);
-        setClasses([]);
-      })
-      .finally(() => setLoading(false));
+  const loadClasses = async () => {
+    if (!selectedSession?.id) {
+      setClasses([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/classes/${selectedSession.id}/getAll`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch classes");
+
+      const data = await res.json();
+      setClasses(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load classes:", err);
+      setClasses([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // 🔥 reload whenever session changes
   useEffect(() => {
     loadClasses();
-  }, []);
+  }, [selectedSession]);
 
   // ---------------- DELETE CLASS ----------------
   const deleteClass = async (id) => {
@@ -50,6 +64,7 @@ const AdminViewClasses = () => {
     <div className="vc-container">
       <div className="vc-header">
         <h2 className="vc-title">All Classes</h2>
+
         <button
           className="vc-add-btn"
           onClick={() => navigate("/admindashboard/add-class")}
@@ -90,7 +105,6 @@ const AdminViewClasses = () => {
                   <td>{c.className}</td>
                   <td>₹ {c.fees}</td>
 
-                  {/* Update Button */}
                   <td>
                     <button
                       className="vc-update-btn"
@@ -104,7 +118,6 @@ const AdminViewClasses = () => {
                     </button>
                   </td>
 
-                  {/* Delete Button */}
                   <td>
                     <button
                       className="vc-delete-btn"

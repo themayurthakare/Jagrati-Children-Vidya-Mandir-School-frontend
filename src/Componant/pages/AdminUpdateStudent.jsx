@@ -1,10 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
+
 import "./AdminUpdateStudent.css";
 
 const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const studentId = location.state?.studentId;
 
   // Document types configuration - ADDED PAN and CASTE_CERTIFICATE
@@ -91,18 +97,16 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       setLoading(true);
       try {
         // Fetch classes
-        const classesRes = await fetch(`${apiBase}/api/classes/getAll`);
+        const classesRes = await fetch(
+          `${apiBase}/api/classes/${sessionId}/getAll`
+        );
         if (classesRes.ok) {
           const classesData = await classesRes.json();
           setClasses(Array.isArray(classesData) ? classesData : []);
         }
 
         // Fetch student data
-        const endpoints = [
-          `${apiBase}/api/users/${studentId}`,
-          `${apiBase}/api/users/get/${studentId}`,
-          `${apiBase}/api/users/getById/${studentId}`,
-        ];
+        const endpoints = [`${apiBase}/api/users/${sessionId}/${studentId}`];
 
         let studentData = null;
         for (const endpoint of endpoints) {
@@ -210,10 +214,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     if (!form.email) newErrors.email = "Email is required";
     if (!form.studentClassId) newErrors.studentClassId = "Class is required";
 
-    // Format validations
-    if (form.studentPhone && !/^[0-9]{10}$/.test(form.studentPhone)) {
-      newErrors.studentPhone = "Enter a valid 10-digit phone number";
-    }
+
 
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
@@ -223,9 +224,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       newErrors.studentAadharNo = "Aadhar must be 12 digits";
     }
 
-    if (form.parentPhone && !/^[0-9]{10}$/.test(form.parentPhone)) {
-      newErrors.parentPhone = "Enter a valid 10-digit phone number";
-    }
+   
 
     if (form.parentAadharNo && !/^[0-9]{12}$/.test(form.parentAadharNo)) {
       newErrors.parentAadharNo = "Parent Aadhar must be 12 digits";
@@ -381,9 +380,9 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
       // Try multiple update endpoints
       const updateEndpoints = [
-        `${apiBase}/api/users/update/${studentId}`,
-        `${apiBase}/api/users/${studentId}`,
-        `${apiBase}/api/users/update`,
+        `${apiBase}/api/users/update/${sessionId}/${studentId}`,
+        `${apiBase}/api/users/${sessionId}/${studentId}`,
+        `${apiBase}/api/users/update/${sessionId}`,
       ];
 
       let success = false;
@@ -431,17 +430,14 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
   // Handle save all (details + documents)
   const handleSaveAll = async () => {
-    // First save student details
-    const formValid = validateForm();
-    if (!formValid) {
-      window.alert("Please fix student details errors before saving.");
+    if (!validateForm()) {
+      alert("Please fix student details errors before saving.");
       return;
     }
 
     setUpdating(true);
 
     try {
-      // Save student details
       const selectedClass = classes.find(
         (c) =>
           String(c.classId) === String(form.studentClassId) ||
@@ -455,37 +451,30 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
           : "",
         studentClassId: Number(form.studentClassId),
         id: studentId,
-        userId: studentId,
       };
 
-      if (!form.password) {
-        delete payload.password;
-      }
+      if (!form.password) delete payload.password;
 
       const updateEndpoints = [
-        `${apiBase}/api/users/update/${studentId}`,
-        `${apiBase}/api/users/${studentId}`,
-        `${apiBase}/api/users/update`,
+        `${apiBase}/api/users/update/${sessionId}/${studentId}`,
+        `${apiBase}/api/users/${sessionId}/${studentId}`,
       ];
 
       let detailsSuccess = false;
-      for (const endpoint of updateEndpoints) {
-        try {
-          const res = await fetch(endpoint, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
 
-          if (res.ok || res.status === 200) {
-            detailsSuccess = true;
-            break;
-          }
-        } catch (err) {
-          continue;
+      for (const endpoint of updateEndpoints) {
+        const res = await fetch(endpoint, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          detailsSuccess = true;
+          break;
         }
       }
 
@@ -493,27 +482,21 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
         throw new Error("Failed to update student details");
       }
 
-      // Then upload documents if any
       const hasNewDocuments = Object.keys(docs).some(
         (key) => docs[key]?.file && !docs[key]?.exists
       );
 
-      let docsSuccess = true;
       if (hasNewDocuments) {
-        docsSuccess = await uploadAllDocuments();
+        await uploadAllDocuments();
       }
 
-      if (detailsSuccess && docsSuccess) {
-        setUpdateSuccess(true);
-        setForm((prev) => ({ ...prev, password: "" }));
-
-        setTimeout(() => {
-          navigate("/admindashboard/view-students");
-        }, 1500);
-      }
+      setUpdateSuccess(true);
+      setTimeout(() => {
+        navigate("/admindashboard/view-students");
+      }, 1500);
     } catch (err) {
-      console.error("Save all error:", err);
-      window.alert(`Save failed: ${err.message || "Please try again"}`);
+      console.error(err);
+      alert(err.message);
     } finally {
       setUpdating(false);
     }
