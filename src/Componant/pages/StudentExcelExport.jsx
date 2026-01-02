@@ -111,14 +111,35 @@ const StudentPdfExport = () => {
     doc.setFontSize(16);
     doc.text("Student Master Report", 40, 40);
     doc.setFontSize(11);
-    doc.text(`Class : ${getClassName(selectedClass)}`, 40, 60);
+    doc.text(`Class: ${getClassName(selectedClass)}`, 40, 60);
 
     autoTable(doc, {
-      head: [cols.map((c) => COLUMN_LABELS[c] || c)],
+      head: [cols.map((c) => (COLUMN_LABELS[c] || c).toString())],
       body: filteredStudents.map((s) => cols.map((c) => String(s[c] ?? ""))),
       startY: 80,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [37, 99, 235], textColor: 255 },
+      styles: {
+        fontSize: 7, // Reduced for longer headers
+        textColor: [0, 0, 0],
+        lineColor: [0, 0, 0],
+        lineWidth: 0.3,
+        cellPadding: 4,
+        overflow: "linebreak",
+        halign: "left",
+        valign: "middle",
+        cellWidth: "wrap", // Better wrapping
+      },
+      headStyles: {
+        fillColor: [255, 255, 255],
+        textColor: [0, 0, 0],
+        fontStyle: "bold",
+        fontSize: 7,
+        halign: "center",
+        valign: "middle",
+        overflow: "linebreak",
+      },
+      theme: "grid",
+      tableWidth: "wrap", // Dynamic width with wrapping
+      margin: { left: 30, right: 30 },
     });
 
     doc.save(`Students_${getClassName(selectedClass)}.pdf`);

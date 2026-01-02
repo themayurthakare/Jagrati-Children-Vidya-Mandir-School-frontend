@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminViewFees.css";
+import { SessionContext } from "./SessionContext";
 
 const OperatorViewFees = () => {
   const [classes, setClasses] = useState([]);
@@ -8,10 +9,13 @@ const OperatorViewFees = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const { selectedSession } = useContext(SessionContext);
+  const sessionId = selectedSession?.id;
+
   const loadClasses = () => {
     setLoading(true);
     setError("");
-    fetch("http://localhost:8080/api/classes/getAll")
+    fetch(`http://localhost:8080/api/classes/${sessionId}/getAll`)
       .then((res) => {
         if (!res.ok) {
           if (res.status === 404) {
