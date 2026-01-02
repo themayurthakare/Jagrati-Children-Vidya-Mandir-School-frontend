@@ -82,6 +82,22 @@ const Login = () => {
         navigate("/admindashboard", { state: { userId: data.userId } });
         return;
       }
+      // ---------- Computer operator ----------
+      response = await fetch(
+        "http://localhost:8080/api/computeroperator/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneNumber: phone, password }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setAuth("computeroperator", data.userId);
+        navigate("/computeroperator", { state: { userId: data.userId } });
+        return;
+      }
 
       alert("Invalid credentials. Enter valid details..");
     } catch (err) {
