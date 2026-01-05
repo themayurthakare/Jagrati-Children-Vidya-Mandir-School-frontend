@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./AdminViewFees.css";
 import { SessionContext } from "./SessionContext";
 
-const OperatorViewFees = () => {
+import "./AdminStudentIdClass.css";
+
+const COStudentIdClass = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,14 +27,12 @@ const OperatorViewFees = () => {
         return res.json();
       })
       .then((data) => {
-        console.log("Classes data received:", data);
         setClasses(Array.isArray(data) ? data : []);
         if (Array.isArray(data) && data.length === 0) {
           setError("No classes found in the system.");
         }
       })
       .catch((err) => {
-        console.error("Failed to load classes:", err);
         setError(`Failed to load classes: ${err.message}`);
         setClasses([]);
       })
@@ -44,28 +43,21 @@ const OperatorViewFees = () => {
     loadClasses();
   }, []);
 
-  const formatCurrency = (amount) => {
-    if (amount === null || amount === undefined) return "₹ 0";
-    return `₹ ${parseInt(amount).toLocaleString("en-IN")}`;
-  };
-
   return (
-    <div className="fees-container">
-      <div className="fees-header">
-        <h2 className="fees-title">Class Fees Details</h2>
-        <div className="header-buttons">
-          <button
-            className="fees-refresh-btn"
-            onClick={loadClasses}
-            disabled={loading}
-          >
-            {loading ? "Refreshing..." : "Refresh"}
-          </button>
-        </div>
+    <div className="id-cards-container">
+      <div className="id-cards-header">
+        <h2 className="id-cards-title">Generate ID & Admit Cards</h2>
+        <button
+          className="id-cards-refresh-btn"
+          onClick={loadClasses}
+          disabled={loading}
+        >
+          {loading ? "Refreshing..." : "Refresh"}
+        </button>
       </div>
 
       {error && (
-        <div className="fees-error">
+        <div className="id-cards-error">
           <p>{error}</p>
           <button
             className="error-retry-btn"
@@ -77,28 +69,21 @@ const OperatorViewFees = () => {
         </div>
       )}
 
-      <div className="fees-table-container">
+      <div className="id-cards-table-container">
         {loading ? (
           <div className="loading-state">
-            <p>Loading class fees...</p>
+            <p>Loading classes...</p>
           </div>
         ) : classes.length === 0 ? (
           <div className="empty-state">
             <p>No classes found.</p>
-            <button
-              className="add-class-btn"
-              onClick={() => navigate("/computeroperator/add-class")}
-            >
-              Add Class
-            </button>
           </div>
         ) : (
-          <table className="fees-table">
+          <table className="id-cards-table">
             <thead>
               <tr>
                 <th>Sr. No.</th>
                 <th>Class Name</th>
-                <th>Annual Fees</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -107,20 +92,19 @@ const OperatorViewFees = () => {
               {classes.map((c, index) => (
                 <tr key={c.classId || c.id}>
                   <td className="text-center">{index + 1}</td>
+
                   <td>
-                    <div className="class-name">
+                    <div className="class-name1">
                       {c.className || "Unnamed Class"}
                     </div>
                   </td>
-                  <td className="text-left fees-amount">
-                    {formatCurrency(c.fees)}
-                  </td>
+
                   <td className="text-center">
                     <div className="action-buttons">
                       <button
-                        className="view-btn"
+                        className="idcard1-btn"
                         onClick={() =>
-                          navigate("/computeroperator/view-class-student", {
+                          navigate("/computeroperator/generate-admit-cards", {
                             state: {
                               classId: c.classId || c.id,
                               className: c.className,
@@ -128,7 +112,21 @@ const OperatorViewFees = () => {
                           })
                         }
                       >
-                        View Students
+                        Generate ID Card
+                      </button>
+
+                      <button
+                        className="admit-btn"
+                        onClick={() =>
+                          navigate("/computeroperator/generate-admit-cards", {
+                            state: {
+                              classId: c.classId || c.id,
+                              className: c.className,
+                            },
+                          })
+                        }
+                      >
+                        Generate Admit Card
                       </button>
                     </div>
                   </td>
@@ -142,4 +140,4 @@ const OperatorViewFees = () => {
   );
 };
 
-export default OperatorViewFees;
+export default COStudentIdClass;

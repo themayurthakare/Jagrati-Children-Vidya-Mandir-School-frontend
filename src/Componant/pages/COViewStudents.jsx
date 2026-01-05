@@ -4,7 +4,7 @@ import { SessionContext } from "./SessionContext";
 
 import "./AdminViewStudents.css";
 
-const ViewStudents = () => {
+const COViewStudents = () => {
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -160,7 +160,7 @@ const ViewStudents = () => {
         <div className="vs-header-buttons">
           <button
             className="vs-add-btn"
-            onClick={() => navigate("/admindashboard/add-student")}
+            onClick={() => navigate("/computeroperator/add-student")}
           >
             + Add Student
           </button>
@@ -214,7 +214,7 @@ const ViewStudents = () => {
                     <button
                       className="vs-update-btn"
                       onClick={() =>
-                        navigate("/admindashboard/update-student", {
+                        navigate("/computeroperator/update-student", {
                           state: { studentId: s.userId },
                         })
                       }
@@ -228,7 +228,7 @@ const ViewStudents = () => {
                     <button
                       className="vs-view-btn"
                       onClick={() =>
-                        navigate("/admindashboard/view-details", {
+                        navigate("/computeroperator/view-details", {
                           state: { studentId: s.userId },
                         })
                       }
@@ -256,4 +256,4 @@ const ViewStudents = () => {
   );
 };
 
-export default ViewStudents;
+export default COViewStudents;

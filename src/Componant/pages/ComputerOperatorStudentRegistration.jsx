@@ -30,7 +30,7 @@ const initialForm = {
   panNo: "",
 };
 
-const AdminStudentRegistration = ({
+const ComputerOperatorStudentRegistration = ({
   onAddStudent,
   classes: classesProp = null,
   apiBase = "",
@@ -140,7 +140,7 @@ const AdminStudentRegistration = ({
       if (res.ok || res.status === 201) {
         const id = saved?.userId ?? saved?.id;
         window.alert(`Successfully registered! ID: ${id || "N/A"}`);
-        navigate("/admindashboard/upload-docs", {
+        navigate("/computeroperator/upload-docs", {
           state: { studentId: id },
         });
         setForm(initialForm);
@@ -428,4 +428,4 @@ const AdminStudentRegistration = ({
   );
 };
 
-export default AdminStudentRegistration;
+export default ComputerOperatorStudentRegistration;

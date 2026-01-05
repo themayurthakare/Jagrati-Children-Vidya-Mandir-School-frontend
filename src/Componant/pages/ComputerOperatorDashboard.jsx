@@ -12,17 +12,12 @@ import {
 
 import "./AdminDashboard.css";
 
-import AdminStudentRegistration from "./AdminStudentRegistration";
-import ViewStudents from "./AdminViewStudents";
-import AdminTeacherRegistration from "./AdminTeacherRegistration";
 import AdminViewTeacher from "./AdminViewTeacher";
 import AdminViewClasses from "./AdminViewClasses";
 import AdminViewEnquiries from "./AdminViewEnquiries";
 import AdminViewAttendance from "./AdminViewAttendance";
-import AdminUploadStudentDocuments from "./AdminUploadStudentDocuments";
 import AdminPrintStudentDetails from "./AdminPrintStudentDetails";
-import ViewStudentDetails from "./AdminViewStudentDetails";
-import AdminUpdateStudent from "./AdminUpdateStudent";
+
 import AdminAddClass from "./AdminAddClass";
 import AdminUpdateClass from "./AdminUpdateClass";
 import AdminUploadExcel from "./AdminUploadExcel";
@@ -38,13 +33,31 @@ import AdminIdCardPrint from "./AdminIdCardPrint";
 import AdminIdCardPrintAll from "./AdminIdCardPrintAll";
 import AdminAdmitCardPrint from "./AdminAdmitCardPrint";
 import AdminAdmitCardPrintAll from "./AdminAdmitCardPrintAll";
-import AdminTeacherDocumentUpload from "./AdminTeacherDocumentUpload";
 import AdminTeacherRegistrationReceipt from "./AdminTeacherRegistrationReceipt";
 import AdminViewTeacherDetails from "./AdminViewTeacherDetails";
 import AdminUpdateTeacher from "./AdminUpdateTeacher";
 import TransactionReport from "./TransactionReport";
 import StudentExcelExport from "./StudentExcelExport";
 import OperatorViewFees from "./OperatorViewFees";
+import ComputerOperatorStudentRegistration from "./ComputerOperatorStudentRegistration";
+import ComputerOperatorUploadStudentDocuments from "./ComputerOperatorUploadStudentDocuments";
+import COTeacherRegistration from "./COTeacherRegistration";
+import COTeacherDocumentUpload from "./COTeacherDocumentUpload";
+import COViewStudents from "./COViewStudents";
+import COUpdateStudent from "./COUpdateStudent";
+import COViewStudentDetails from "./COViewStudentDetails";
+import COViewTeacher from "./COViewTeacher";
+import COViewTeacherDetails from "./COViewTeacherDetails";
+import COUpdateTeacher from "./COUpdateTeacher";
+import COViewClasses from "./COViewClasses";
+import COAddClass from "./COAddClass";
+import COUpdateClass from "./COUpdateClass";
+import COViewClassStudents from "./COViewClassStudents";
+import COStudentFeeDetails from "./COStudentFeeDetails";
+import COViewEnquiries from "./COViewEnquiries";
+import COStudentIdClass from "./COStudentIdClass";
+import COIdCardPrint from "./COIdCardPrint";
+import COPrintIdCard from "./COPrintIdCard";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -200,35 +213,39 @@ const ComputerOperatorDashboard = () => {
           <Routes>
             <Route
               path="add-student"
-              element={<AdminStudentRegistration onAddStudent={addStudent} />}
+              element={
+                <ComputerOperatorStudentRegistration
+                  onAddStudent={addStudent}
+                />
+              }
             />
             <Route
               path="add-teacher"
-              element={<AdminTeacherRegistration onAddTeacher={addTeacher} />}
+              element={<COTeacherRegistration onAddTeacher={addTeacher} />}
             />
             <Route
               path="view-students"
-              element={<ViewStudents students={students} />}
+              element={<COViewStudents students={students} />}
             />
             <Route
               path="view-teachers"
               element={
-                <AdminViewTeacher teachers={teachers} onUpdate={updatePoints} />
+                <COViewTeacher teachers={teachers} onUpdate={updatePoints} />
               }
             />
-            <Route path="view-classes" element={<AdminViewClasses />} />
+            <Route path="view-classes" element={<COViewClasses />} />
             <Route path="view-attendance" element={<AdminViewAttendance />} />
             <Route path="view-fees" element={<OperatorViewFees />} />
-            <Route path="view-enquiries" element={<AdminViewEnquiries />} />
+            <Route path="view-enquiries" element={<COViewEnquiries />} />
             <Route path="upload-student-excel" element={<AdminUploadExcel />} />
 
             <Route
               path="upload-docs"
-              element={<AdminUploadStudentDocuments />}
+              element={<ComputerOperatorUploadStudentDocuments />}
             />
             <Route
               path="teacher-documents"
-              element={<AdminTeacherDocumentUpload />}
+              element={<COTeacherDocumentUpload />}
             />
             <Route
               path="teacher-receipt"
@@ -236,25 +253,22 @@ const ComputerOperatorDashboard = () => {
             />
             <Route
               path="view-teacher-details"
-              element={<AdminViewTeacherDetails />}
+              element={<COViewTeacherDetails />}
             />
-            <Route path="update-teacher" element={<AdminUpdateTeacher />} />
+            <Route path="update-teacher" element={<COUpdateTeacher />} />
             <Route
               path="print-student"
               element={<AdminPrintStudentDetails />}
             />
-            <Route path="view-details" element={<ViewStudentDetails />} />
-            <Route path="update-student" element={<AdminUpdateStudent />} />
-            <Route path="add-class" element={<AdminAddClass />} />
-            <Route path="update-class" element={<AdminUpdateClass />} />
+            <Route path="view-details" element={<COViewStudentDetails />} />
+            <Route path="update-student" element={<COUpdateStudent />} />
+            <Route path="add-class" element={<COAddClass />} />
+            <Route path="update-class" element={<COUpdateClass />} />
             <Route path="notice" element={<AdminNotice />} />
-            <Route path="fee-details" element={<AdminStudentFeeDetails />} />
-            <Route path="generate-id-cards" element={<AdminStudentIdClass />} />
-            <Route path="generate-admit-cards" element={<AdminPrintIdCard />} />
-            <Route
-              path="generate-id-cards/print"
-              element={<AdminIdCardPrint />}
-            />
+            <Route path="fee-details" element={<COStudentFeeDetails />} />
+            <Route path="generate-id-cards" element={<COStudentIdClass />} />
+            <Route path="generate-admit-cards" element={<COPrintIdCard />} />
+            <Route path="generate-id-cards/print" element={<COIdCardPrint />} />
             <Route
               path="generate-admit-card"
               element={<AdminAdmitCardPrint />}
@@ -266,7 +280,7 @@ const ComputerOperatorDashboard = () => {
 
             <Route
               path="view-class-student"
-              element={<AdminViewClassStudents />}
+              element={<COViewClassStudents />}
             />
             <Route
               path="generate-id-cards/print-all"
