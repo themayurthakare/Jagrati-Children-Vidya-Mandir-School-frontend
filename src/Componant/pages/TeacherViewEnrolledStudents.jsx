@@ -1,117 +1,149 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Enrolledstudents.css";
 
-const Enrolledstudents = () => {
+const TeacherViewEnrolledStudents = () => {
+  const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [searchParams] = useSearchParams();
 
-  // Fetch students data from API
+  const navigate = useNavigate();
+  const teacherId = localStorage.getItem("userId");
+
+  /* ================= AUTH + LOAD CLASSES ================= */
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (!teacherId) {
+      navigate("/login");
+      return;
+    }
 
-  const fetchStudents = async () => {
+    const fetchClasses = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/teachers/${teacherId}/classes`
+        );
+        if (!res.ok) throw new Error("Failed to fetch classes");
+        const data = await res.json();
+        setClasses(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchClasses();
+  }, [teacherId, navigate]);
+
+  /* ================= FETCH STUDENTS BY CLASS ================= */
+  const fetchStudentsByClass = async (classId) => {
+    if (!classId) {
+      setStudents([]);
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `http://localhost:8080/api/teachers/${localStorage.getItem(
-          "userId"
-        )}/students`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const res = await fetch(
+        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`
       );
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Non-OK response body:", text);
-        throw new Error("Failed to fetch students");
+      if (res.status === 204) {
+        setStudents([]);
+        return;
       }
 
-      const contentType = response.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("Expected JSON, got:", text);
-        throw new Error(
-          "Server did not return JSON. Please check API URL or authentication."
-        );
-      }
+      if (!res.ok) throw new Error("Failed to fetch students");
 
-      const studentsData = await response.json();
-      setStudents(studentsData);
+      const data = await res.json();
+      setStudents(data);
     } catch (err) {
       setError(err.message);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="students-container">
-        <h2 className="page-title">View Enrolled Students</h2>
-        <div className="loading">Loading students...</div>
-      </div>
-    );
-  }
+  /* ================= DROPDOWN CHANGE ================= */
+  const handleClassChange = (e) => {
+    const classId = e.target.value;
+    setSelectedClassId(classId);
+    fetchStudentsByClass(classId);
+  };
 
   return (
     <div className="students-container">
-      <h2 className="page-title">View Enrolled Students</h2>
 
-      {error && (
-        <div className="error-message">
-          {error}
-          <button className="retry-btn" onClick={fetchStudents}>
-            Retry
-          </button>
-        </div>
+      {/* ===== Assigned Classes ===== */}
+      <div className="assigned-card">
+        <h3>Assigned Classes</h3>
+        {classes.length === 0 ? (
+          <p>No classes assigned</p>
+        ) : (
+          <div className="class-badges">
+            {classes.map((cls) => (
+              <span key={cls.classId} className="class-badge">
+                {cls.className}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ===== Page Title ===== */}
+      <h2 className="page-title">Enrolled Students</h2>
+
+      {/* ===== Class Dropdown ===== */}
+      <div className="filter-row">
+        <select value={selectedClassId} onChange={handleClassChange}>
+          <option value="">Select Class</option>
+          {classes.map((cls) => (
+            <option key={cls.classId} value={cls.classId}>
+              {cls.className}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* ===== Status Messages ===== */}
+      {loading && <p>Loading students...</p>}
+      {error && <div className="error-message">{error}</div>}
+
+      {!loading && selectedClassId && students.length === 0 && (
+        <p>No students found.</p>
       )}
 
-      {students.length === 0 ? (
-        <div className="no-data">
-          <p>No students enrolled yet.</p>
-        </div>
-      ) : (
+      {/* ===== Students Table ===== */}
+      {students.length > 0 && (
         <div className="table-wrapper">
           <table className="students-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Student Name</th>
-                <th>Class</th>
+                <th>Name</th>
                 <th>Gender</th>
                 <th>Contact</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {students.map((stu, index) => (
-                <tr key={stu.id}>
+                <tr key={stu.userId}>
                   <td>{index + 1}</td>
-                  <td>{stu.name || stu.studentName}</td>
-                  <td>{stu.className || `${stu.class} - ${stu.section}`}</td>
+                  <td>{stu.name}</td>
                   <td>{stu.gender}</td>
-                  <td>{stu.phone || stu.contact || stu.mobile}</td>
-                  <td>
-                    <button className="action-btn view-marks">Marks</button>
-                  </td>
+                  <td>{stu.studentPhone}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       )}
+
     </div>
   );
 };
 
-export default Enrolledstudents;
+export default TeacherViewEnrolledStudents;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavLink, Routes, Route } from "react-router-dom";
 import {
   FaChalkboardTeacher,
@@ -8,7 +8,7 @@ import {
   FaEdit,
   FaChartBar,
 } from "react-icons/fa";
-import "../styles/TeacherDashboard.css"; // Same CSS as AdminDashboard.css (copy the file)
+import "../styles/TeacherDashboard.css";
 
 import TeacherViewAssignedClasses from "./TeacherViewAssignedClasses";
 import TeacherViewEnrolledStudents from "./TeacherViewEnrolledStudents";
@@ -16,6 +16,7 @@ import TeacherMarkAttendance from "./TeacherMarkAttendance";
 import TeacherViewAttendanceReport from "./TeacherViewAttendanceReport";
 import TeacherAddMarks from "./TeacherAddMarks";
 import TeacherViewMarks from "./TeacherViewMarks";
+import EditMarks from "./EditMarks";
 
 /* -------------------- Sidebar -------------------- */
 const TeacherSidebar = () => {
@@ -59,38 +60,6 @@ const TeacherSidebar = () => {
 
 /* -------------------- Main Layout -------------------- */
 const TeacherDashboard = () => {
-  // Store classes, students, attendance data for teacher pages
-  const [assignedClasses, setAssignedClasses] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const [marks, setMarks] = useState([]);
-
-  // Helper functions for child components
-  const addAttendanceRecord = (record) => {
-    setAttendanceRecords((prev) => [record, ...prev]);
-  };
-
-  const addMarksRecord = (markData) => {
-    const newMark = {
-      id: Date.now(),
-      studentId: markData.studentId,
-      subject: markData.subject,
-      marks: markData.marks,
-      date: markData.date,
-    };
-    setMarks((prev) => [newMark, ...prev]);
-  };
-
-  const updateAttendance = (classId, studentId, status) => {
-    setAttendanceRecords((prev) =>
-      prev.map((record) =>
-        record.classId === classId && record.studentId === studentId
-          ? { ...record, status }
-          : record
-      )
-    );
-  };
-
   return (
     <div className="teacher-page">
       <TeacherSidebar />
@@ -99,31 +68,38 @@ const TeacherDashboard = () => {
         <Routes>
           <Route
             path="assigned-classes"
-            element={<TeacherViewAssignedClasses classes={assignedClasses} />}
+            element={<TeacherViewAssignedClasses />}
           />
+
           <Route
             path="enrolled-students"
-            element={<TeacherViewEnrolledStudents students={students} />}
+            element={<TeacherViewEnrolledStudents />}
           />
+
           <Route
             path="attendance"
-            element={
-              <TeacherMarkAttendance
-                students={students}
-                onAddAttendance={addAttendanceRecord}
-                onUpdateAttendance={updateAttendance}
-              />
-            }
+            element={<TeacherMarkAttendance />}
           />
+
           <Route
             path="attendance-report"
-            element={<TeacherViewAttendanceReport records={attendanceRecords} />}
+            element={<TeacherViewAttendanceReport />}
           />
+
           <Route
             path="add-marks"
-            element={<TeacherAddMarks students={students} onAddMarks={addMarksRecord} />}
+            element={<TeacherAddMarks />}
           />
-          <Route path="view-marks" element={<TeacherViewMarks marks={marks} />} />
+
+          <Route
+            path="view-marks"
+            element={<TeacherViewMarks />}
+          />
+
+          <Route
+            path="edit-marks/:marksId"
+            element={<EditMarks />}
+          />
 
           {/* Default route */}
           <Route
@@ -131,7 +107,10 @@ const TeacherDashboard = () => {
             element={
               <div className="page">
                 <h3>Welcome to Teacher Dashboard</h3>
-                <p>Use the side menu to manage your classes, attendance, and student marks.</p>
+                <p>
+                  Use the side menu to manage your classes, attendance, and
+                  student marks.
+                </p>
               </div>
             }
           />

@@ -274,3 +274,18 @@
   .report-card { box-shadow: none; max-width: none; }
   .filter-row, .view-table { display: none; }
 }
+
+
+.edit-btn {
+  margin-left: 8px;
+  padding: 6px 12px;
+  background-color: #ffc107;
+  border: none;
+  color: #000;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background-color: #e0a800;
+}

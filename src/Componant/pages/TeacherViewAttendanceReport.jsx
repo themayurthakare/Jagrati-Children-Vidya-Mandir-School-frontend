@@ -11,55 +11,52 @@ const Attendencereport = () => {
   });
   const [summary, setSummary] = useState({ present: 0, absent: 0 });
 
-  // Fetch students data from API
+  // ================= FETCH ATTENDANCE =================
   useEffect(() => {
+    const fetchAttendanceData = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await fetch("http://localhost:8080/api/attendance", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Non-OK response body:", text);
+          throw new Error("Failed to fetch attendance");
+        }
+
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          const text = await response.text();
+          console.error("Expected JSON, got:", text);
+          throw new Error("Server did not return JSON");
+        }
+
+        const data = await response.json();
+        setReportData(data);
+        calculateSummary(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchAttendanceData();
   }, []);
 
-  const fetchAttendanceData = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch(
-        `http://localhost:8080/api/teachers/attendance/all`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Non-OK response body:", text);
-        throw new Error("Request failed");
-      }
-
-      const contentType = response.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("Expected JSON, got:", text);
-        throw new Error("Server did not return JSON");
-      }
-
-      const data = await response.json();
-      setReportData(data);
-      calculateSummary(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ================= SUMMARY =================
   const calculateSummary = (data) => {
     const present = data.filter((item) => item.status === "Present").length;
     const absent = data.filter((item) => item.status === "Absent").length;
     setSummary({ present, absent });
   };
 
+  // ================= FILTERS =================
   const handleFilterChange = (e) => {
     setFilters({
       ...filters,
@@ -95,6 +92,7 @@ const Attendencereport = () => {
     ) {
       return false;
     }
+
     if (
       filters.className &&
       !(item.className || `${item.class}-${item.section}`).includes(
@@ -103,6 +101,7 @@ const Attendencereport = () => {
     ) {
       return false;
     }
+
     return true;
   });
 
@@ -122,9 +121,6 @@ const Attendencereport = () => {
       {error && (
         <div className="error-message">
           {error}
-          <button className="retry-btn" onClick={fetchAttendanceData}>
-            Retry
-          </button>
         </div>
       )}
 
@@ -205,7 +201,9 @@ const Attendencereport = () => {
                   <td>{row.className || `${row.class}-${row.section}`}</td>
                   <td
                     className={
-                      row.status === "Present" ? "present-text" : "absent-text"
+                      row.status === "Present"
+                        ? "present-text"
+                        : "absent-text"
                     }
                   >
                     {row.status}

@@ -1,101 +1,145 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/Attendance.css";
 
-const Attendance = () => {
+const TeacherMarkAttendance = () => {
+  const teacherId = localStorage.getItem("userId");
+
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
   const [recentAttendance, setRecentAttendance] = useState([]);
 
-  // Fetch students and recent attendance
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  /* ================= FETCH CLASSES ================= */
   useEffect(() => {
-    fetchData();
+    const fetchClasses = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/teachers/${teacherId}/classes`
+        );
+        if (!res.ok) throw new Error("Failed to fetch classes");
+        const data = await res.json();
+        setClasses(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchClasses();
+  }, [teacherId]);
+
+  /* ================= FETCH RECENT ATTENDANCE ================= */
+  useEffect(() => {
+    const fetchRecentAttendance = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:8080/api/attendance/today"
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setRecentAttendance(data);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchRecentAttendance();
   }, []);
 
-  const fetchData = async () => {
+  /* ================= FETCH STUDENTS BY CLASS ================= */
+  const fetchStudentsByClass = async (classId) => {
+    if (!classId) {
+      setStudents([]);
+      return;
+    }
+
     try {
       setLoading(true);
+      setAttendance({});
       setError("");
 
-      // Fetch students
-      const studentsRes = await fetch(
-        `http://localhost:8080/api/teachers/${localStorage.getItem(
-          "userId"
-        )}/students`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+      const res = await fetch(
+        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`
       );
 
-      if (!studentsRes.ok) throw new Error("Failed to fetch students");
-
-      const studentsData = await studentsRes.json();
-      setStudents(studentsData);
-
-      // Fetch recent attendance
-      const attendanceRes = await fetch(
-        `http://localhost:8080/api/teachers/${localStorage.getItem(
-          "userId"
-        )}/attendance`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (attendanceRes.ok) {
-        const attendanceData = await attendanceRes.json();
-        setRecentAttendance(attendanceData.slice(0, 5)); // Last 5 records
+      if (res.status === 204) {
+        setStudents([]);
+        return;
       }
+
+      if (!res.ok) throw new Error("Failed to fetch students");
+
+      const data = await res.json();
+      setStudents(data);
     } catch (err) {
       setError(err.message);
+      setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (studentId, status) => {
-    setAttendance({ ...attendance, [studentId]: status });
+  /* ================= CLASS CHANGE ================= */
+  const handleClassChange = (e) => {
+    const classId = e.target.value;
+    setSelectedClassId(classId);
+    fetchStudentsByClass(classId);
   };
 
+  /* ================= ATTENDANCE CHANGE ================= */
+  const handleAttendanceChange = (studentId, status) => {
+    setAttendance((prev) => ({
+      ...prev,
+      [studentId]: status,
+    }));
+  };
+
+  /* ================= SAVE ATTENDANCE ================= */
   const handleSaveAttendance = async () => {
     try {
+      if (!selectedClassId) {
+        setError("Please select a class");
+        return;
+      }
+
+      if (Object.keys(attendance).length === 0) {
+        setError("Please mark attendance before saving");
+        return;
+      }
+
       setSaving(true);
       setError("");
 
-      const teacherId = localStorage.getItem("userId");
-
-      const attendanceData = Object.entries(attendance).map(
+      const payload = Object.entries(attendance).map(
         ([studentId, status]) => ({
-          studentId: parseInt(studentId, 10),
+          userId: Number(studentId),
+          classId: Number(selectedClassId),
           status,
-          date: new Date().toISOString().split("T")[0], // YYYY-MM-DD
-          teacherId,
+          date: new Date().toISOString().split("T")[0],
         })
       );
 
-      const response = await fetch("http://localhost:8080/api/teachers/mark", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(attendanceData),
-      });
+      const res = await fetch(
+        "http://localhost:8080/api/attendance/mark",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Non-OK response body:", text);
-        throw new Error("Failed to save attendance");
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || "Attendance save failed");
       }
 
       alert("Attendance saved successfully ✅");
-      setAttendance({}); // Reset form
-      fetchData(); // Refresh recent attendance
+      setAttendance({});
     } catch (err) {
       setError(err.message);
     } finally {
@@ -103,32 +147,31 @@ const Attendance = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="attendance-container">
-        <h2 className="page-title">Mark & View Attendance</h2>
-        <div className="loading">Loading attendance data...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="attendance-container">
-      <h2 className="page-title">Mark & View Attendance</h2>
+      <h2 className="page-title">Mark Attendance</h2>
 
-      {error && (
-        <div className="error-message">
-          {error}
-          <button className="retry-btn" onClick={fetchData}>
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
-      {/* MARK ATTENDANCE */}
+      {/* ============ CLASS DROPDOWN ============ */}
+      <div className="filter-row">
+        <select value={selectedClassId} onChange={handleClassChange}>
+          <option value="">Select Class</option>
+          {classes.map((cls) => (
+            <option key={cls.classId} value={cls.classId}>
+              {cls.className}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* ============ MARK ATTENDANCE TABLE ============ */}
       <div className="attendance-card">
-        <h3>Mark Attendance (Today)</h3>
-        <div className="table-wrapper">
+        <h3>Students Attendance</h3>
+
+        {loading ? (
+          <p>Loading students...</p>
+        ) : (
           <table className="attendance-table">
             <thead>
               <tr>
@@ -138,82 +181,90 @@ const Attendance = () => {
               </tr>
             </thead>
             <tbody>
-              {students.map((stu, index) => (
-                <tr key={stu.id}>
-                  <td>{index + 1}</td>
-                  <td>{stu.name || stu.studentName}</td>
-                  <td className="radio-cell">
-                    <label className="radio-label">
-                      <input
-                        type="radio"
-                        name={`attendance-${stu.id}`}
-                        value="Present"
-                        checked={attendance[stu.id] === "Present"}
-                        onChange={() => handleChange(stu.id, "Present")}
-                      />
-                      Present
-                    </label>
-                    <label className="radio-label">
-                      <input
-                        type="radio"
-                        name={`attendance-${stu.id}`}
-                        value="Absent"
-                        checked={attendance[stu.id] === "Absent"}
-                        onChange={() => handleChange(stu.id, "Absent")}
-                      />
-                      Absent
-                    </label>
-                  </td>
+              {students.length === 0 ? (
+                <tr>
+                  <td colSpan="3">No students found</td>
                 </tr>
-              ))}
+              ) : (
+                students.map((stu, index) => (
+                  <tr key={stu.userId}>
+                    <td>{index + 1}</td>
+                    <td>{stu.name}</td>
+                    <td>
+                      <label>
+                        <input
+                          type="radio"
+                          name={`attendance-${stu.userId}`}
+                          checked={attendance[stu.userId] === "Present"}
+                          onChange={() =>
+                            handleAttendanceChange(stu.userId, "Present")
+                          }
+                        />
+                        Present
+                      </label>
+
+                      <label style={{ marginLeft: "15px" }}>
+                        <input
+                          type="radio"
+                          name={`attendance-${stu.userId}`}
+                          checked={attendance[stu.userId] === "Absent"}
+                          onChange={() =>
+                            handleAttendanceChange(stu.userId, "Absent")
+                          }
+                        />
+                        Absent
+                      </label>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-        </div>
+        )}
+
         <button
           className="save-btn"
           onClick={handleSaveAttendance}
-          disabled={saving || Object.keys(attendance).length === 0}
+          disabled={saving || students.length === 0}
         >
           {saving ? "Saving..." : "Save Attendance"}
         </button>
       </div>
 
-      {/* VIEW RECENT ATTENDANCE */}
+      {/* ============ RECENT ATTENDANCE TABLE ============ */}
       <div className="attendance-card">
         <h3>Recent Attendance</h3>
-        <div className="table-wrapper">
-          <table className="attendance-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Student</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentAttendance.length > 0 ? (
-                recentAttendance.map((record, index) => (
-                  <tr key={index}>
-                    <td>{new Date(record.date).toLocaleDateString()}</td>
-                    <td>{record.studentName}</td>
-                    <td className={record.status.toLowerCase()}>
-                      {record.status}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="3" className="no-data">
-                    No attendance records yet
-                  </td>
+
+        <table className="attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {recentAttendance.length > 0 ? (
+              recentAttendance.map((rec, index) => (
+                <tr key={index}>
+                  <td>{new Date(rec.date).toLocaleDateString()}</td>
+                  <td>{rec.studentName}</td>
+                  <td>{rec.className}</td>
+                  <td>{rec.status}</td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4">No attendance records found</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
 };
 
-export default Attendance;
+export default TeacherMarkAttendance;

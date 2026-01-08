@@ -49,3 +49,14 @@
 .view-btn:hover {
   background-color: #125aa0;
 }
+
+.assigned-class {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin: 10px 0 15px;
+  font-size: 15px;
+  font-weight: 500;
+}
+

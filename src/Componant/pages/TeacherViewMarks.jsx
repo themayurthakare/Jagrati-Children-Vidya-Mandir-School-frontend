@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/ViewMarks.css";
 
 export default function ViewMarks() {
@@ -9,7 +10,8 @@ export default function ViewMarks() {
   const [examFilter, setExamFilter] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // Fetch marks data from API
+  const navigate = useNavigate();
+
   useEffect(() => {
     fetchMarksData();
   }, []);
@@ -19,31 +21,29 @@ export default function ViewMarks() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        "http://localhost:8080/api/teachers/marks/all",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch("http://localhost:8080/api/marks");
+      if (!response.ok) throw new Error("Failed to fetch marks data");
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Non-OK response body:", text);
-        throw new Error("Failed to fetch marks data");
-      }
+      const data = await response.json();
 
-      const contentType = response.headers.get("content-type") || "";
-      if (!contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("Expected JSON, got:", text);
-        throw new Error("Server did not return JSON");
-      }
+      const formatted = data.map((m, index) => {
+        const percentage =
+          m.percentage ??
+          (m.totalMarks && m.maxMarks
+            ? Math.round((m.totalMarks / m.maxMarks) * 100)
+            : 0);
 
-      const marksData = await response.json();
-      setStudents(marksData);
+        return {
+          id: m.id,
+          name: m.studentName || m.userName || "N/A",
+          className: m.className || "N/A",
+          exam: m.examType || "N/A",
+          percentage,
+          remarks: percentage >= 40 ? "Pass" : "Fail",
+        };
+      });
+
+      setStudents(formatted);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -51,161 +51,101 @@ export default function ViewMarks() {
     }
   };
 
-  // Filtered data
   const filteredStudents = students.filter(
     (s) =>
-      (classFilter === "" || s.class === classFilter) &&
+      (classFilter === "" || s.className === classFilter) &&
       (examFilter === "" || s.exam === examFilter)
   );
 
-  const getUniqueClasses = () => {
-    const classes = [...new Set(students.map((s) => s.class))];
-    return classes.sort();
-  };
-
-  const getUniqueExams = () => {
-    const exams = [...new Set(students.map((s) => s.exam))];
-    return exams.sort();
-  };
+  const classes = [...new Set(students.map((s) => s.className))];
+  const exams = [...new Set(students.map((s) => s.exam))];
 
   if (loading) {
-    return (
-      <div className="view-container">
-        <h2 className="view-title">View Marks</h2>
-        <div className="loading">Loading marks data...</div>
-      </div>
-    );
+    return <div className="loading">Loading marks data...</div>;
   }
 
   return (
     <div className="view-container">
       <h2 className="view-title">View Marks</h2>
 
-      {error && (
-        <div className="error-message">
-          {error}
-          <button className="retry-btn" onClick={fetchMarksData}>
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {/* FILTERS */}
       <div className="filter-row">
-        <select
-          value={classFilter}
-          onChange={(e) => setClassFilter(e.target.value)}
-        >
+        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
           <option value="">All Classes</option>
-          {getUniqueClasses().map((cls) => (
-            <option key={cls} value={cls}>
-              {cls}
-            </option>
+          {classes.map((cls) => (
+            <option key={cls} value={cls}>{cls}</option>
           ))}
         </select>
 
-        <select
-          value={examFilter}
-          onChange={(e) => setExamFilter(e.target.value)}
-        >
+        <select value={examFilter} onChange={(e) => setExamFilter(e.target.value)}>
           <option value="">All Exams</option>
-          {getUniqueExams().map((exam) => (
-            <option key={exam} value={exam}>
-              {exam}
-            </option>
+          {exams.map((exam) => (
+            <option key={exam} value={exam}>{exam}</option>
           ))}
         </select>
       </div>
 
       {/* TABLE */}
-      <div className="table-wrapper">
-        <table className="view-table">
-          <thead>
-            <tr>
-              <th>Sr. No</th>
-              <th>Student Name</th>
-              <th>Class</th>
-              <th>Exam</th>
-              <th>Percentage</th>
-              <th>Remarks</th>
-              <th>Actions</th>
+      <table className="view-table">
+        <thead>
+          <tr>
+            <th>Sr. No</th>
+            <th>Student Name</th>
+            <th>Class</th>
+            <th>Exam</th>
+            <th>Percentage</th>
+            <th>Remarks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredStudents.map((s, i) => (
+            <tr key={s.id}>
+              <td>{i + 1}</td>
+              <td>{s.name}</td>
+              <td>{s.className}</td>
+              <td>{s.exam}</td>
+              <td>{s.percentage}%</td>
+              <td className={s.percentage >= 40 ? "pass" : "fail"}>
+                {s.remarks}
+              </td>
+              <td className="action-cell">
+                <button
+                  className="report-btn"
+                  onClick={() => setSelectedStudent(s)}
+                >
+                  View
+                </button>
+
+                <button
+                  className="edit-btn"
+                  onClick={() => navigate(`/teacherdashboard/edit-marks/${s.id}`)}
+                >
+                  Edit
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((s, i) => (
-              <tr key={s.id}>
-                <td>{i + 1}</td>
-                <td>{s.name || s.studentName}</td>
-                <td>{s.class || `${s.className} - ${s.section}`}</td>
-                <td>{s.exam}</td>
-                <td>{s.percentage}%</td>
-                <td className={s.remarks === "Pass" ? "pass" : "fail"}>
-                  {s.remarks || (s.percentage >= 40 ? "Pass" : "Fail")}
-                </td>
-                <td>
-                  <button
-                    className="report-btn"
-                    onClick={() => setSelectedStudent(s)}
-                  >
-                    View Details
-                  </button>
-                </td>
-              </tr>
-            ))}
+          ))}
 
-            {filteredStudents.length === 0 && (
-              <tr>
-                <td colSpan="7" className="no-data">
-                  No records found for selected filters
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          {filteredStudents.length === 0 && (
+            <tr>
+              <td colSpan="7" className="no-data">No records found</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
 
-      {/* SIMPLE REPORT CARD MODAL */}
+      {/* MODAL (unchanged) */}
       {selectedStudent && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedStudent(null)}
-        >
+        <div className="modal-overlay" onClick={() => setSelectedStudent(null)}>
           <div className="report-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>{selectedStudent.name}</h3>
-              <button
-                className="close-btn"
-                onClick={() => setSelectedStudent(null)}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="report-content">
-              <p>
-                <strong>Class:</strong> {selectedStudent.class}
-              </p>
-              <p>
-                <strong>Exam:</strong> {selectedStudent.exam}
-              </p>
-              <p>
-                <strong>Percentage:</strong> {selectedStudent.percentage}%
-              </p>
-              <p
-                className={`remarks ${
-                  selectedStudent.remarks?.toLowerCase() ||
-                  (selectedStudent.percentage >= 40 ? "pass" : "fail")
-                }`}
-              >
-                <strong>Remarks:</strong>{" "}
-                {selectedStudent.remarks ||
-                  (selectedStudent.percentage >= 40 ? "Pass" : "Fail")}
-              </p>
-            </div>
-
-            <button className="print-btn" onClick={() => window.print()}>
-              Print Report Card
-            </button>
+            <h3>{selectedStudent.name}</h3>
+            <p>Class: {selectedStudent.className}</p>
+            <p>Exam: {selectedStudent.exam}</p>
+            <p>Percentage: {selectedStudent.percentage}%</p>
+            <button onClick={() => setSelectedStudent(null)}>Close</button>
           </div>
         </div>
       )}
