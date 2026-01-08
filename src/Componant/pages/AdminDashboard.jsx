@@ -45,6 +45,8 @@ import AdminViewTeacherDetails from "./AdminViewTeacherDetails";
 import AdminUpdateTeacher from "./AdminUpdateTeacher";
 import TransactionReport from "./TransactionReport";
 import StudentExcelExport from "./StudentExcelExport";
+import AdminGenerateTC from "./AdminGenerateTC";
+import ViewTCStudents from "./ViewTCStudents";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -156,8 +158,17 @@ const Sidebar = () => {
         >
           <FaFileUpload /> <span>Export Student Excel</span>
         </NavLink>
-      </nav>
 
+        <NavLink
+          to="/admindashboard/tc-students"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <FaFileUpload /> <span>TC Students</span>
+        </NavLink>
+      </nav>
+          
       <div className="sidebar-footer">
         Logged in as <strong>Admin</strong>
       </div>
@@ -222,6 +233,7 @@ const AdminDashboard = () => {
               path="view-students"
               element={<ViewStudents students={students} />}
             />
+            <Route path="tc-students" element={<ViewTCStudents />} />
             <Route
               path="view-teachers"
               element={
@@ -266,6 +278,8 @@ const AdminDashboard = () => {
               element={<AdminStudentIdClass />}
             />
             <Route path="generate-admit-cards" element={<AdminPrintIdCard />} />
+            <Route path="generate-tc" element={<AdminGenerateTC />} />
+
             <Route
               path="/generate-id-cards/print"
               element={<AdminIdCardPrint />}

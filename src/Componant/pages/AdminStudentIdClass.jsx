@@ -116,7 +116,7 @@ const AdminStudentIdClass = () => {
                       </button>
 
                       <button
-                        className="admit-btn"
+                        className="admit-btn1"
                         onClick={() =>
                           navigate("/admindashboard/generate-admit-cards", {
                             state: {
@@ -127,6 +127,20 @@ const AdminStudentIdClass = () => {
                         }
                       >
                         Generate Admit Card
+                      </button>
+
+                      <button
+                        className="tc-btn"
+                        onClick={() =>
+                          navigate("/admindashboard/generate-admit-cards", {
+                            state: {
+                              classId: c.classId || c.id,
+                              className: c.className,
+                            },
+                          })
+                        }
+                      >
+                        Generate TC
                       </button>
                     </div>
                   </td>

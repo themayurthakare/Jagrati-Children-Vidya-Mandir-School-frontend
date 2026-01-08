@@ -259,6 +259,19 @@ const AdminPrintIdCard = () => {
                       >
                         Download Admit Card
                       </button>
+                      <button
+                        className="tc-btn"
+                        onClick={() =>
+                          navigate("/admindashboard/generate-tc", {
+                            state: {
+                              studentId: student.userId,
+                              className,
+                            },
+                          })
+                        }
+                      >
+                        Generate TC
+                      </button>
                     </div>
                   </td>
                 </tr>

@@ -16,7 +16,7 @@ import TeacherMarkAttendance from "./TeacherMarkAttendance";
 import TeacherViewAttendanceReport from "./TeacherViewAttendanceReport";
 import TeacherAddMarks from "./TeacherAddMarks";
 import TeacherViewMarks from "./TeacherViewMarks";
-import EditMarks from "./EditMarks";
+// import EditMarks from "./EditMarks";
 
 /* -------------------- Sidebar -------------------- */
 const TeacherSidebar = () => {
@@ -76,30 +76,18 @@ const TeacherDashboard = () => {
             element={<TeacherViewEnrolledStudents />}
           />
 
-          <Route
-            path="attendance"
-            element={<TeacherMarkAttendance />}
-          />
+          <Route path="attendance" element={<TeacherMarkAttendance />} />
 
           <Route
             path="attendance-report"
             element={<TeacherViewAttendanceReport />}
           />
 
-          <Route
-            path="add-marks"
-            element={<TeacherAddMarks />}
-          />
+          <Route path="add-marks" element={<TeacherAddMarks />} />
 
-          <Route
-            path="view-marks"
-            element={<TeacherViewMarks />}
-          />
+          <Route path="view-marks" element={<TeacherViewMarks />} />
 
-          <Route
-            path="edit-marks/:marksId"
-            element={<EditMarks />}
-          />
+          {/* <Route path="edit-marks/:marksId" element={<EditMarks />} /> */}
 
           {/* Default route */}
           <Route

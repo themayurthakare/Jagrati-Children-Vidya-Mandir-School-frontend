@@ -166,7 +166,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 15px;
+    gap: 13px;
     flex-wrap: wrap;
 }
 
@@ -181,7 +181,7 @@
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
-    min-width: 160px;
+    min-width: 100px;
 }
 
 .idcard1-btn:hover {
@@ -189,7 +189,7 @@
 }
 
 /* Admit Card Button */
-.admit-btn {
+.admit-btn1 {
     background: #28a745;
     color: white;
     border: none;
@@ -199,10 +199,10 @@
     font-size: 14px;
     font-weight: 500;
     transition: all 0.3s ease;
-    min-width: 160px;
+    min-width: 100px;
 }
 
-.admit-btn:hover {
+.admit-btn1:hover {
     background: #218838;
 }
 
@@ -255,7 +255,7 @@
     }
 
     .idcard1-btn,
-    .admit-btn {
+    .admit-btn1 {
         width: 100%;
         max-width: 250px;
         min-width: unset;
@@ -278,4 +278,22 @@
     .loading-state {
         padding: 50px 15px;
     }
+}
+
+.tc-btn {
+
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 160px;
+}
+
+.tc-btn:hover {
+    background-color: #4a148c;
 }

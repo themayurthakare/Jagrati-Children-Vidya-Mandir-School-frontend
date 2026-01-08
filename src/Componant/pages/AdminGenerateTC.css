@@ -1,0 +1,333 @@
+/* AdminGenerateTC.css - EXACT COPY from AdminPrintStudentDetails.css */
+
+/* =====================================================
+   GLOBAL - IDENTICAL
+===================================================== */
+.ps-page {
+    padding: 20px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* header (controls) - IDENTICAL */
+.ps-header {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.ps-header h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.5em;
+    flex-grow: 1;
+}
+
+.ps-back {
+    padding: 8px 16px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.ps-back:hover {
+    background: #7f8c8d;
+}
+
+.ps-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.ps-print {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    background: #2ecc71;
+    color: white;
+}
+
+.ps-print:hover:not(:disabled) {
+    background: #27ae60;
+}
+
+/* states - IDENTICAL */
+.ps-loading,
+.ps-error {
+    background: white;
+    padding: 40px;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 1.1em;
+}
+
+.ps-loading {
+    color: #3498db;
+}
+
+.ps-error {
+    color: #e74c3c;
+    background: #fdf2f2;
+    border-left: 4px solid #e74c3c;
+}
+
+/* printable sheet – IDENTICAL */
+.ps-sheet {
+    background: white;
+    padding: 10px 20px;
+    margin: 0 auto 20px;
+    border: 2px solid #000;
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+/* ===== top header box - IDENTICAL ===== */
+.admission-header {
+    display: flex;
+    border-bottom: 3px solid #1e88e5;
+    padding: 10px 10px 8px;
+}
+
+.admission-logo {
+    width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.admission-title-block {
+    flex: 1;
+    text-align: center;
+}
+
+.admission-school-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.admission-school-address {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.admission-recognized {
+    font-size: 10px;
+    margin-top: 2px;
+    font-style: italic;
+}
+
+.admission-meta-box {
+    margin-top: 6px;
+    border: 1px solid #000;
+    padding: 6px 8px;
+    font-size: 11px;
+    display: inline-block;
+    text-align: left;
+}
+
+.meta-row {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+.meta-label {
+    min-width: 80px;
+    font-weight: 600;
+}
+
+.meta-value {
+    min-width: 90px;
+    border-bottom: 1px solid #000;
+    padding: 0 4px;
+}
+
+.admission-photo-box {
+    width: 130px;
+    height: 140px;
+    border: 1px solid #000;
+    margin-left: 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-photo-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+/* ===== title line - IDENTICAL but TC ===== */
+.admission-form-title {
+    text-align: center;
+    margin-top: 4px;
+    margin-bottom: 2px;
+    color: #c0392b;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.admission-form-title::after {
+    content: "";
+    display: block;
+    margin-top: 4px;
+    border-bottom: 3px solid #1e88e5;
+}
+
+/* ===== body - IDENTICAL ===== */
+.admission-body {
+    padding: 14px 18px 18px;
+    font-size: 16px;
+    min-height: 700px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 14px;
+}
+
+.ad-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    line-height: 1.6;
+}
+
+.ad-label {
+    font-weight: 600;
+    margin-right: 6px;
+}
+
+.ad-label.small {
+    font-size: 13px;
+}
+
+.ad-underline {
+    border-bottom: 1px solid #000;
+    min-height: 20px;
+    padding: 0 2px;
+    margin-right: 8px;
+}
+
+.ad-underline.long {
+    flex: 1;
+}
+
+.ad-underline.small {
+    width: 110px;
+}
+
+.dob-boxes {
+    display: inline-flex;
+    gap: 7px;
+    margin-right: 10px;
+}
+
+.dob-box {
+    width: 40px;
+    height: 25px;
+    border: 1px solid #000;
+}
+
+/* TC SPECIFIC */
+.tc-declaration {
+    margin-top: 30px;
+    padding: 15px;
+    border: 1px solid #000;
+    background: #f9f9f9;
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.ad-sign-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 70px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* PRINT - IDENTICAL */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #print-area,
+    #print-area * {
+        visibility: visible;
+    }
+
+    #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+        background: white;
+    }
+
+    .ps-header {
+        display: none !important;
+    }
+
+    @page {
+        margin: 0.5in;
+        size: A4 portrait;
+    }
+
+    .ps-sheet {
+        padding: 10px 20px;
+        border: 2px solid #000;
+        box-sizing: border-box;
+        page-break-inside: avoid;
+    }
+}
+
+/* RESPONSIVE - IDENTICAL */
+@media screen and (max-width: 768px) {
+    .ps-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ps-actions {
+        flex-direction: column;
+    }
+
+    .admission-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .admission-photo-box {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}
