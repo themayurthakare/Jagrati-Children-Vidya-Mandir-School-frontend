@@ -16,7 +16,7 @@ import TeacherMarkAttendance from "./TeacherMarkAttendance";
 import TeacherViewAttendanceReport from "./TeacherViewAttendanceReport";
 import TeacherAddMarks from "./TeacherAddMarks";
 import TeacherViewMarks from "./TeacherViewMarks";
-// import EditMarks from "./EditMarks";
+import EditMarks from "./EditMarks";
 
 /* -------------------- Sidebar -------------------- */
 const TeacherSidebar = () => {
