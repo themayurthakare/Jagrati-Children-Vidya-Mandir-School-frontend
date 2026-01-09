@@ -75,7 +75,7 @@ const ViewTCStudents = () => {
   return (
     <div className="vs-container">
       <div className="vs-header">
-        <h2 className="vs-title">TC Students</h2>
+        <h2 className="vs-title">TC Issued Students</h2>
 
         {/* SEARCH BAR */}
         <div className="vs-search-bar">
