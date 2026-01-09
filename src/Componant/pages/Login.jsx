@@ -84,7 +84,7 @@ const Login = () => {
       }
       // ---------- Computer operator ----------
       response = await fetch(
-        "http://localhost:8080/api/computeroperator/login",
+        "http://localhost:8080/api/computer-operators/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
