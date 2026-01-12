@@ -26,22 +26,21 @@ export default function ViewMarks() {
 
       const data = await response.json();
 
-      const formatted = data.map((m, index) => {
-        const percentage =
-          m.percentage ??
-          (m.totalMarks && m.maxMarks
-            ? Math.round((m.totalMarks / m.maxMarks) * 100)
-            : 0);
+      const formatted = data.map((m) => {
+  const percentage = m.percentage ?? 0;
 
-        return {
-          id: m.id,
-          name: m.studentName || m.userName || "N/A",
-          className: m.className || "N/A",
-          exam: m.examType || "N/A",
-          percentage,
-          remarks: percentage >= 40 ? "Pass" : "Fail",
-        };
-      });
+  return {
+    marksId: m.marksId,        // 🔥 MUST
+    name: m.studentName,
+    className: m.className,
+    exam: m.examType,
+    percentage,
+    remarks: percentage >= 35 ? "Pass" : "Fail",
+  };
+});
+
+setStudents(formatted); // ❗ ensure yahi array render ho
+
 
       setStudents(formatted);
     } catch (err) {
@@ -101,30 +100,38 @@ export default function ViewMarks() {
           </tr>
         </thead>
         <tbody>
-          {filteredStudents.map((s, i) => (
-            <tr key={s.id}>
-              <td>{i + 1}</td>
-              <td>{s.name}</td>
-              <td>{s.className}</td>
-              <td>{s.exam}</td>
-              <td>{s.percentage}%</td>
-              <td className={s.percentage >= 40 ? "pass" : "fail"}>
-                {s.remarks}
-              </td>
-              <td className="action-cell">
-                <button
-                  className="report-btn"
-                  onClick={() => setSelectedStudent(s)}
-                >
+  {students.map((s, i) => (
+    <tr key={s.marksId}>
+      <td>{i + 1}</td>
+      <td>{s.name}</td>
+      <td>{s.className}</td>
+      <td>{s.exam}</td>
+      <td>{s.percentage}%</td>
+      <td>{s.remarks}</td>
+      <td>
+        <button
+          className="edit-btn"
+          onClick={() => {
+            console.log("EDIT MARKS ID:", s.marksId);
+            navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
+          }}
+        >
                   View
                 </button>
 
                 <button
-                  className="edit-btn"
-                  onClick={() => navigate(`/teacherdashboard/edit-marks/${s.id}`)}
-                >
-                  Edit
-                </button>
+  className="edit-btn"
+  onClick={() => {
+    console.log("EDIT MARKS ID:", s.marksId);
+    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
+  }}
+>
+  Edit
+</button>
+
+
+
+
               </td>
             </tr>
           ))}
