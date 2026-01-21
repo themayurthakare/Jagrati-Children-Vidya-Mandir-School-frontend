@@ -34,7 +34,7 @@ const COPrintIdCard = () => {
         setError("");
 
         const response = await fetch(
-          `http://localhost:8080/api/classes/${sessionId}/${classId}/students`
+          `http://localhost:8080/api/classes/${sessionId}/${classId}/students`,
         );
 
         if (response.ok) {
@@ -45,11 +45,11 @@ const COPrintIdCard = () => {
         } else {
           // fallback: fetch all students
           const allRes = await fetch(
-            `http://localhost:8080/api/users/${sessionId}/getAll`
+            `http://localhost:8080/api/users/${sessionId}/getAll`,
           );
           const allStudents = await allRes.json();
           const filtered = allStudents.filter(
-            (s) => s.studentClassId === classId
+            (s) => s.studentClassId === classId,
           );
           setStudents(filtered);
           setFilteredStudents(filtered);
@@ -73,7 +73,7 @@ const COPrintIdCard = () => {
     } else {
       const term = searchTerm.toLowerCase();
       setFilteredStudents(
-        students.filter((s) => s.name && s.name.toLowerCase().includes(term))
+        students.filter((s) => s.name && s.name.toLowerCase().includes(term)),
       );
     }
   }, [searchTerm, students]);
@@ -241,7 +241,7 @@ const COPrintIdCard = () => {
                                 className,
                                 studentName: student.name,
                               },
-                            }
+                            },
                           )
                         }
                       >
@@ -261,6 +261,19 @@ const COPrintIdCard = () => {
                         }
                       >
                         Download Admit Card
+                      </button>
+                      <button
+                        className="tc-btn"
+                        onClick={() =>
+                          navigate("/computeroperator/generate-tc", {
+                            state: {
+                              studentId: student.userId,
+                              className,
+                            },
+                          })
+                        }
+                      >
+                        Generate TC
                       </button>
                     </div>
                   </td>

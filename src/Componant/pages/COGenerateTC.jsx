@@ -4,7 +4,7 @@ import "./AdminGenerateTC.css";
 import logo from "../../media/logo.jpeg";
 import { SessionContext } from "./SessionContext";
 
-const AdminGenerateTC = ({ apiBase = "http://localhost:8080" }) => {
+const COGenerateTC = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -126,7 +126,7 @@ const AdminGenerateTC = ({ apiBase = "http://localhost:8080" }) => {
       if (!res.ok) throw new Error();
 
       window.print();
-      setTimeout(() => navigate("/admindashboard/tc-students"), 1000);
+      setTimeout(() => navigate("/computeroperator/tc-students"), 1000);
     } catch {
       alert("Failed to generate TC");
     }
@@ -359,4 +359,4 @@ const AdminGenerateTC = ({ apiBase = "http://localhost:8080" }) => {
   );
 };
 
-export default AdminGenerateTC;
+export default COGenerateTC;

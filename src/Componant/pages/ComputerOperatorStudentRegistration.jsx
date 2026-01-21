@@ -63,7 +63,7 @@ const ComputerOperatorStudentRegistration = ({
           arr.map((c) => ({
             id: c.classId,
             name: c.className,
-          }))
+          })),
         );
       })
       .catch(() => setClasses([]));
@@ -73,32 +73,36 @@ const ComputerOperatorStudentRegistration = ({
   const validate = () => {
     const e = {};
 
-    if (!form.name.trim()) e.name = "Name is required";
-
-    if (!form.admissionNo.trim()) e.admissionNo = "Admission No is required";
-
-    if (!form.admissionDate) e.admissionDate = "Admission date is required";
-
-    if (!form.password || form.password.length < 6)
+    // Required fields (matching UI * marks)
+    if (!form.name?.trim()) e.name = "Name is required";
+    if (!form.admissionNo?.trim()) e.admissionNo = "Admission No is required";
+    if (!form.admissionDate) e.admissionDate = "Admission Date is required";
+    if (!form.password) e.password = "Password is required";
+    else if (form.password.length < 6)
       e.password = "Password must be at least 6 characters";
-
-    if (!form.studentClassId) e.studentClassId = "Please select a class";
-
+    if (!form.address?.trim()) e.address = "Address is required";
     if (!form.gender) e.gender = "Please select gender";
-
-    if (!form.studentPhone.trim()) e.studentPhone = "Student phone is required";
-    else if (!/^\d{10}$/.test(form.studentPhone))
-      e.studentPhone = "Enter valid 10-digit phone number";
-
-    if (!form.parentPhone.trim()) e.parentPhone = "Parent phone is required";
-    else if (!/^\d{10}$/.test(form.parentPhone))
-      e.parentPhone = "Enter valid 10-digit phone number";
-
-    if (!form.address.trim()) e.address = "Address is required";
-
     if (!form.rte) e.rte = "Please select RTE option";
-
+    if (!form.studentClassId) e.studentClassId = "Please select a class";
     if (!sessionId) e.session = "Please select academic session";
+
+    // Optional but validated if present
+    if (form.studentPhone && !/^\d{10}$/.test(form.studentPhone))
+      e.studentPhone = "Student phone must be 10 digits";
+    if (form.parentPhone && !/^\d{10}$/.test(form.parentPhone))
+      e.parentPhone = "Parent phone must be 10 digits";
+    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email))
+      e.email = "Invalid email format";
+    if (form.studentAadharNo && !/^\d{12}$/.test(form.studentAadharNo))
+      e.studentAadharNo = "Student Aadhar must be 12 digits";
+    if (form.parentAadharNo && !/^\d{12}$/.test(form.parentAadharNo))
+      e.parentAadharNo = "Parent Aadhar must be 12 digits";
+    if (
+      form.panNo &&
+      !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(form.panNo.toUpperCase())
+    ) {
+      e.panNo = "Invalid PAN format (ABCDE1234F)";
+    }
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -107,6 +111,7 @@ const ComputerOperatorStudentRegistration = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
+    // Clear error when user starts typing
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
@@ -115,7 +120,10 @@ const ComputerOperatorStudentRegistration = ({
     e.preventDefault();
 
     if (!validate()) {
-      window.alert("Please fix the errors highlighted in the form.");
+      // Show first specific error instead of generic message
+      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorMsg = errors[firstErrorField];
+      window.alert(firstErrorMsg || "Please fix the form errors.");
       return;
     }
 
@@ -146,7 +154,9 @@ const ComputerOperatorStudentRegistration = ({
         setForm(initialForm);
         if (onAddStudent) onAddStudent(saved || payload);
       } else {
-        window.alert(saved?.message || "Registration failed");
+        // Show specific backend message (e.g. duplicate email, admission no, etc.)
+        const msg = saved?.message || "Registration failed";
+        window.alert(msg);
       }
     } catch (err) {
       window.alert("Network error: " + err.message);
@@ -168,7 +178,12 @@ const ComputerOperatorStudentRegistration = ({
         <form className="sr-form" onSubmit={handleSubmit}>
           <label>
             Full Name *
-            <input name="name" value={form.name} onChange={handleChange} />
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              className={errors.name ? "error" : ""}
+            />
             {errors.name && (
               <small className="field-error">{errors.name}</small>
             )}
@@ -180,6 +195,7 @@ const ComputerOperatorStudentRegistration = ({
               name="admissionNo"
               value={form.admissionNo}
               onChange={handleChange}
+              className={errors.admissionNo ? "error" : ""}
             />
             {errors.admissionNo && (
               <small className="field-error">{errors.admissionNo}</small>
@@ -193,6 +209,7 @@ const ComputerOperatorStudentRegistration = ({
               name="admissionDate"
               value={form.admissionDate}
               onChange={handleChange}
+              className={errors.admissionDate ? "error" : ""}
             />
             {errors.admissionDate && (
               <small className="field-error">{errors.admissionDate}</small>
@@ -207,6 +224,7 @@ const ComputerOperatorStudentRegistration = ({
                 name="password"
                 value={form.password}
                 onChange={handleChange}
+                className={errors.password ? "error" : ""}
               />
               <button
                 type="button"
@@ -255,6 +273,7 @@ const ComputerOperatorStudentRegistration = ({
               name="studentPhone"
               value={form.studentPhone}
               onChange={handleChange}
+              className={errors.studentPhone ? "error" : ""}
             />
             {errors.studentPhone && (
               <small className="field-error">{errors.studentPhone}</small>
@@ -263,15 +282,24 @@ const ComputerOperatorStudentRegistration = ({
 
           <label>
             Email
-            <input name="email" value={form.email} onChange={handleChange} />
+            <input
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              className={errors.email ? "error" : ""}
+            />
+            {errors.email && (
+              <small className="field-error">{errors.email}</small>
+            )}
           </label>
 
           <label>
-            Parent Phone *
+            Parent Phone
             <input
               name="parentPhone"
               value={form.parentPhone}
               onChange={handleChange}
+              className={errors.parentPhone ? "error" : ""}
             />
             {errors.parentPhone && (
               <small className="field-error">{errors.parentPhone}</small>
@@ -284,6 +312,7 @@ const ComputerOperatorStudentRegistration = ({
               name="address"
               value={form.address}
               onChange={handleChange}
+              className={errors.address ? "error" : ""}
             />
             {errors.address && (
               <small className="field-error">{errors.address}</small>
@@ -292,7 +321,12 @@ const ComputerOperatorStudentRegistration = ({
 
           <label>
             Gender *
-            <select name="gender" value={form.gender} onChange={handleChange}>
+            <select
+              name="gender"
+              value={form.gender}
+              onChange={handleChange}
+              className={errors.gender ? "error" : ""}
+            >
               <option value="">Select</option>
               <option>Male</option>
               <option>Female</option>
@@ -309,7 +343,11 @@ const ComputerOperatorStudentRegistration = ({
               name="studentAadharNo"
               value={form.studentAadharNo}
               onChange={handleChange}
+              className={errors.studentAadharNo ? "error" : ""}
             />
+            {errors.studentAadharNo && (
+              <small className="field-error">{errors.studentAadharNo}</small>
+            )}
           </label>
 
           <label>
@@ -318,12 +356,21 @@ const ComputerOperatorStudentRegistration = ({
               name="parentAadharNo"
               value={form.parentAadharNo}
               onChange={handleChange}
+              className={errors.parentAadharNo ? "error" : ""}
             />
+            {errors.parentAadharNo && (
+              <small className="field-error">{errors.parentAadharNo}</small>
+            )}
           </label>
 
           <label>
             RTE *
-            <select name="rte" value={form.rte} onChange={handleChange}>
+            <select
+              name="rte"
+              value={form.rte}
+              onChange={handleChange}
+              className={errors.rte ? "error" : ""}
+            >
               <option value="">Select</option>
               <option>Yes</option>
               <option>No</option>
@@ -365,7 +412,15 @@ const ComputerOperatorStudentRegistration = ({
 
           <label>
             PAN No
-            <input name="panNo" value={form.panNo} onChange={handleChange} />
+            <input
+              name="panNo"
+              value={form.panNo}
+              onChange={handleChange}
+              className={errors.panNo ? "error" : ""}
+            />
+            {errors.panNo && (
+              <small className="field-error">{errors.panNo}</small>
+            )}
           </label>
 
           <label>
@@ -397,6 +452,7 @@ const ComputerOperatorStudentRegistration = ({
               name="studentClassId"
               value={form.studentClassId}
               onChange={handleChange}
+              className={errors.studentClassId ? "error" : ""}
             >
               <option value="">Select class</option>
               {classes.map((c) => (
@@ -417,7 +473,10 @@ const ComputerOperatorStudentRegistration = ({
             <button
               type="button"
               className="btn-ghost"
-              onClick={() => setForm(initialForm)}
+              onClick={() => {
+                setForm(initialForm);
+                setErrors({});
+              }}
             >
               Reset
             </button>

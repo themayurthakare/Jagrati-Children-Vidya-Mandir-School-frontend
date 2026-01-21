@@ -27,20 +27,19 @@ export default function ViewMarks() {
       const data = await response.json();
 
       const formatted = data.map((m) => {
-  const percentage = m.percentage ?? 0;
+        const percentage = m.percentage ?? 0;
 
-  return {
-    marksId: m.marksId,        // 🔥 MUST
-    name: m.studentName,
-    className: m.className,
-    exam: m.examType,
-    percentage,
-    remarks: percentage >= 35 ? "Pass" : "Fail",
-  };
-});
+        return {
+          marksId: m.marksId, // 🔥 MUST
+          name: m.studentName,
+          className: m.className,
+          exam: m.examType,
+          percentage,
+          remarks: percentage >= 35 ? "Pass" : "Fail",
+        };
+      });
 
-setStudents(formatted); // ❗ ensure yahi array render ho
-
+      setStudents(formatted); // ❗ ensure yahi array render ho
 
       setStudents(formatted);
     } catch (err) {
@@ -53,7 +52,7 @@ setStudents(formatted); // ❗ ensure yahi array render ho
   const filteredStudents = students.filter(
     (s) =>
       (classFilter === "" || s.className === classFilter) &&
-      (examFilter === "" || s.exam === examFilter)
+      (examFilter === "" || s.exam === examFilter),
   );
 
   const classes = [...new Set(students.map((s) => s.className))];
@@ -71,17 +70,27 @@ setStudents(formatted); // ❗ ensure yahi array render ho
 
       {/* FILTERS */}
       <div className="filter-row">
-        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+        <select
+          value={classFilter}
+          onChange={(e) => setClassFilter(e.target.value)}
+        >
           <option value="">All Classes</option>
           {classes.map((cls) => (
-            <option key={cls} value={cls}>{cls}</option>
+            <option key={cls} value={cls}>
+              {cls}
+            </option>
           ))}
         </select>
 
-        <select value={examFilter} onChange={(e) => setExamFilter(e.target.value)}>
+        <select
+          value={examFilter}
+          onChange={(e) => setExamFilter(e.target.value)}
+        >
           <option value="">All Exams</option>
           {exams.map((exam) => (
-            <option key={exam} value={exam}>{exam}</option>
+            <option key={exam} value={exam}>
+              {exam}
+            </option>
           ))}
         </select>
       </div>
@@ -100,45 +109,43 @@ setStudents(formatted); // ❗ ensure yahi array render ho
           </tr>
         </thead>
         <tbody>
-  {students.map((s, i) => (
-    <tr key={s.marksId}>
-      <td>{i + 1}</td>
-      <td>{s.name}</td>
-      <td>{s.className}</td>
-      <td>{s.exam}</td>
-      <td>{s.percentage}%</td>
-      <td>{s.remarks}</td>
-      <td>
-        <button
-          className="edit-btn"
-          onClick={() => {
-            console.log("EDIT MARKS ID:", s.marksId);
-            navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
-          }}
-        >
+          {students.map((s, i) => (
+            <tr key={s.marksId}>
+              <td>{i + 1}</td>
+              <td>{s.name}</td>
+              <td>{s.className}</td>
+              <td>{s.exam}</td>
+              <td>{s.percentage}%</td>
+              <td>{s.remarks}</td>
+              <td>
+                <button
+                  className="edit-btn"
+                  onClick={() => {
+                    console.log("EDIT MARKS ID:", s.marksId);
+                    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
+                  }}
+                >
                   View
                 </button>
 
                 <button
-  className="edit-btn"
-  onClick={() => {
-    console.log("EDIT MARKS ID:", s.marksId);
-    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
-  }}
->
-  Edit
-</button>
-
-
-
-
+                  className="edit-btn"
+                  onClick={() => {
+                    console.log("EDIT MARKS ID:", s.marksId);
+                    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
+                  }}
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           ))}
 
           {filteredStudents.length === 0 && (
             <tr>
-              <td colSpan="7" className="no-data">No records found</td>
+              <td colSpan="7" className="no-data">
+                No records found
+              </td>
             </tr>
           )}
         </tbody>

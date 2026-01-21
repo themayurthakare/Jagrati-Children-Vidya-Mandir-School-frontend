@@ -12,30 +12,18 @@ import {
 
 import "./AdminDashboard.css";
 
-import AdminViewTeacher from "./AdminViewTeacher";
-import AdminViewClasses from "./AdminViewClasses";
-import AdminViewEnquiries from "./AdminViewEnquiries";
 import AdminViewAttendance from "./AdminViewAttendance";
 import AdminPrintStudentDetails from "./AdminPrintStudentDetails";
 
-import AdminAddClass from "./AdminAddClass";
-import AdminUpdateClass from "./AdminUpdateClass";
 import AdminUploadExcel from "./AdminUploadExcel";
 import AdminNotice from "./AdminNotice";
-import AdminViewClassStudents from "./AdminViewClassStudents";
-import AdminStudentFeeDetails from "./AdminStudentFeeDetails";
 
 import { SessionProvider, SessionContext } from "./SessionContext";
 import { useContext } from "react";
-import AdminStudentIdClass from "./AdminStudentIdClass";
-import AdminPrintIdCard from "./AdminPrintIdCard";
-import AdminIdCardPrint from "./AdminIdCardPrint";
 import AdminIdCardPrintAll from "./AdminIdCardPrintAll";
 import AdminAdmitCardPrint from "./AdminAdmitCardPrint";
 import AdminAdmitCardPrintAll from "./AdminAdmitCardPrintAll";
 import AdminTeacherRegistrationReceipt from "./AdminTeacherRegistrationReceipt";
-import AdminViewTeacherDetails from "./AdminViewTeacherDetails";
-import AdminUpdateTeacher from "./AdminUpdateTeacher";
 import TransactionReport from "./TransactionReport";
 import StudentExcelExport from "./StudentExcelExport";
 import OperatorViewFees from "./OperatorViewFees";
@@ -58,6 +46,8 @@ import COViewEnquiries from "./COViewEnquiries";
 import COStudentIdClass from "./COStudentIdClass";
 import COIdCardPrint from "./COIdCardPrint";
 import COPrintIdCard from "./COPrintIdCard";
+import COGenerateTC from "./COGenerateTC";
+import COViewTCStudents from "./COViewTCStudents";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -172,6 +162,14 @@ const Sidebar = () => {
         >
           <FaFileUpload /> <span>Export Student Excel</span>
         </NavLink>
+        <NavLink
+          to="/computeroperator/tc-students"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <FaFileUpload /> <span>TC Students</span>
+        </NavLink>
       </nav>
 
       <div className="sidebar-footer">
@@ -200,8 +198,8 @@ const ComputerOperatorDashboard = () => {
   const updatePoints = (id, val) =>
     setTeachers((prev) =>
       prev.map((t) =>
-        t.id === id ? { ...t, points: Math.max(0, t.points + val) } : t
-      )
+        t.id === id ? { ...t, points: Math.max(0, t.points + val) } : t,
+      ),
     );
 
   return (
@@ -243,6 +241,8 @@ const ComputerOperatorDashboard = () => {
               path="upload-docs"
               element={<ComputerOperatorUploadStudentDocuments />}
             />
+            <Route path="tc-students" element={<COViewTCStudents />} />
+
             <Route
               path="teacher-documents"
               element={<COTeacherDocumentUpload />}
@@ -291,6 +291,8 @@ const ComputerOperatorDashboard = () => {
               path="students/export-excel"
               element={<StudentExcelExport />}
             />
+            <Route path="generate-tc" element={<COGenerateTC />} />
+
             <Route
               path=""
               element={

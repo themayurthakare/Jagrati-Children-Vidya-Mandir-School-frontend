@@ -14,7 +14,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const prefillId = location.state?.studentId ?? null;
 
   const [studentId, setStudentId] = useState(
-    prefillId ? String(prefillId) : ""
+    prefillId ? String(prefillId) : "",
   );
   const [user, setUser] = useState(null);
   const [docs, setDocs] = useState([]);
@@ -49,7 +49,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       const cls = classes.find(
         (c) =>
           String(c.classId) === String(classId) ||
-          String(c.id) === String(classId)
+          String(c.id) === String(classId),
       );
 
       setClassName(cls?.className || cls?.name || classId);
@@ -373,7 +373,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                 नियमों का पालन करूंगा / करूंगी।
               </div>
 
-              <div className="ad-sign-row">
+              <div className="ad-sign-row1">
                 <div>Student signature</div>
                 <div>Parents Signature</div>
               </div>

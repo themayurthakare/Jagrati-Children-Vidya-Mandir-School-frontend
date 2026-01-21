@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "../styles/Addmarks.css";
-import { useContext } from "react";
-import { SessionContext } from "./SessionContext";
-
-
 
 /* ===== SUBJECTS BY CATEGORY ===== */
 const SUBJECT_BY_CATEGORY = {
@@ -45,12 +41,14 @@ const getCategoryByClassName = (name = "") => {
 };
 
 export default function TeacherAddMarks() {
+  /* ================= AUTH & SESSION ================= */
   const teacherId = localStorage.getItem("userId");
 
-  const { selectedSession } = useContext(SessionContext);
-  const sessionId = selectedSession?.id;
+  // ✅ FINAL FIX: sessionId localStorage se READ hogi
+  const storedSession = JSON.parse(localStorage.getItem("activeSession"));
+  const sessionId = storedSession?.id || 1;
 
-
+  /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [rows, setRows] = useState([]);
@@ -62,7 +60,7 @@ export default function TeacherAddMarks() {
     const fetchClasses = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/teachers/${teacherId}/classes`
+          `http://localhost:8080/api/teachers/${teacherId}/classes`,
         );
         if (!res.ok) throw new Error();
         const data = await res.json();
@@ -72,7 +70,7 @@ export default function TeacherAddMarks() {
       }
     };
 
-    fetchClasses();
+    if (teacherId) fetchClasses();
   }, [teacherId]);
 
   /* ================= SUBJECTS BY SELECTED CLASS ================= */
@@ -86,13 +84,13 @@ export default function TeacherAddMarks() {
     return SUBJECT_BY_CATEGORY[category] || [];
   }, [category]);
 
-  /* ================= FETCH STUDENTS CLASS-WISE ================= */
+  /* ================= FETCH STUDENTS ================= */
   const fetchStudents = useCallback(async () => {
     if (!teacherId || !selectedClass) return;
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`
+        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`,
       );
 
       if (!res.ok) {
@@ -108,7 +106,7 @@ export default function TeacherAddMarks() {
           srno: index + 1,
           name: s.name,
         };
-        activeSubjects.forEach(sub => (row[sub.key] = ""));
+        activeSubjects.forEach((sub) => (row[sub.key] = ""));
         return row;
       });
 
@@ -131,59 +129,95 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
-    if (!examType || rows.length === 0) return;
+    // ✅ HARD VALIDATION (MOST IMPORTANT)
+    if (!teacherId) {
+      alert("Teacher not logged in");
+      return;
+    }
+
+    if (!selectedClass?.classId) {
+      alert("Please select class");
+      return;
+    }
+
+    if (!sessionId) {
+      alert("Academic session not selected. Please contact admin.");
+      return;
+    }
+
+    if (!examType) {
+      alert("Please select exam");
+      return;
+    }
+
+    if (rows.length === 0) {
+      alert("No students found");
+      return;
+    }
 
     try {
       setSaving(true);
 
-      const payload = rows.map(r => ({
+      const payload = rows.map((r) => ({
         studentId: r.id,
         teacherId: Number(teacherId),
-        classId: selectedClass.classId,
-        sessionId,
+        classId: Number(selectedClass.classId),
+        sessionId: Number(sessionId),
         examType,
         ...Object.fromEntries(
-          activeSubjects.map(s => [s.key, Number(r[s.key]) || 0])
+          activeSubjects.map((s) => [s.key, Number(r[s.key]) || 0]),
         ),
       }));
 
-      await fetch("http://localhost:8080/api/marks/bulk", {
+      console.log("FINAL MARKS PAYLOAD:", payload);
+
+      const res = await fetch("http://localhost:8080/api/marks/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("SAVE MARKS ERROR:", err);
+        alert("Marks save failed ❌");
+        return;
+      }
+
       alert("Marks saved successfully ✅");
+    } catch (e) {
+      console.error(e);
+      alert("Server error");
     } finally {
       setSaving(false);
     }
   };
 
+  /* ================= UI ================= */
   return (
     <div className="marks-container">
       <h2>Add Student Marks</h2>
 
-      {/* ===== FILTERS ===== */}
       <div className="filter-row">
         <select
           value={selectedClass?.classId || ""}
           onChange={(e) =>
             setSelectedClass(
-              classes.find(c => c.classId === Number(e.target.value))
+              classes.find((c) => c.classId === Number(e.target.value)),
             )
           }
         >
           <option value="">Select Class</option>
-          {classes.map(cls => (
+          {classes.map((cls) => (
             <option key={cls.classId} value={cls.classId}>
               {cls.className}
             </option>
           ))}
         </select>
 
-        <select value={examType} onChange={e => setExamType(e.target.value)}>
+        <select value={examType} onChange={(e) => setExamType(e.target.value)}>
           <option value="">Select Exam</option>
-          {EXAMS.map(ex => (
+          {EXAMS.map((ex) => (
             <option key={ex} value={ex}>
               {ex}
             </option>
@@ -191,7 +225,6 @@ export default function TeacherAddMarks() {
         </select>
       </div>
 
-      {/* ===== MARKS TABLE ===== */}
       {rows.length > 0 && (
         <>
           <table className="marks-table">
@@ -199,7 +232,7 @@ export default function TeacherAddMarks() {
               <tr>
                 <th>Sr No</th>
                 <th>Student Name</th>
-                {activeSubjects.map(sub => (
+                {activeSubjects.map((sub) => (
                   <th key={sub.key}>{sub.label}</th>
                 ))}
               </tr>
@@ -209,14 +242,14 @@ export default function TeacherAddMarks() {
                 <tr key={row.id}>
                   <td>{row.srno}</td>
                   <td>{row.name}</td>
-                  {activeSubjects.map(sub => (
+                  {activeSubjects.map((sub) => (
                     <td key={sub.key}>
                       <input
                         type="number"
                         min="0"
                         max="100"
                         value={row[sub.key]}
-                        onChange={e =>
+                        onChange={(e) =>
                           handleChange(i, sub.key, e.target.value)
                         }
                       />

@@ -43,9 +43,7 @@ export default function EditMarks() {
         setLoading(true);
         setError("");
 
-        const res = await fetch(
-          `http://localhost:8080/api/marks/${marksId}`
-        );
+        const res = await fetch(`http://localhost:8080/api/marks/${marksId}`);
         if (!res.ok) throw new Error("Failed to fetch marks");
 
         const record = await res.json();
@@ -83,14 +81,11 @@ export default function EditMarks() {
         payload[s] = Number(marks[s]) || 0;
       });
 
-      const res = await fetch(
-        `http://localhost:8080/api/marks/${marksId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`http://localhost:8080/api/marks/${marksId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!res.ok) throw new Error("Failed to update marks");
 
@@ -111,9 +106,15 @@ export default function EditMarks() {
       {error && <div className="error-message">{error}</div>}
 
       <div className="student-info">
-        <p><strong>Name:</strong> {studentInfo.name}</p>
-        <p><strong>Class:</strong> {studentInfo.className}</p>
-        <p><strong>Exam:</strong> {studentInfo.examType}</p>
+        <p>
+          <strong>Name:</strong> {studentInfo.name}
+        </p>
+        <p>
+          <strong>Class:</strong> {studentInfo.className}
+        </p>
+        <p>
+          <strong>Exam:</strong> {studentInfo.examType}
+        </p>
       </div>
 
       <table className="edit-marks-table">
@@ -133,9 +134,7 @@ export default function EditMarks() {
                   min="0"
                   max="100"
                   value={marks[key] ?? ""}
-                  onChange={(e) =>
-                    handleChange(key, e.target.value)
-                  }
+                  onChange={(e) => handleChange(key, e.target.value)}
                 />
               </td>
             </tr>
@@ -150,9 +149,7 @@ export default function EditMarks() {
 
         <button
           className="cancel-btn"
-          onClick={() =>
-            navigate("/teacherdashboard/view-marks")
-          }
+          onClick={() => navigate("/teacherdashboard/view-marks")}
         >
           Cancel
         </button>

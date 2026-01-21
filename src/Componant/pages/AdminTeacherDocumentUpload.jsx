@@ -23,7 +23,7 @@ const AdminTeacherDocumentUpload = ({
 
   const prefillId = location.state?.teacherId || searchParams.get("teacherId");
   const [teacherId, setTeacherId] = useState(
-    prefillId ? String(prefillId) : ""
+    prefillId ? String(prefillId) : "",
   );
 
   const [docs, setDocs] = useState({
@@ -120,7 +120,7 @@ const AdminTeacherDocumentUpload = ({
     });
 
     const toUpload = DOC_TYPES.map((d) => ({ ...d, file: docs[d.key] })).filter(
-      (d) => d.file
+      (d) => d.file,
     );
 
     const results = [];
@@ -152,7 +152,7 @@ const AdminTeacherDocumentUpload = ({
 
     if (failed.length === 0) {
       window.alert(
-        `All ${successCount} document(s) uploaded successfully for teacher ${teacherId}.`
+        `All ${successCount} document(s) uploaded successfully for teacher ${teacherId}.`,
       );
       navigate(`/admindashboard/teacher-receipt?teacherId=${teacherId}`);
     } else {
@@ -160,7 +160,7 @@ const AdminTeacherDocumentUpload = ({
       window.alert(
         `Uploaded ${successCount} succeeded, ${
           failed.length
-        } failed:\n\n${messages.join("\n")}`
+        } failed:\n\n${messages.join("\n")}`,
       );
     }
   };
@@ -170,12 +170,12 @@ const AdminTeacherDocumentUpload = ({
     if (
       hasSelectedFiles &&
       !window.confirm(
-        "You have unsaved document selections. Are you sure you want to go back?"
+        "You have unsaved document selections. Are you sure you want to go back?",
       )
     ) {
       return;
     }
-    navigate("/admin/add-teacher");
+    navigate("/admindashboard/add-teacher");
   };
 
   const handleClearAll = () => {
