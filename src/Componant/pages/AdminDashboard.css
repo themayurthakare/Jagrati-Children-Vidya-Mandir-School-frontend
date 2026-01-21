@@ -48,7 +48,7 @@
 
 /* Footer */
 .sidebar-footer {
-    margin-top: auto;
+    margin-top: 20px;
     color: var(--muted);
     font-size: 0.9rem;
 }

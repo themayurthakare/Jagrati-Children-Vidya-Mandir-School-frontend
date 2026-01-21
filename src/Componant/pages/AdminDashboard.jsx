@@ -9,6 +9,7 @@ import {
   FaMoneyBillWave,
   FaClipboardList,
   FaIdCard,
+  FaFileAlt,
 } from "react-icons/fa";
 
 import "./AdminDashboard.css";
@@ -47,6 +48,8 @@ import TransactionReport from "./TransactionReport";
 import StudentExcelExport from "./StudentExcelExport";
 import AdminGenerateTC from "./AdminGenerateTC";
 import ViewTCStudents from "./ViewTCStudents";
+import AdminMarksheetClass from "./AdminMarksheetClasses";
+import AdminMarksheetStudents from "./AdminMarksheetStudents";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -167,8 +170,16 @@ const Sidebar = () => {
         >
           <FaFileUpload /> <span>TC Students</span>
         </NavLink>
+        <NavLink
+          to="/admindashboard/marksheet"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <FaFileAlt /> <span>Generate Marksheet</span>
+        </NavLink>
       </nav>
-          
+
       <div className="sidebar-footer">
         Logged in as <strong>Admin</strong>
       </div>
@@ -210,8 +221,8 @@ const AdminDashboard = () => {
   const updatePoints = (id, val) =>
     setTeachers((prev) =>
       prev.map((t) =>
-        t.id === id ? { ...t, points: Math.max(0, t.points + val) } : t
-      )
+        t.id === id ? { ...t, points: Math.max(0, t.points + val) } : t,
+      ),
     );
 
   return (
@@ -320,6 +331,11 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               }
+            />
+            <Route path="marksheet" element={<AdminMarksheetClass />} />
+            <Route
+              path="generate-marksheet"
+              element={<AdminMarksheetStudents />}
             />
           </Routes>
         </main>

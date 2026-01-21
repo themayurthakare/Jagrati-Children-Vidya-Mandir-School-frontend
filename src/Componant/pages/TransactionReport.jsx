@@ -31,7 +31,7 @@ const TransactionReport = () => {
     }
 
     fetch(
-      `http://localhost:8080/api/transactions/${sessionId}/getAllUsingSessionId`
+      `http://localhost:8080/api/transactions/${sessionId}/getAllUsingSessionId`,
     )
       .then((res) => res.json())
       .then((data) => {
@@ -71,7 +71,7 @@ const TransactionReport = () => {
 
   const totalAmount = filtered.reduce(
     (sum, t) => sum + Number(t.amount || 0),
-    0
+    0,
   );
 
   const downloadExcel = () => {
@@ -104,7 +104,7 @@ const TransactionReport = () => {
       new Blob([excelBuffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      `Transaction_Report_Session_${sessionId}.xlsx`
+      `Transaction_Report_Session_${sessionId}.xlsx`,
     );
   };
 
@@ -120,7 +120,7 @@ const TransactionReport = () => {
     doc.text(
       `Transaction Report (${selectedSession?.name || "Session"})`,
       14,
-      15
+      15,
     );
 
     doc.setFontSize(10);
@@ -220,7 +220,7 @@ const TransactionReport = () => {
       <table className="report-table1">
         <thead>
           <tr>
-            <th>#</th>
+            <th>Sr No.</th>
             <th>Receipt</th>
             <th>Amount</th>
             <th>Mode</th>
