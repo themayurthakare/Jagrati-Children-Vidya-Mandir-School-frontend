@@ -2,42 +2,66 @@ import React, { useEffect, useState } from "react";
 import "./AdminViewAttendance.css";
 
 const Attendance = () => {
-  // 🔐 studentId from login
+  /* ---------------- AUTH ---------------- */
   const studentId = localStorage.getItem("userId");
 
+  /* ---------------- SESSION ---------------- */
+  const [sessionId, setSessionId] = useState(localStorage.getItem("sessionId"));
+
+  /* ---------------- STATE ---------------- */
   const [attendances, setAttendances] = useState([]);
   const [filtered, setFiltered] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
   const [classes, setClasses] = useState([]);
 
-  // date filter
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
 
-  /* ---------------- Fetch Classes ---------------- */
+  /* ---------------- AUTO ACTIVE SESSION ---------------- */
   useEffect(() => {
-    fetch("http://localhost:8080/api/classes/getAll")
+    if (sessionId) return;
+
+    const loadSession = async () => {
+      const res = await fetch("http://localhost:8080/api/sessions/getAll");
+      const sessions = await res.json();
+      const active =
+        sessions.find((s) => s.active) || sessions.find((s) => s.isActive);
+
+      if (active) {
+        const sid = active.sessionId || active.id;
+        setSessionId(sid);
+        localStorage.setItem("sessionId", sid);
+      }
+    };
+
+    loadSession();
+  }, [sessionId]);
+
+  /* ---------------- CLASSES ---------------- */
+  useEffect(() => {
+    if (!sessionId) return;
+
+    fetch(`http://localhost:8080/api/classes/${sessionId}/getAll`)
       .then((res) => res.json())
       .then((data) => setClasses(Array.isArray(data) ? data : []))
       .catch(() => {});
-  }, []);
+  }, [sessionId]);
 
   const getClassName = (classId) => {
     const c = classes.find(
-      (x) => x.classId === classId || x.id === classId
+      (x) =>
+        String(x.classId) === String(classId) ||
+        String(x.id) === String(classId),
     );
     return c ? c.className || c.name : "-";
   };
 
-  /* ---------------- Fetch Attendance ---------------- */
+  /* ---------------- DATA ---------------- */
   useEffect(() => {
-    if (!studentId) {
-      setError("User not logged in");
-      setLoading(false);
-      return;
-    }
+    if (!studentId || !sessionId) return;
 
     const fetchData = async () => {
       try {
@@ -45,7 +69,7 @@ const Attendance = () => {
 
         // student info
         const studentRes = await fetch(
-          `http://localhost:8080/api/users/${studentId}`
+          `http://localhost:8080/api/users/${sessionId}/${studentId}`,
         );
         if (!studentRes.ok) throw new Error("Student not found");
         const student = await studentRes.json();
@@ -58,17 +82,12 @@ const Attendance = () => {
 
         // attendance
         const attRes = await fetch(
-          `http://localhost:8080/api/attendance/user/${studentId}`
+          `http://localhost:8080/api/attendance/user/${studentId}`,
         );
-        if (!attRes.ok) {
-          setAttendances([]);
-          setFiltered([]);
-          return;
-        }
 
-        const arr = await attRes.json();
+        const arr = attRes.ok ? await attRes.json() : [];
         const sorted = (Array.isArray(arr) ? arr : []).sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
+          (a, b) => new Date(b.date) - new Date(a.date),
         );
 
         setAttendances(sorted);
@@ -81,22 +100,16 @@ const Attendance = () => {
     };
 
     fetchData();
-  }, [studentId, classes]);
+  }, [studentId, sessionId, classes]);
 
-  /* ---------------- Filters ---------------- */
+  /* ---------------- FILTER ---------------- */
   const applyDateFilter = () => {
-    if (!fromDate && !toDate) {
-      setFiltered(attendances);
-      return;
-    }
-
     const f = attendances.filter((a) => {
       const d = new Date(a.date);
       if (fromDate && d < new Date(fromDate)) return false;
       if (toDate && d > new Date(toDate + "T23:59:59")) return false;
       return true;
     });
-
     setFiltered(f);
   };
 
@@ -113,17 +126,11 @@ const Attendance = () => {
       year: "numeric",
     });
 
-  const summary = {
-    total: filtered.length,
-    present: filtered.filter(
-      (a) => a.status?.toUpperCase() === "PRESENT"
-    ).length,
-  };
-
-  const percentage =
-    summary.total > 0
-      ? ((summary.present / summary.total) * 100).toFixed(1)
-      : 0;
+  const total = filtered.length;
+  const present = filtered.filter(
+    (a) => a.status?.toUpperCase() === "PRESENT",
+  ).length;
+  const percentage = total ? ((present / total) * 100).toFixed(1) : 0;
 
   /* ---------------- UI ---------------- */
   return (
@@ -134,17 +141,34 @@ const Attendance = () => {
 
       {studentInfo && (
         <div className="student-info">
-          <div><strong>Name:</strong> {studentInfo.name}</div>
-          <div><strong>Class:</strong> {studentInfo.className}</div>
-          <div><strong>Admission No:</strong> {studentInfo.admissionNo}</div>
+          <h3>Student Details</h3>
+          <div className="info-grid">
+            <div>
+              <strong>Name:</strong> {studentInfo.name}
+            </div>
+            <div>
+              <strong>Class:</strong> {studentInfo.className}
+            </div>
+            <div>
+              <strong>Admission No:</strong> {studentInfo.admissionNo}
+            </div>
+          </div>
         </div>
       )}
 
       {attendances.length > 0 && (
         <div className="date-filter">
           <h4>Filter by Date</h4>
-          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
-          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
           <button onClick={applyDateFilter}>Filter</button>
           <button onClick={clearDateFilter}>Clear</button>
         </div>
@@ -152,14 +176,20 @@ const Attendance = () => {
 
       {filtered.length > 0 && (
         <div className="summary">
-          <div>Total: <strong>{summary.total}</strong></div>
-          <div>Present: <strong>{summary.present}</strong></div>
-          <div>Attendance: <strong>{percentage}%</strong></div>
+          <div>
+            Total Records: <strong>{total}</strong>
+          </div>
+          <div>
+            Present: <strong>{present}</strong>
+          </div>
+          <div>
+            Attendance: <strong>{percentage}%</strong>
+          </div>
         </div>
       )}
 
       {loading ? (
-        <div className="loading">Loading attendance…</div>
+        <div className="loading">Loading attendance...</div>
       ) : filtered.length === 0 ? (
         <div className="no-data">No attendance records found.</div>
       ) : (
