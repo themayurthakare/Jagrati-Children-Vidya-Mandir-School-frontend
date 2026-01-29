@@ -29,38 +29,37 @@ const Fees = () => {
         setLoading(true);
         setError("");
 
-        // Student info
+        // student
         const studentRes = await fetch(
           `http://localhost:8080/api/users/${studentId}`
         );
         if (studentRes.ok) {
-          const studentData = await studentRes.json();
-          setStudentInfo(studentData);
+          setStudentInfo(await studentRes.json());
         }
 
-        // Fees
+        // fees
         const feeRes = await fetch(
           `http://localhost:8080/api/fees/user/${studentId}`
         );
         if (feeRes.ok) {
-          const feeData = await feeRes.json();
-          setFees(Array.isArray(feeData) ? feeData : [feeData]);
+          const data = await feeRes.json();
+          setFees(Array.isArray(data) ? data : [data]);
         } else {
           setFees([]);
         }
 
-        // Transactions (read-only)
+        // transactions
         const txRes = await fetch(
           `http://localhost:8080/api/transactions/user/${studentId}`
         );
         if (txRes.ok) {
-          const txData = await txRes.json();
-          setTransactions(Array.isArray(txData) ? txData : []);
+          const data = await txRes.json();
+          setTransactions(Array.isArray(data) ? data : []);
         } else {
           setTransactions([]);
         }
       } catch (err) {
-        setError(err.message || "Failed to load fee details");
+        setError("Failed to load fee details");
         setFees([]);
         setTransactions([]);
       } finally {
@@ -72,8 +71,10 @@ const Fees = () => {
   }, [studentId]);
 
   /* ---------------- HELPERS ---------------- */
-  const formatCurrency = (amount) =>
-    `₹ ${parseFloat(amount || 0).toLocaleString("en-IN")}`;
+  const formatCurrency = (amt) =>
+    `₹ ${parseFloat(amt || 0).toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+    })}`;
 
   const formatDate = (d) =>
     d
@@ -104,19 +105,21 @@ const Fees = () => {
           <div className="summary-stats">
             <div className="stat-item">
               <span>Total Fees:</span>
-              <strong>{formatCurrency(totalFees)}</strong>
+              <span className="stat-value">
+                {formatCurrency(totalFees)}
+              </span>
             </div>
             <div className="stat-item">
               <span>Paid:</span>
-              <strong className="paid">
+              <span className="stat-value paid">
                 {formatCurrency(totalPaid)}
-              </strong>
+              </span>
             </div>
             <div className="stat-item">
               <span>Pending:</span>
-              <strong className="pending">
+              <span className="stat-value pending">
                 {formatCurrency(totalRemaining)}
-              </strong>
+              </span>
             </div>
           </div>
         )}
@@ -126,19 +129,23 @@ const Fees = () => {
       {studentInfo && (
         <div className="student-info-card">
           <div className="info-row">
-            <span>Student ID:</span> {studentId}
+            <span className="info-label">Student ID:</span>
+            <span className="info-value">{studentId}</span>
           </div>
           <div className="info-row">
-            <span>Name:</span> {studentInfo.name}
+            <span className="info-label">Name:</span>
+            <span className="info-value">{studentInfo.name}</span>
           </div>
           {studentInfo.admissionNo && (
             <div className="info-row">
-              <span>Admission No:</span> {studentInfo.admissionNo}
+              <span className="info-label">Admission No:</span>
+              <span className="info-value">{studentInfo.admissionNo}</span>
             </div>
           )}
           {studentInfo.studentClass && (
             <div className="info-row">
-              <span>Class:</span> {studentInfo.studentClass}
+              <span className="info-label">Class:</span>
+              <span className="info-value">{studentInfo.studentClass}</span>
             </div>
           )}
         </div>
@@ -146,53 +153,61 @@ const Fees = () => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {/* FEE TABLE */}
+      {/* -------- FEE STRUCTURE TABLE (SAME AS ADMIN) -------- */}
+      <div className="section-header">
+        <h3>Fee Structure</h3>
+      </div>
+
       <div className="fee-table-container">
         {loading ? (
-          <div className="loading-state">Loading fees...</div>
+          <div className="loading-state">Loading fee details...</div>
         ) : fees.length === 0 ? (
           <div className="empty-state">No fee records found.</div>
         ) : (
-          <table className="fee-table">
-            <thead>
-              <tr>
-                <th>Fee ID</th>
-                <th>Amount</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>Payment Date</th>
-                <th>Paid</th>
-                <th>Remaining</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fees.map((f) => (
-                <tr key={f.feesId}>
-                  <td>{f.feesId}</td>
-                  <td>{formatCurrency(f.amount)}</td>
-                  <td>{formatDate(f.dueDate)}</td>
-                  <td>
-                    <span
-                      className={`status-badge ${f.paymentStatus?.toLowerCase()}`}
-                    >
-                      {f.paymentStatus || "Pending"}
-                    </span>
-                  </td>
-                  <td>{formatDate(f.paymentDate)}</td>
-                  <td>{formatCurrency(f.paidAmount)}</td>
-                  <td>{formatCurrency(f.remainingAmount)}</td>
-                  <td className="text-center">
-                    <span className="status-info">View Only</span>
-                  </td>
+          <div className="table-wrapper">
+            <table className="fee-table">
+              <thead>
+                <tr>
+                  <th>Fee ID</th>
+                  <th>Total Amount</th>
+                  <th>Paid</th>
+                  <th>Remaining</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {fees.map((fee) => (
+                  <tr key={fee.feesId}>
+                    <td className="text-center">{fee.feesId}</td>
+                    <td className="text-right amount">
+                      {formatCurrency(fee.amount)}
+                    </td>
+                    <td className="text-right paid">
+                      {formatCurrency(fee.paidAmount)}
+                    </td>
+                    <td className="text-right remaining">
+                      {formatCurrency(fee.remainingAmount)}
+                    </td>
+                    <td className="text-center1">
+                      <span
+                        className={`status-badge ${fee.paymentStatus?.toLowerCase()}`}
+                      >
+                        {fee.paymentStatus || "Pending"}
+                      </span>
+                    </td>
+                    <td className="text-center1">
+                      <span className="status-info">View Only</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
-      {/* TRANSACTIONS TABLE (READ ONLY) */}
+      {/* -------- TRANSACTIONS TABLE (SAME AS ADMIN) -------- */}
       <div className="section-header">
         <h3>Payment Transactions</h3>
       </div>
@@ -203,38 +218,46 @@ const Fees = () => {
             No payment transactions found.
           </div>
         ) : (
-          <table className="transactions-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.map((t, i) => (
-                <tr key={t.id || i}>
-                  <td>{i + 1}</td>
-                  <td>{formatCurrency(t.amount)}</td>
-                  <td>{formatDate(t.paymentDate)}</td>
-                  <td>{t.description || "Fee Payment"}</td>
-                  <td>
-                    <span
-                      className={`status-badge ${t.status?.toLowerCase()}`}
-                    >
-                      {t.status || "SUCCESS"}
-                    </span>
-                  </td>
-                  <td className="text-center">
-                    <span className="status-info">View Only</span>
-                  </td>
+          <div className="table-wrapper">
+            <table className="transactions-table">
+              <thead>
+                <tr>
+                  <th>Sr. No.</th>
+                  <th>Amount</th>
+                  <th>Payment Date</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {transactions.map((t, i) => (
+                  <tr key={t.id || i}>
+                    <td className="text-center1">{i + 1}</td>
+                    <td className="text-right amount">
+                      {formatCurrency(t.amount)}
+                    </td>
+                    <td className="text-center1">
+                      {formatDate(t.paymentDate)}
+                    </td>
+                    <td className="text-center1">
+                      {t.description || "Fee Payment"}
+                    </td>
+                    <td className="text-center">
+                      <span
+                        className={`status-badge ${t.status?.toLowerCase()}`}
+                      >
+                        {t.status || "SUCCESS"}
+                      </span>
+                    </td>
+                    <td className="text-center">
+                      <span className="status-info">View Only</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
