@@ -37,13 +37,13 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                 c.classId === classId ||
                 c.id === classId ||
                 String(c.classId) === String(classId) ||
-                String(c.id) === String(classId)
+                String(c.id) === String(classId),
             )
           : null;
 
         if (classObj) {
           setClassName(
-            classObj.className || classObj.name || `Class ${classId}`
+            classObj.className || classObj.name || `Class ${classId}`,
           );
         } else {
           setClassName(`Class ${classId}`);
@@ -81,7 +81,7 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
             `${apiBase}/api/documents/download/${userId}/${type}`,
             {
               method: "GET",
-            }
+            },
           );
 
           if (response.ok) {
@@ -112,7 +112,7 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               (doc.endpoint &&
                 (doc.endpoint.toUpperCase().includes("PHOTO") ||
                   doc.endpoint.toUpperCase().includes("IMAGE") ||
-                  doc.endpoint.toUpperCase().includes("PROFILE")))
+                  doc.endpoint.toUpperCase().includes("PROFILE"))),
           );
 
           if (photoDoc && photoDoc.url) {
@@ -123,7 +123,7 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               const photoResponse = await fetch(
                 `${apiBase}/api/documents/download/${userId}/${
                   photoDoc.type || photoDoc.endpoint
-                }`
+                }`,
               );
               if (photoResponse.ok) {
                 const blob = await photoResponse.blob();
@@ -160,7 +160,7 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       setLoadingUser(true);
       setError(null);
       try {
-        const res = await fetch(`${apiBase}/api/users/${studentId}`);
+        const res = await fetch(`${apiBase}/api/users/${1}/${studentId}`);
 
         if (res.status === 404) {
           throw new Error("Student not found");
@@ -230,7 +230,7 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       }
 
       const downloadUrl = `${apiBase}/api/documents/download/${userId}/${encodeURIComponent(
-        type
+        type,
       )}`;
       window.open(downloadUrl, "_blank");
     } catch (err) {

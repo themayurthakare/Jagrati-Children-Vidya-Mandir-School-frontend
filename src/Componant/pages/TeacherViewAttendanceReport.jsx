@@ -70,15 +70,15 @@ const Attendencereport = () => {
     if (filters.date) {
       filtered = filtered.filter(
         (item) =>
-          new Date(item.date).toISOString().split("T")[0] === filters.date
+          new Date(item.date).toISOString().split("T")[0] === filters.date,
       );
     }
 
     if (filters.className) {
       filtered = filtered.filter((item) =>
         (item.className || `${item.class}-${item.section}`).includes(
-          filters.className
-        )
+          filters.className,
+        ),
       );
     }
 
@@ -96,7 +96,7 @@ const Attendencereport = () => {
     if (
       filters.className &&
       !(item.className || `${item.class}-${item.section}`).includes(
-        filters.className
+        filters.className,
       )
     ) {
       return false;
@@ -118,11 +118,7 @@ const Attendencereport = () => {
     <div className="report-container">
       <h2 className="page-title">Attendance Report</h2>
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {/* FILTER SECTION */}
       <div className="filter-card">
@@ -201,9 +197,7 @@ const Attendencereport = () => {
                   <td>{row.className || `${row.class}-${row.section}`}</td>
                   <td
                     className={
-                      row.status === "Present"
-                        ? "present-text"
-                        : "absent-text"
+                      row.status === "Present" ? "present-text" : "absent-text"
                     }
                   >
                     {row.status}

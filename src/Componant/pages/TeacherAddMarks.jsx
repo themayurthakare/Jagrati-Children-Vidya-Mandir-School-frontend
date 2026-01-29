@@ -41,12 +41,44 @@ const getCategoryByClassName = (name = "") => {
 };
 
 export default function TeacherAddMarks() {
-  /* ================= AUTH & SESSION ================= */
+  /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
-  // ✅ FINAL FIX: sessionId localStorage se READ hogi
-  const storedSession = JSON.parse(localStorage.getItem("activeSession"));
-  const sessionId = storedSession?.id || 1;
+  /* ================= ACTIVE SESSION (DB) ================= */
+  const [sessionId, setSessionId] = useState(null);
+  const [sessionName, setSessionName] = useState("");
+
+  // ✅ Load active session from backend
+  useEffect(() => {
+    const loadActiveSession = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/sessions/active");
+
+        if (!res.ok) {
+          throw new Error("No active session found");
+        }
+
+        const data = await res.json();
+
+        // ✅ Set in state
+        setSessionId(data.sessionId);
+        setSessionName(data.name);
+
+        // ✅ (Optional) store in localStorage
+        localStorage.setItem(
+          "activeSession",
+          JSON.stringify({ id: data.sessionId, name: data.name }),
+        );
+      } catch (err) {
+        console.error("Active session fetch error:", err);
+        setSessionId(null);
+        setSessionName("");
+        localStorage.removeItem("activeSession");
+      }
+    };
+
+    loadActiveSession();
+  }, []);
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
@@ -129,7 +161,7 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
-    // ✅ HARD VALIDATION (MOST IMPORTANT)
+    // ✅ HARD VALIDATION
     if (!teacherId) {
       alert("Teacher not logged in");
       return;
@@ -141,7 +173,7 @@ export default function TeacherAddMarks() {
     }
 
     if (!sessionId) {
-      alert("Academic session not selected. Please contact admin.");
+      alert("Academic session not active. Please contact admin.");
       return;
     }
 
@@ -198,6 +230,12 @@ export default function TeacherAddMarks() {
     <div className="marks-container">
       <h2>Add Student Marks</h2>
 
+      {/* ✅ Active session display */}
+      <div style={{ marginBottom: 10, fontSize: 14 }}>
+        <b>Active Session:</b>{" "}
+        {sessionName ? sessionName : "Not Active (Contact Admin)"}
+      </div>
+
       <div className="filter-row">
         <select
           value={selectedClass?.classId || ""}
@@ -237,11 +275,13 @@ export default function TeacherAddMarks() {
                 ))}
               </tr>
             </thead>
+
             <tbody>
               {rows.map((row, i) => (
                 <tr key={row.id}>
                   <td>{row.srno}</td>
                   <td>{row.name}</td>
+
                   {activeSubjects.map((sub) => (
                     <td key={sub.key}>
                       <input

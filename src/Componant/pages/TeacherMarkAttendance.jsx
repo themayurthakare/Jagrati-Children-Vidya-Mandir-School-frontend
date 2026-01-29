@@ -19,7 +19,7 @@ const TeacherMarkAttendance = () => {
     const fetchClasses = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/teachers/${teacherId}/classes`
+          `http://localhost:8080/api/teachers/${teacherId}/classes`,
         );
         if (!res.ok) throw new Error("Failed to fetch classes");
         const data = await res.json();
@@ -36,9 +36,7 @@ const TeacherMarkAttendance = () => {
   useEffect(() => {
     const fetchRecentAttendance = async () => {
       try {
-        const res = await fetch(
-          "http://localhost:8080/api/attendance/today"
-        );
+        const res = await fetch("http://localhost:8080/api/attendance/today");
         if (res.ok) {
           const data = await res.json();
           setRecentAttendance(data);
@@ -64,7 +62,7 @@ const TeacherMarkAttendance = () => {
       setError("");
 
       const res = await fetch(
-        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`
+        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`,
       );
 
       if (res.status === 204) {
@@ -115,23 +113,18 @@ const TeacherMarkAttendance = () => {
       setSaving(true);
       setError("");
 
-      const payload = Object.entries(attendance).map(
-        ([studentId, status]) => ({
-          userId: Number(studentId),
-          classId: Number(selectedClassId),
-          status,
-          date: new Date().toISOString().split("T")[0],
-        })
-      );
+      const payload = Object.entries(attendance).map(([studentId, status]) => ({
+        userId: Number(studentId),
+        classId: Number(selectedClassId),
+        status,
+        date: new Date().toISOString().split("T")[0],
+      }));
 
-      const res = await fetch(
-        "http://localhost:8080/api/attendance/mark",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch("http://localhost:8080/api/attendance/mark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
       if (!res.ok) {
         const msg = await res.text();

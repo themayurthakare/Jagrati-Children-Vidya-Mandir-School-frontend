@@ -28,7 +28,7 @@ const Assignedclasses = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (!response.ok) {

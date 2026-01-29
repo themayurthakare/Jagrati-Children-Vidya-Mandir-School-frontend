@@ -22,7 +22,7 @@ const TeacherViewEnrolledStudents = () => {
     const fetchClasses = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/teachers/${teacherId}/classes`
+          `http://localhost:8080/api/teachers/${teacherId}/classes`,
         );
         if (!res.ok) throw new Error("Failed to fetch classes");
         const data = await res.json();
@@ -47,7 +47,7 @@ const TeacherViewEnrolledStudents = () => {
       setError("");
 
       const res = await fetch(
-        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`
+        `http://localhost:8080/api/teachers/${teacherId}/class/${classId}/students`,
       );
 
       if (res.status === 204) {
@@ -76,7 +76,6 @@ const TeacherViewEnrolledStudents = () => {
 
   return (
     <div className="students-container">
-
       {/* ===== Assigned Classes ===== */}
       <div className="assigned-card">
         <h3>Assigned Classes</h3>
@@ -141,7 +140,6 @@ const TeacherViewEnrolledStudents = () => {
           </table>
         </div>
       )}
-
     </div>
   );
 };
