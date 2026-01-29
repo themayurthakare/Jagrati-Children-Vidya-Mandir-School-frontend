@@ -1,33 +1,72 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SessionContext } from "./SessionContext";
 import "./AdminViewStudentDetails.css";
-
-// import "./StudentDetails.css"; // You'll need to rename or copy the CSS
 
 const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const studentId = location.state?.studentId || localStorage.getItem("userId");
 
+  /* ---------------- CONTEXT SESSION ---------------- */
+  const { selectedSession } = useContext(SessionContext);
+  const [autoSessionId, setAutoSessionId] = useState(null);
+
+  /* ---------------- FINAL SESSION ID ---------------- */
+  const sessionId =
+    selectedSession?.id ||
+    autoSessionId ||
+    localStorage.getItem("sessionId");
+
+  /* ---------------- STUDENT ---------------- */
+  const studentId =
+    location.state?.studentId || localStorage.getItem("userId");
+
+  /* ---------------- STATE ---------------- */
   const [user, setUser] = useState(null);
-  const [docs, setDocs] = useState([]);
   const [className, setClassName] = useState("");
   const [studentPhotoUrl, setStudentPhotoUrl] = useState("");
-  const [loadingUser, setLoadingUser] = useState(false);
-  const [loadingDocs, setLoadingDocs] = useState(false);
+
+  const [loadingUser, setLoadingUser] = useState(true);
   const [loadingClass, setLoadingClass] = useState(false);
   const [loadingPhoto, setLoadingPhoto] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch class name by ID
+  /* ---------------- AUTO SELECT ACTIVE SESSION ---------------- */
+  useEffect(() => {
+    if (selectedSession?.id) return;
+
+    const fetchActiveSession = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/sessions/getAll");
+        const sessions = await res.json();
+
+        const active =
+          sessions.find((s) => s.active === true) ||
+          sessions.find((s) => s.isActive === true);
+
+        if (active) {
+          const sid = active.sessionId || active.id;
+          setAutoSessionId(sid);
+          localStorage.setItem("sessionId", sid);
+        }
+      } catch (err) {
+        console.error("Session auto-pick failed", err);
+      }
+    };
+
+    fetchActiveSession();
+  }, [selectedSession]);
+
+  /* ---------------- FETCH CLASS ---------------- */
   const fetchClassName = async (classId) => {
-    if (!classId) {
+    if (!classId || !sessionId) {
       setClassName("Not Assigned");
       return;
     }
 
     setLoadingClass(true);
     try {
+<<<<<<< HEAD
       const res = await fetch(`${apiBase}/api/classes/getAll`);
       if (res.ok) {
         const classes = await res.json();
@@ -53,18 +92,30 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       }
     } catch (err) {
       console.error("Failed to fetch class:", err);
+=======
+      const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
+      const classes = res.ok ? await res.json() : [];
+      const found = classes.find(
+        (c) =>
+          String(c.id) === String(classId) ||
+          String(c.classId) === String(classId)
+      );
+      setClassName(found?.className || found?.name || `Class ${classId}`);
+    } catch {
+>>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
       setClassName(`Class ${classId}`);
     } finally {
       setLoadingClass(false);
     }
   };
 
-  // Fetch student photo using the download endpoint
-  const fetchStudentPhoto = async (userId) => {
-    if (!userId) return;
-
+  /* ---------------- FETCH PHOTO ---------------- */
+  const fetchStudentPhoto = async (uid) => {
+    if (!uid) return;
     setLoadingPhoto(true);
+
     try {
+<<<<<<< HEAD
       // Try different possible photo document types
       const possibleTypes = [
         "PHOTO",
@@ -138,28 +189,42 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       }
     } catch (err) {
       console.error("Error fetching student photo:", err);
+=======
+      const types = ["PHOTO", "STUDENT_PHOTO", "PROFILE_PHOTO", "IMAGE"];
+      for (const type of types) {
+        const res = await fetch(
+          `${apiBase}/api/documents/download/${uid}/${type}`
+        );
+        if (res.ok) {
+          const blob = await res.blob();
+          setStudentPhotoUrl(URL.createObjectURL(blob));
+          break;
+        }
+      }
+    } catch {
+      // ignore
+>>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
     } finally {
       setLoadingPhoto(false);
     }
   };
 
-  // Clean up object URLs on unmount
+  /* ---------------- CLEANUP PHOTO ---------------- */
   useEffect(() => {
     return () => {
-      if (studentPhotoUrl && studentPhotoUrl.startsWith("blob:")) {
+      if (studentPhotoUrl?.startsWith("blob:")) {
         URL.revokeObjectURL(studentPhotoUrl);
       }
     };
   }, [studentPhotoUrl]);
 
+  /* ---------------- FETCH USER ---------------- */
   useEffect(() => {
-    if (!studentId) return;
+    if (!studentId || !sessionId) return;
 
-    // Fetch user
     const fetchUser = async () => {
-      setLoadingUser(true);
-      setError(null);
       try {
+<<<<<<< HEAD
         const res = await fetch(`${apiBase}/api/users/${1}/${studentId}`);
 
         if (res.status === 404) {
@@ -169,55 +234,28 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
         if (!res.ok) {
           throw new Error(`Failed to load student (${res.status})`);
         }
+=======
+        const res = await fetch(
+          `${apiBase}/api/users/${sessionId}/${studentId}`
+        );
+        if (!res.ok) throw new Error("Student not found");
+>>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
 
         const data = await res.json();
         setUser(data);
-
-        // Fetch class name after getting user data
-        if (data.studentClassId || data.studentClass) {
-          fetchClassName(data.studentClassId || data.studentClass);
-        }
-
-        // Fetch student photo
+        fetchClassName(data.studentClassId || data.studentClass);
         fetchStudentPhoto(studentId);
       } catch (err) {
-        setError(err.message || "Failed to load student details");
+        setError(err.message);
       } finally {
         setLoadingUser(false);
       }
     };
 
-    // Fetch docs
-    const fetchDocs = async () => {
-      setLoadingDocs(true);
-      try {
-        const res = await fetch(`${apiBase}/api/documents/${studentId}`);
-
-        if (res.status === 404) {
-          setDocs([]);
-          return;
-        }
-
-        if (!res.ok) {
-          console.warn(`Failed to load documents (${res.status})`);
-          setDocs([]);
-          return;
-        }
-
-        const arr = await res.json();
-        setDocs(Array.isArray(arr) ? arr : []);
-      } catch (err) {
-        console.warn("Documents fetch:", err.message);
-        setDocs([]);
-      } finally {
-        setLoadingDocs(false);
-      }
-    };
-
     fetchUser();
-    fetchDocs();
-  }, [studentId, apiBase]);
+  }, [studentId, sessionId, apiBase]);
 
+<<<<<<< HEAD
   // Download document (kept for user view access)
   const handleDownload = async (doc) => {
     try {
@@ -256,49 +294,33 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       </div>
     );
   }
+=======
+  /* ---------------- GUARDS ---------------- */
+  if (!studentId) return <p style={{ padding: 20 }}>No student selected.</p>;
+  if (!sessionId) return <p style={{ padding: 20 }}>Loading session…</p>;
+>>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="vsd-container">
-      {/* Simplified header - only back button */}
       <div className="vsd-actions">
-        <button className="btn-ghost" onClick={handleBack}>
+        <button className="btn-ghost" onClick={() => navigate(-1)}>
           ← Back
         </button>
       </div>
 
-      <div className="vsd-card" id="printable-content">
+      <div className="vsd-card">
         {loadingUser ? (
-          <div className="vsd-loading">
-            <div className="loading-spinner"></div>
-            <p>Loading student details...</p>
-          </div>
+          <p>Loading student details…</p>
         ) : error ? (
-          <div className="vsd-error">
-            <h3>❌ Error Loading Student</h3>
-            <p>{error}</p>
-            <div className="error-actions">
-              <button className="btn-ghost" onClick={handleBack}>
-                Go Back
-              </button>
-            </div>
-          </div>
-        ) : !user ? (
-          <div className="vsd-empty">
-            <h3>Student Not Found</h3>
-            <p>The student with ID {studentId} could not be found.</p>
-            <button className="btn-primary" onClick={handleBack}>
-              Go Back
-            </button>
-          </div>
+          <p>❌ {error}</p>
         ) : (
           <>
-            {/* Header Section with Photo and Basic Info */}
+            {/* HEADER */}
             <div className="vsd-header-section">
               <div className="vsd-photo-container">
                 {loadingPhoto ? (
-                  <div className="vsd-photo-loading">
-                    <div className="loading-spinner-small"></div>
-                  </div>
+                  <div className="vsd-photo-loading" />
                 ) : studentPhotoUrl ? (
                   <img
                     src={studentPhotoUrl}
@@ -307,219 +329,60 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                   />
                 ) : (
                   <div className="vsd-photo-placeholder">
-                    <span className="vsd-photo-initial">
-                      {(user.name || "?").slice(0, 1).toUpperCase()}
-                    </span>
+                    {(user.name || "?")[0]}
                   </div>
                 )}
               </div>
 
               <div className="vsd-header-info">
-                <h1 className="vsd-student-name">{user.name || "—"}</h1>
+                <h1>{user.name}</h1>
                 <div className="vsd-header-grid">
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Admission No:</span>
-                    <span className="vsd-header-value">
-                      {user.admissionNo || "—"}
-                    </span>
-                  </div>
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Student ID:</span>
-                    <span className="vsd-header-value">{studentId}</span>
-                  </div>
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Class:</span>
-                    <span className="vsd-header-value">
-                      {loadingClass
-                        ? "Loading..."
-                        : className || "Not Assigned"}
-                    </span>
-                  </div>
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Admission Date:</span>
-                    <span className="vsd-header-value">
-                      {user.admissionDate || "—"}
-                    </span>
-                  </div>
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Phone:</span>
-                    <span className="vsd-header-value">
-                      {user.studentPhone || "—"}
-                    </span>
-                  </div>
-                  <div className="vsd-header-item">
-                    <span className="vsd-header-label">Email:</span>
-                    <span className="vsd-header-value">
-                      {user.email || "—"}
-                    </span>
-                  </div>
+                  <div><b>Admission No:</b> {user.admissionNo || "-"}</div>
+                  <div><b>Student ID:</b> {studentId}</div>
+                  <div><b>Class:</b> {loadingClass ? "Loading..." : className}</div>
+                  <div><b>Admission Date:</b> {user.admissionDate || "-"}</div>
+                  <div><b>Phone:</b> {user.studentPhone || "-"}</div>
+                  <div><b>Email:</b> {user.email || "-"}</div>
                 </div>
               </div>
             </div>
 
-            {/* Main Content Grid */}
+            {/* DETAILS */}
             <div className="vsd-content-grid">
-              {/* Left Column - Personal Information */}
               <div className="vsd-info-section">
-                <h2 className="vsd-section-title">
-                  <span className="vsd-title-icon">👤</span>
-                  Personal Information
-                </h2>
+                <h2 className="vsd-section-title">👤 Personal Information</h2>
                 <div className="vsd-info-grid">
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Date of Birth</span>
-                    <span className="vsd-info-value">{user.dob || "-"}</span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Gender</span>
-                    <span className="vsd-info-value">{user.gender || "-"}</span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Student Aadhar</span>
-                    <span className="vsd-info-value">
-                      {user.studentAadharNo || "-"}
-                    </span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">RTE Status</span>
-                    <span className="vsd-info-value">{user.rte || "-"}</span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">SSM ID</span>
-                    <span className="vsd-info-value">{user.ssmId || "-"}</span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Passout Class</span>
-                    <span className="vsd-info-value">
-                      {user.passoutClass || "-"}
-                    </span>
-                  </div>
+                  <div>DOB: {user.dob || "-"}</div>
+                  <div>Gender: {user.gender || "-"}</div>
+                  <div>Aadhar: {user.studentAadharNo || "-"}</div>
+                  <div>Caste: {user.caste || "-"}</div>
+                  <div>Sub Caste: {user.subCaste || "-"}</div>
+                  <div>Religion: {user.religion || "-"}</div>
                 </div>
               </div>
 
-              {/* Middle Column - Parent Information */}
               <div className="vsd-info-section">
-                <h2 className="vsd-section-title">
-                  <span className="vsd-title-icon">👨‍👩‍👧‍👦</span>
-                  Parent Information
-                </h2>
+                <h2 className="vsd-section-title">👨‍👩‍👧‍👦 Parent Information</h2>
                 <div className="vsd-info-grid">
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Father's Name</span>
-                    <span className="vsd-info-value">
-                      {user.fatherName || "-"}
-                    </span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Mother's Name</span>
-                    <span className="vsd-info-value">
-                      {user.motherName || "-"}
-                    </span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Parent Phone</span>
-                    <span className="vsd-info-value">
-                      {user.parentPhone || "-"}
-                    </span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">Parent Aadhar</span>
-                    <span className="vsd-info-value">
-                      {user.parentAadharNo || "-"}
-                    </span>
-                  </div>
+                  <div>Father: {user.fatherName || "-"}</div>
+                  <div>Mother: {user.motherName || "-"}</div>
+                  <div>Parent Phone: {user.parentPhone || "-"}</div>
+                  <div>Parent Aadhar: {user.parentAadharNo || "-"}</div>
                 </div>
               </div>
 
-              {/* Right Column - Additional Information */}
               <div className="vsd-info-section">
-                <h2 className="vsd-section-title">
-                  <span className="vsd-title-icon">🏠</span>
-                  Address & Other Details
-                </h2>
+                <h2 className="vsd-section-title">📋 Additional Details</h2>
                 <div className="vsd-info-grid">
-                  <div className="vsd-info-item vsd-address-item">
-                    <span className="vsd-info-label">Address</span>
-                    <span className="vsd-info-value">
-                      {user.address || "-"}
-                    </span>
-                  </div>
-                  <div className="vsd-info-item">
-                    <span className="vsd-info-label">TC Number</span>
-                    <span className="vsd-info-value">
-                      {user.tcNumber || "-"}
-                    </span>
-                  </div>
+                  <div>Address: {user.address || "-"}</div>
+                  <div>APAAR ID: {user.apaarId || "-"}</div>
+                  <div>PAN: {user.panNo || "-"}</div>
+                  <div>RTE: {user.rte || "-"}</div>
+                  <div>SSSM ID: {user.ssmId || "-"}</div>
+                  <div>Passout Class: {user.passoutClass || "-"}</div>
+                  <div>TC No: {user.tcNumber || "-"}</div>
                 </div>
               </div>
-            </div>
-
-            {/* Documents Section */}
-            <div className="vsd-documents-section">
-              <h2 className="vsd-section-title">
-                <span className="vsd-title-icon">📄</span>
-                Uploaded Documents
-                {loadingDocs && (
-                  <span className="vsd-loading-text"> (loading...)</span>
-                )}
-              </h2>
-
-              {loadingDocs ? (
-                <div className="vsd-loading-small">
-                  <div className="loading-spinner-small"></div>
-                  <p>Loading documents...</p>
-                </div>
-              ) : !docs || docs.length === 0 ? (
-                <div className="vsd-empty-docs">
-                  <p>No documents uploaded for this student.</p>
-                </div>
-              ) : (
-                <div className="vsd-documents-grid">
-                  {docs.map((d) => (
-                    <div
-                      className="vsd-document-card"
-                      key={d.documentId ?? d.id ?? d.fileName}
-                    >
-                      <div className="vsd-document-icon">📎</div>
-                      <div className="vsd-document-content">
-                        <div className="vsd-document-type">
-                          {d.type || d.endpoint || "Document"}
-                        </div>
-                        <div className="vsd-document-name">
-                          {d.fileName || d.originalName || "-"}
-                        </div>
-                        <div className="vsd-document-time">
-                          {d.uploadedAt
-                            ? new Date(d.uploadedAt).toLocaleDateString()
-                            : ""}
-                        </div>
-                      </div>
-                      <div className="vsd-document-actions">
-                        {d.url ? (
-                          <a
-                            className="vsd-doc-btn"
-                            href={d.url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View
-                          </a>
-                        ) : (
-                          <button
-                            className="vsd-doc-btn"
-                            onClick={() => handleDownload(d)}
-                            title={`Download ${
-                              d.type || d.endpoint || "document"
-                            }`}
-                          >
-                            Download
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </>
         )}

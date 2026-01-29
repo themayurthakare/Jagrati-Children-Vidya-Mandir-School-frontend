@@ -32,6 +32,7 @@ const Navbar = ({ logoText = "J.C.V.M" }) => {
     localStorage.removeItem("userRole");
     localStorage.removeItem("userId");
     localStorage.removeItem("authExpiresAt");
+    localStorage.removeItem("sessionId");
 
     // notify navbar
     window.dispatchEvent(new Event("auth-change"));

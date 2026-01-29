@@ -14,14 +14,18 @@ import StudentAttendance from "./Attendance";
 import StudentFees from "./Fees";
 
 /* -------------------- Sidebar -------------------- */
-const StudentSidebar = () => {
+const StudentSidebar = ({ selectedSession }) => {
   const navClass = ({ isActive }) =>
     isActive ? "nav-item active" : "nav-item";
 
   return (
     <aside className="student-sidebar">
       <nav className="menu">
-        <NavLink to="/user-dashboard/details" className={navClass}>
+        <NavLink
+          to="/user-dashboard/details"
+          state={{ sessionId: selectedSession?.sessionId }}
+          className={navClass}
+        >
           <FaUser /> <span>My Details</span>
         </NavLink>
 
@@ -44,52 +48,138 @@ const StudentSidebar = () => {
 /* -------------------- Dashboard -------------------- */
 export default function StudentDashboard() {
   const location = useLocation();
-  const [student, setStudent] = useState(null);
 
-  // SAFE userId (state OR storage)
   const userId = location.state?.userId || localStorage.getItem("userId");
   const userRole = localStorage.getItem("userRole");
 
-  // Fetch student details
+  const [student, setStudent] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
+
+  /* ---------------- Fetch Sessions ---------------- */
+  const reloadSessions = () => {
+    fetch("http://localhost:8080/api/sessions/getAll")
+      .then((res) => res.json())
+      .then((data) => {
+        setSessions(data);
+
+        const savedId = localStorage.getItem("sessionId");
+        if (savedId) {
+          const found = data.find(
+            (s) => String(s.sessionId) === String(savedId)
+          );
+          if (found) setSelectedSession(found);
+        }
+      })
+      .catch(() => console.log("Sessions API down 😴"));
+  };
+
+  useEffect(() => {
+    reloadSessions();
+  }, []);
+
+  /* ---------------- Fetch Student ---------------- */
   useEffect(() => {
     if (!userId || userRole !== "student") return;
 
-    fetch(`http://localhost:8080/api/students/${userId}`)
+    fetch(`http://localhost:8080/api/users/basic/${userId}`)
       .then((res) => res.json())
       .then(setStudent)
-      .catch(() => console.log("Backend on chai break ☕"));
+      .catch(() => console.log("Student fetch failed"));
   }, [userId, userRole]);
 
-  // Redirect AFTER hooks: must be logged in as student
   if (!userId || userRole !== "student") {
     return <Navigate to="/login" replace />;
   }
 
   return (
     <div className="student-page">
-      <StudentSidebar />
+      <StudentSidebar selectedSession={selectedSession} />
 
       <main className="student-content">
         <div className="welcome-box">
           {student ? (
-            <>
-              Welcome <span className="bold">{student.name}</span>
-            </>
+            <>Welcome <span className="bold">{student.name}</span></>
           ) : (
             "Loading student vibes..."
           )}
         </div>
 
+        {/* ---------------- SESSION SELECT ---------------- */}
+        {/* <div
+          className="session-select"
+          style={{ display: "flex", gap: 10, alignItems: "center" }}
+        >
+          <label style={{ fontSize: 13 }}>Yearly Sessions</label>
+
+          <select
+            value={selectedSession?.sessionId || ""}
+            onChange={(e) => {
+              const id = e.target.value;
+
+              const found = sessions.find(
+                (s) => String(s.sessionId) === String(id)
+              );
+
+              setSelectedSession(found || null);
+
+              if (found) {
+                localStorage.setItem("sessionId", found.sessionId);
+              } else {
+                localStorage.removeItem("sessionId");
+              }
+            }}
+            style={{
+              padding: "6px 8px",
+              borderRadius: 6,
+              border: "1px solid #ccc",
+              minWidth: 180,
+            }}
+          >
+            <option value="">-- Select session --</option>
+            {sessions.map((s) => (
+              <option key={s.sessionId} value={s.sessionId}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+
+          <button
+            onClick={reloadSessions}
+            title="Reload sessions"
+            style={{
+              padding: "6px 8px",
+              borderRadius: 6,
+              border: "1px solid #ccc",
+              background: "white",
+              cursor: "pointer",
+            }}
+          >
+            ↻
+          </button>
+        </div> */}
+
+        {/* ---------------- ROUTES ---------------- */}
         <Routes>
-          <Route
-            path="details"
-            element={<StudentDetails student={student} />}
-          />
+          <Route path="details" element={<StudentDetails />} />
           <Route
             path="attendance"
-            element={<StudentAttendance userId={userId} />}
+            element={
+              <StudentAttendance
+                userId={userId}
+                sessionId={selectedSession?.sessionId}
+              />
+            }
           />
-          <Route path="fees" element={<StudentFees userId={userId} />} />
+          <Route
+            path="fees"
+            element={
+              <StudentFees
+                userId={userId}
+                sessionId={selectedSession?.sessionId}
+              />
+            }
+          />
           <Route
             index
             element={
