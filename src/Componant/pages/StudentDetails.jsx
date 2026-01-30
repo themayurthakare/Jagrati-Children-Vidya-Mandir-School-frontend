@@ -13,13 +13,10 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
 
   /* ---------------- FINAL SESSION ID ---------------- */
   const sessionId =
-    selectedSession?.id ||
-    autoSessionId ||
-    localStorage.getItem("sessionId");
+    selectedSession?.id || autoSessionId || localStorage.getItem("sessionId");
 
   /* ---------------- STUDENT ---------------- */
-  const studentId =
-    location.state?.studentId || localStorage.getItem("userId");
+  const studentId = location.state?.studentId || localStorage.getItem("userId");
 
   /* ---------------- STATE ---------------- */
   const [user, setUser] = useState(null);
@@ -66,43 +63,15 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
 
     setLoadingClass(true);
     try {
-<<<<<<< HEAD
-      const res = await fetch(`${apiBase}/api/classes/getAll`);
-      if (res.ok) {
-        const classes = await res.json();
-        const classObj = Array.isArray(classes)
-          ? classes.find(
-              (c) =>
-                c.classId === classId ||
-                c.id === classId ||
-                String(c.classId) === String(classId) ||
-                String(c.id) === String(classId),
-            )
-          : null;
-
-        if (classObj) {
-          setClassName(
-            classObj.className || classObj.name || `Class ${classId}`,
-          );
-        } else {
-          setClassName(`Class ${classId}`);
-        }
-      } else {
-        setClassName(`Class ${classId}`);
-      }
-    } catch (err) {
-      console.error("Failed to fetch class:", err);
-=======
       const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
       const classes = res.ok ? await res.json() : [];
       const found = classes.find(
         (c) =>
           String(c.id) === String(classId) ||
-          String(c.classId) === String(classId)
+          String(c.classId) === String(classId),
       );
       setClassName(found?.className || found?.name || `Class ${classId}`);
     } catch {
->>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
       setClassName(`Class ${classId}`);
     } finally {
       setLoadingClass(false);
@@ -115,85 +84,10 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     setLoadingPhoto(true);
 
     try {
-<<<<<<< HEAD
-      // Try different possible photo document types
-      const possibleTypes = [
-        "PHOTO",
-        "STUDENT_PHOTO",
-        "PROFILE_PHOTO",
-        "IMAGE",
-      ];
-
-      let photoFound = false;
-
-      for (const type of possibleTypes) {
-        try {
-          const response = await fetch(
-            `${apiBase}/api/documents/download/${userId}/${type}`,
-            {
-              method: "GET",
-            },
-          );
-
-          if (response.ok) {
-            // Create object URL from blob
-            const blob = await response.blob();
-            const objectUrl = URL.createObjectURL(blob);
-            setStudentPhotoUrl(objectUrl);
-            photoFound = true;
-            break;
-          }
-        } catch (err) {
-          console.log(`Photo type ${type} not found, trying next...`);
-          continue;
-        }
-      }
-
-      if (!photoFound) {
-        // Try to get photo from documents list
-        const docsRes = await fetch(`${apiBase}/api/documents/${userId}`);
-        if (docsRes.ok) {
-          const documents = await docsRes.json();
-          const photoDoc = documents.find(
-            (doc) =>
-              (doc.type &&
-                (doc.type.toUpperCase().includes("PHOTO") ||
-                  doc.type.toUpperCase().includes("IMAGE") ||
-                  doc.type.toUpperCase().includes("PROFILE"))) ||
-              (doc.endpoint &&
-                (doc.endpoint.toUpperCase().includes("PHOTO") ||
-                  doc.endpoint.toUpperCase().includes("IMAGE") ||
-                  doc.endpoint.toUpperCase().includes("PROFILE"))),
-          );
-
-          if (photoDoc && photoDoc.url) {
-            setStudentPhotoUrl(photoDoc.url);
-          } else if (photoDoc) {
-            // Try to download the photo
-            try {
-              const photoResponse = await fetch(
-                `${apiBase}/api/documents/download/${userId}/${
-                  photoDoc.type || photoDoc.endpoint
-                }`,
-              );
-              if (photoResponse.ok) {
-                const blob = await photoResponse.blob();
-                const objectUrl = URL.createObjectURL(blob);
-                setStudentPhotoUrl(objectUrl);
-              }
-            } catch (err) {
-              console.log("Could not download photo from document:", err);
-            }
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching student photo:", err);
-=======
       const types = ["PHOTO", "STUDENT_PHOTO", "PROFILE_PHOTO", "IMAGE"];
       for (const type of types) {
         const res = await fetch(
-          `${apiBase}/api/documents/download/${uid}/${type}`
+          `${apiBase}/api/documents/download/${uid}/${type}`,
         );
         if (res.ok) {
           const blob = await res.blob();
@@ -203,7 +97,6 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       }
     } catch {
       // ignore
->>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
     } finally {
       setLoadingPhoto(false);
     }
@@ -224,22 +117,10 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
 
     const fetchUser = async () => {
       try {
-<<<<<<< HEAD
-        const res = await fetch(`${apiBase}/api/users/${1}/${studentId}`);
-
-        if (res.status === 404) {
-          throw new Error("Student not found");
-        }
-
-        if (!res.ok) {
-          throw new Error(`Failed to load student (${res.status})`);
-        }
-=======
         const res = await fetch(
-          `${apiBase}/api/users/${sessionId}/${studentId}`
+          `${apiBase}/api/users/${sessionId}/${studentId}`,
         );
         if (!res.ok) throw new Error("Student not found");
->>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
 
         const data = await res.json();
         setUser(data);
@@ -255,50 +136,9 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
     fetchUser();
   }, [studentId, sessionId, apiBase]);
 
-<<<<<<< HEAD
-  // Download document (kept for user view access)
-  const handleDownload = async (doc) => {
-    try {
-      const userId = studentId;
-      const type = doc.type || doc.endpoint || "";
-
-      if (!type) {
-        alert("Cannot download: Document type not specified");
-        return;
-      }
-
-      const downloadUrl = `${apiBase}/api/documents/download/${userId}/${encodeURIComponent(
-        type,
-      )}`;
-      window.open(downloadUrl, "_blank");
-    } catch (err) {
-      console.error("Download error:", err);
-      alert("Download failed: " + (err.message || ""));
-    }
-  };
-
-  const handleBack = () => {
-    navigate(-1); // Go back to previous page
-  };
-
-  if (!studentId) {
-    return (
-      <div className="vsd-container">
-        <div className="vsd-card vsd-error-card">
-          <h2>⚠️ No Student Selected</h2>
-          <p>Please select a student to view details.</p>
-          <button className="btn-primary" onClick={handleBack}>
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-=======
   /* ---------------- GUARDS ---------------- */
   if (!studentId) return <p style={{ padding: 20 }}>No student selected.</p>;
   if (!sessionId) return <p style={{ padding: 20 }}>Loading session…</p>;
->>>>>>> 1e769ba7396e6710c950499340f35a320a83a60a
 
   /* ---------------- UI ---------------- */
   return (
@@ -337,12 +177,24 @@ const StudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               <div className="vsd-header-info">
                 <h1>{user.name}</h1>
                 <div className="vsd-header-grid">
-                  <div><b>Admission No:</b> {user.admissionNo || "-"}</div>
-                  <div><b>Student ID:</b> {studentId}</div>
-                  <div><b>Class:</b> {loadingClass ? "Loading..." : className}</div>
-                  <div><b>Admission Date:</b> {user.admissionDate || "-"}</div>
-                  <div><b>Phone:</b> {user.studentPhone || "-"}</div>
-                  <div><b>Email:</b> {user.email || "-"}</div>
+                  <div>
+                    <b>Admission No:</b> {user.admissionNo || "-"}
+                  </div>
+                  <div>
+                    <b>Student ID:</b> {studentId}
+                  </div>
+                  <div>
+                    <b>Class:</b> {loadingClass ? "Loading..." : className}
+                  </div>
+                  <div>
+                    <b>Admission Date:</b> {user.admissionDate || "-"}
+                  </div>
+                  <div>
+                    <b>Phone:</b> {user.studentPhone || "-"}
+                  </div>
+                  <div>
+                    <b>Email:</b> {user.email || "-"}
+                  </div>
                 </div>
               </div>
             </div>
