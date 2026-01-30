@@ -44,7 +44,7 @@ export default function TeacherAddMarks() {
   /* ================= AUTH & SESSION ================= */
   const teacherId = localStorage.getItem("userId");
 
-  // ✅ FINAL FIX: sessionId localStorage se READ hogi
+
   const storedSession = JSON.parse(localStorage.getItem("activeSession"));
   const sessionId = storedSession?.id || 1;
 
