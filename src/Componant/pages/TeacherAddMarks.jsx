@@ -34,16 +34,48 @@ const EXAMS = ["Monthly Exam", "Midsem", "Final"];
 
 /* ===== CLASS NAME → CATEGORY ===== */
 const getCategoryByClassName = (name = "") => {
-  if (name.toLowerCase() === "primary") return "PRIMARY";
-  if (/class\s?[1-5]/i.test(name)) return "MIDDLE";
-  if (/class\s?[6-8]/i.test(name)) return "SECONDARY";
+  const lower = name.toLowerCase();
+
+  // 🔹 NURSERY / LKG / UKG / PRIMARY WORD
+  if (
+    lower.includes("nursery") ||
+    lower.includes("lkg") ||
+    lower.includes("ukg") ||
+    lower.includes("primary")
+  ) {
+    return "PRIMARY";
+  }
+
+  // 🔹 CLASS 1 TO 5
+  if (
+    lower.includes("1st") ||
+    lower.includes("2nd") ||
+    lower.includes("3rd") ||
+    lower.includes("4th") ||
+    lower.includes("5th")
+  ) {
+    return "MIDDLE";
+  }
+
+  // 🔹 CLASS 6 TO 8
+  if (
+    lower.includes("6th") ||
+    lower.includes("7th") ||
+    lower.includes("8th")
+  ) {
+    return "SECONDARY";
+  }
+
   return null;
 };
+
+
 
 export default function TeacherAddMarks() {
   /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
+<<<<<<< HEAD
   /* ================= ACTIVE SESSION (DB) ================= */
   const [sessionId, setSessionId] = useState(null);
   const [sessionName, setSessionName] = useState("");
@@ -79,6 +111,11 @@ export default function TeacherAddMarks() {
 
     loadActiveSession();
   }, []);
+=======
+
+  const storedSession = JSON.parse(localStorage.getItem("activeSession"));
+  const sessionId = storedSession?.id || 1;
+>>>>>>> 4e6a814dd3636bfd5c884e5075b59ee94ad58bf1
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);

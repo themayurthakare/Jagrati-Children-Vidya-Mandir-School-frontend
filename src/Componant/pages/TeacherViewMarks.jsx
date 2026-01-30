@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ViewMarks.css";
 
+
 export default function ViewMarks() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [classFilter, setClassFilter] = useState("");
   const [examFilter, setExamFilter] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const navigate = useNavigate();
 
@@ -28,9 +28,8 @@ export default function ViewMarks() {
 
       const formatted = data.map((m) => {
         const percentage = m.percentage ?? 0;
-
         return {
-          marksId: m.marksId, // 🔥 MUST
+          marksId: m.marksId, // 🔥 VERY IMPORTANT
           name: m.studentName,
           className: m.className,
           exam: m.examType,
@@ -38,8 +37,6 @@ export default function ViewMarks() {
           remarks: percentage >= 35 ? "Pass" : "Fail",
         };
       });
-
-      setStudents(formatted); // ❗ ensure yahi array render ho
 
       setStudents(formatted);
     } catch (err) {
@@ -52,15 +49,13 @@ export default function ViewMarks() {
   const filteredStudents = students.filter(
     (s) =>
       (classFilter === "" || s.className === classFilter) &&
-      (examFilter === "" || s.exam === examFilter),
+      (examFilter === "" || s.exam === examFilter)
   );
 
   const classes = [...new Set(students.map((s) => s.className))];
   const exams = [...new Set(students.map((s) => s.exam))];
 
-  if (loading) {
-    return <div className="loading">Loading marks data...</div>;
-  }
+  if (loading) return <div className="loading">Loading marks data...</div>;
 
   return (
     <div className="view-container">
@@ -70,27 +65,17 @@ export default function ViewMarks() {
 
       {/* FILTERS */}
       <div className="filter-row">
-        <select
-          value={classFilter}
-          onChange={(e) => setClassFilter(e.target.value)}
-        >
+        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
           <option value="">All Classes</option>
           {classes.map((cls) => (
-            <option key={cls} value={cls}>
-              {cls}
-            </option>
+            <option key={cls} value={cls}>{cls}</option>
           ))}
         </select>
 
-        <select
-          value={examFilter}
-          onChange={(e) => setExamFilter(e.target.value)}
-        >
+        <select value={examFilter} onChange={(e) => setExamFilter(e.target.value)}>
           <option value="">All Exams</option>
           {exams.map((exam) => (
-            <option key={exam} value={exam}>
-              {exam}
-            </option>
+            <option key={exam} value={exam}>{exam}</option>
           ))}
         </select>
       </div>
@@ -109,7 +94,7 @@ export default function ViewMarks() {
           </tr>
         </thead>
         <tbody>
-          {students.map((s, i) => (
+          {filteredStudents.map((s, i) => (
             <tr key={s.marksId}>
               <td>{i + 1}</td>
               <td>{s.name}</td>
@@ -118,22 +103,12 @@ export default function ViewMarks() {
               <td>{s.percentage}%</td>
               <td>{s.remarks}</td>
               <td>
+                {/* ✅ ONLY EDIT BUTTON */}
                 <button
                   className="edit-btn"
-                  onClick={() => {
-                    console.log("EDIT MARKS ID:", s.marksId);
-                    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
-                  }}
-                >
-                  View
-                </button>
-
-                <button
-                  className="edit-btn"
-                  onClick={() => {
-                    console.log("EDIT MARKS ID:", s.marksId);
-                    navigate(`/teacherdashboard/edit-marks/${s.marksId}`);
-                  }}
+                  onClick={() =>
+                    navigate(`/teacherdashboard/edit-marks/${s.marksId}`)
+                  }
                 >
                   Edit
                 </button>
@@ -143,26 +118,11 @@ export default function ViewMarks() {
 
           {filteredStudents.length === 0 && (
             <tr>
-              <td colSpan="7" className="no-data">
-                No records found
-              </td>
+              <td colSpan="7" className="no-data">No records found</td>
             </tr>
           )}
         </tbody>
       </table>
-
-      {/* MODAL (unchanged) */}
-      {selectedStudent && (
-        <div className="modal-overlay" onClick={() => setSelectedStudent(null)}>
-          <div className="report-card" onClick={(e) => e.stopPropagation()}>
-            <h3>{selectedStudent.name}</h3>
-            <p>Class: {selectedStudent.className}</p>
-            <p>Exam: {selectedStudent.exam}</p>
-            <p>Percentage: {selectedStudent.percentage}%</p>
-            <button onClick={() => setSelectedStudent(null)}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
