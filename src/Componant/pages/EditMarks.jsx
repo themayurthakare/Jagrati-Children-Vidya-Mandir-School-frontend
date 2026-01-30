@@ -1,27 +1,77 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/EditMarks.css";
 
-/* ===== SUBJECT LABELS ===== */
-const SUBJECT_LABELS = {
-  marathi: "Marathi",
-  hindi: "Hindi",
-  english: "English",
-  maths: "Maths",
-  science: "Science",
-  socialScience: "Social Science",
-  evs: "EVS",
-  computer: "Computer",
-  gk: "GK",
-  drawing: "Drawing",
-  sanskrit: "Sanskrit",
+/* ===== SUBJECTS BY CATEGORY (SAME AS ADD MARKS) ===== */
+const SUBJECT_BY_CATEGORY = {
+  PRIMARY: [
+    { key: "hindi", label: "Hindi" },
+    { key: "english", label: "English" },
+    { key: "maths", label: "Maths" },
+    { key: "gk", label: "GK" },
+    { key: "drawing", label: "Drawing" },
+  ],
+
+  MIDDLE: [
+    { key: "hindi", label: "Hindi" },
+    { key: "english", label: "English" },
+    { key: "maths", label: "Maths" },
+    { key: "computer", label: "Computer" },
+    { key: "gk", label: "GK" },
+    { key: "drawing", label: "Drawing" },
+    { key: "evs", label: "EVS" },
+  ],
+
+  SECONDARY: [
+    { key: "hindi", label: "Hindi" },
+    { key: "english", label: "English" },
+    { key: "maths", label: "Maths" },
+    { key: "science", label: "Science" },
+    { key: "socialScience", label: "Social Science" },
+    { key: "sanskrit", label: "Sanskrit" },
+    { key: "gk", label: "GK" },
+  ],
+};
+
+/* ===== CLASS → CATEGORY (SAME AS ADD MARKS) ===== */
+const getCategoryByClassName = (name = "") => {
+  const lower = name.toLowerCase();
+
+  // Nursery / LKG / UKG
+  if (
+    lower.includes("nursery") ||
+    lower.includes("lkg") ||
+    lower.includes("ukg") ||
+    lower.includes("primary")
+  ) {
+    return "PRIMARY";
+  }
+
+  // Class 1 to 5
+  if (
+    lower.includes("1st") ||
+    lower.includes("2nd") ||
+    lower.includes("3rd") ||
+    lower.includes("4th") ||
+    lower.includes("5th")
+  ) {
+    return "MIDDLE";
+  }
+
+  // Class 6 to 8
+  if (
+    lower.includes("6th") ||
+    lower.includes("7th") ||
+    lower.includes("8th")
+  ) {
+    return "SECONDARY";
+  }
+
+  return null;
 };
 
 export default function EditMarks() {
-  // ✅ CORRECT PARAM
   const { marksId } = useParams();
-  console.log("ROUTE PARAMS:", { marksId });
-
   const navigate = useNavigate();
 
   const [marks, setMarks] = useState({});
@@ -47,13 +97,15 @@ export default function EditMarks() {
         if (!res.ok) throw new Error("Failed to fetch marks");
 
         const record = await res.json();
-        console.log("RECORD FROM API:", record);
 
+        // save all marks
         setMarks(record);
+
+        // save student info
         setStudentInfo({
-          name: record.studentName,
-          className: record.className,
-          examType: record.examType,
+          name: record.studentName || "",
+          className: record.className || "",
+          examType: record.examType || "",
         });
       } catch (err) {
         setError(err.message);
@@ -65,20 +117,29 @@ export default function EditMarks() {
     fetchMarks();
   }, [marksId]);
 
-  const subjects = Object.keys(SUBJECT_LABELS);
+  /* ================= CATEGORY & SUBJECTS ================= */
+  const category = useMemo(
+    () => getCategoryByClassName(studentInfo.className),
+    [studentInfo.className]
+  );
 
+  const activeSubjects = SUBJECT_BY_CATEGORY[category] || [];
+
+  /* ================= CHANGE ================= */
   const handleChange = (key, value) => {
     setMarks((prev) => ({ ...prev, [key]: value }));
   };
 
+  /* ================= SAVE ================= */
   const handleSave = async () => {
     try {
       setSaving(true);
       setError("");
 
+      // send ONLY allowed subjects
       const payload = {};
-      subjects.forEach((s) => {
-        payload[s] = Number(marks[s]) || 0;
+      activeSubjects.forEach((s) => {
+        payload[s.key] = Number(marks[s.key]) || 0;
       });
 
       const res = await fetch(`http://localhost:8080/api/marks/${marksId}`, {
@@ -106,15 +167,9 @@ export default function EditMarks() {
       {error && <div className="error-message">{error}</div>}
 
       <div className="student-info">
-        <p>
-          <strong>Name:</strong> {studentInfo.name}
-        </p>
-        <p>
-          <strong>Class:</strong> {studentInfo.className}
-        </p>
-        <p>
-          <strong>Exam:</strong> {studentInfo.examType}
-        </p>
+        <p><strong>Name:</strong> {studentInfo.name}</p>
+        <p><strong>Class:</strong> {studentInfo.className}</p>
+        <p><strong>Exam:</strong> {studentInfo.examType}</p>
       </div>
 
       <table className="edit-marks-table">
@@ -125,16 +180,18 @@ export default function EditMarks() {
           </tr>
         </thead>
         <tbody>
-          {subjects.map((key) => (
-            <tr key={key}>
-              <td>{SUBJECT_LABELS[key]}</td>
+          {activeSubjects.map((sub) => (
+            <tr key={sub.key}>
+              <td>{sub.label}</td>
               <td>
                 <input
                   type="number"
                   min="0"
                   max="100"
-                  value={marks[key] ?? ""}
-                  onChange={(e) => handleChange(key, e.target.value)}
+                  value={marks[sub.key] ?? ""}
+                  onChange={(e) =>
+                    handleChange(sub.key, e.target.value)
+                  }
                 />
               </td>
             </tr>

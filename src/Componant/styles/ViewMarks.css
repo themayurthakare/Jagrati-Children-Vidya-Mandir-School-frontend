@@ -289,3 +289,91 @@
 .edit-btn:hover {
   background-color: #e0a800;
 }
+
+/* ================= VIEW MARKS PAGE ================= */
+
+.view-container {
+  padding: 20px;
+}
+
+/* FILTER ROW */
+.filter-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-row select {
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* ================= TABLE ================= */
+
+.view-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* HEADER */
+.view-table thead {
+  background: #0d6efd;
+  color: white;
+}
+
+.view-table th,
+.view-table td {
+  padding: 14px 16px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* NAME LEFT ALIGN */
+.view-table td:nth-child(2) {
+  text-align: left;
+}
+
+/* ACTION COLUMN */
+.view-table th:last-child,
+.view-table td:last-child {
+  width: 120px;
+}
+
+/* ROW HOVER */
+.view-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+/* ================= BUTTON ================= */
+
+.edit-btn {
+  background: #ffc107;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.edit-btn:hover {
+  background: #ffb300;
+}
+
+/* ================= EMPTY STATE ================= */
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  font-weight: 500;
+}
+
+/* ================= LOADING ================= */
+
+.loading {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+}
