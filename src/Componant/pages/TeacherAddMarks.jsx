@@ -58,64 +58,19 @@ const getCategoryByClassName = (name = "") => {
   }
 
   // 🔹 CLASS 6 TO 8
-  if (
-    lower.includes("6th") ||
-    lower.includes("7th") ||
-    lower.includes("8th")
-  ) {
+  if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
     return "SECONDARY";
   }
 
   return null;
 };
 
-
-
 export default function TeacherAddMarks() {
   /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
-<<<<<<< HEAD
-  /* ================= ACTIVE SESSION (DB) ================= */
-  const [sessionId, setSessionId] = useState(null);
-  const [sessionName, setSessionName] = useState("");
-
-  // ✅ Load active session from backend
-  useEffect(() => {
-    const loadActiveSession = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/sessions/active");
-
-        if (!res.ok) {
-          throw new Error("No active session found");
-        }
-
-        const data = await res.json();
-
-        // ✅ Set in state
-        setSessionId(data.sessionId);
-        setSessionName(data.name);
-
-        // ✅ (Optional) store in localStorage
-        localStorage.setItem(
-          "activeSession",
-          JSON.stringify({ id: data.sessionId, name: data.name }),
-        );
-      } catch (err) {
-        console.error("Active session fetch error:", err);
-        setSessionId(null);
-        setSessionName("");
-        localStorage.removeItem("activeSession");
-      }
-    };
-
-    loadActiveSession();
-  }, []);
-=======
-
   const storedSession = JSON.parse(localStorage.getItem("activeSession"));
   const sessionId = storedSession?.id || 1;
->>>>>>> 4e6a814dd3636bfd5c884e5075b59ee94ad58bf1
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
