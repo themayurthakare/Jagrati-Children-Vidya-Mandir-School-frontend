@@ -36,7 +36,6 @@ const EXAMS = ["Monthly Exam", "Midsem", "Final"];
 const getCategoryByClassName = (name = "") => {
   const lower = name.toLowerCase();
 
-  // 🔹 NURSERY / LKG / UKG / PRIMARY WORD
   if (
     lower.includes("nursery") ||
     lower.includes("lkg") ||
@@ -46,7 +45,6 @@ const getCategoryByClassName = (name = "") => {
     return "PRIMARY";
   }
 
-  // 🔹 CLASS 1 TO 5
   if (
     lower.includes("1st") ||
     lower.includes("2nd") ||
@@ -57,7 +55,6 @@ const getCategoryByClassName = (name = "") => {
     return "MIDDLE";
   }
 
-  // 🔹 CLASS 6 TO 8
   if (
     lower.includes("6th") ||
     lower.includes("7th") ||
@@ -69,15 +66,25 @@ const getCategoryByClassName = (name = "") => {
   return null;
 };
 
-
-
 export default function TeacherAddMarks() {
   /* ================= AUTH & SESSION ================= */
   const teacherId = localStorage.getItem("userId");
 
+  // ✅ FINAL SAFE SESSION HANDLING (Admin + Teacher compatible)
+  let sessionId = null;
+  try {
+    const activeSession = JSON.parse(localStorage.getItem("activeSession"));
+    const selectedSession = JSON.parse(localStorage.getItem("selectedSession"));
 
-  const storedSession = JSON.parse(localStorage.getItem("activeSession"));
-  const sessionId = storedSession?.id || 1;
+    sessionId =
+      activeSession?.id ||
+      activeSession?.sessionId ||
+      selectedSession?.id ||
+      selectedSession?.sessionId ||
+      null;
+  } catch (e) {
+    sessionId = null;
+  }
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
@@ -160,7 +167,6 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
-    // ✅ HARD VALIDATION (MOST IMPORTANT)
     if (!teacherId) {
       alert("Teacher not logged in");
       return;
@@ -172,7 +178,7 @@ export default function TeacherAddMarks() {
     }
 
     if (!sessionId) {
-      alert("Academic session not selected. Please contact admin.");
+      alert("Kindly select an academic session to continue.");
       return;
     }
 
