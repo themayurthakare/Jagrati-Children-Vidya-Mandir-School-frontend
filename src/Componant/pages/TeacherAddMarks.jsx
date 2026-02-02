@@ -67,24 +67,31 @@ const getCategoryByClassName = (name = "") => {
 };
 
 export default function TeacherAddMarks() {
-  /* ================= AUTH & SESSION ================= */
+  /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
-  // ✅ FINAL SAFE SESSION HANDLING (Admin + Teacher compatible)
-  let sessionId = null;
-  try {
-    const activeSession = JSON.parse(localStorage.getItem("activeSession"));
-    const selectedSession = JSON.parse(localStorage.getItem("selectedSession"));
+  /* ================= SESSION (FROM DATABASE) ================= */
+  const [sessionId, setSessionId] = useState(null);
+  const [loadingSession, setLoadingSession] = useState(true);
 
-    sessionId =
-      activeSession?.id ||
-      activeSession?.sessionId ||
-      selectedSession?.id ||
-      selectedSession?.sessionId ||
-      null;
-  } catch (e) {
-    sessionId = null;
-  }
+  useEffect(() => {
+    const fetchActiveSession = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/sessions/active");
+        if (!res.ok) throw new Error("No active session");
+
+        const data = await res.json();
+        setSessionId(data.id); // ✅ ACTIVE session from DB
+      } catch (e) {
+        console.error("Active session fetch failed", e);
+        setSessionId(null);
+      } finally {
+        setLoadingSession(false);
+      }
+    };
+
+    fetchActiveSession();
+  }, []);
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
@@ -98,7 +105,7 @@ export default function TeacherAddMarks() {
     const fetchClasses = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/teachers/${teacherId}/classes`,
+          `http://localhost:8080/api/teachers/${teacherId}/classes`
         );
         if (!res.ok) throw new Error();
         const data = await res.json();
@@ -128,7 +135,7 @@ export default function TeacherAddMarks() {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`,
+        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`
       );
 
       if (!res.ok) {
@@ -178,7 +185,7 @@ export default function TeacherAddMarks() {
     }
 
     if (!sessionId) {
-      alert("Kindly select an academic session to continue.");
+      alert("Active academic session not found.");
       return;
     }
 
@@ -202,11 +209,9 @@ export default function TeacherAddMarks() {
         sessionId: Number(sessionId),
         examType,
         ...Object.fromEntries(
-          activeSubjects.map((s) => [s.key, Number(r[s.key]) || 0]),
+          activeSubjects.map((s) => [s.key, Number(r[s.key]) || 0])
         ),
       }));
-
-      console.log("FINAL MARKS PAYLOAD:", payload);
 
       const res = await fetch("http://localhost:8080/api/marks/bulk", {
         method: "POST",
@@ -215,8 +220,6 @@ export default function TeacherAddMarks() {
       });
 
       if (!res.ok) {
-        const err = await res.text();
-        console.error("SAVE MARKS ERROR:", err);
         alert("Marks save failed ❌");
         return;
       }
@@ -231,6 +234,10 @@ export default function TeacherAddMarks() {
   };
 
   /* ================= UI ================= */
+  if (loadingSession) {
+    return <div className="marks-container">Loading academic session...</div>;
+  }
+
   return (
     <div className="marks-container">
       <h2>Add Student Marks</h2>
@@ -240,7 +247,7 @@ export default function TeacherAddMarks() {
           value={selectedClass?.classId || ""}
           onChange={(e) =>
             setSelectedClass(
-              classes.find((c) => c.classId === Number(e.target.value)),
+              classes.find((c) => c.classId === Number(e.target.value))
             )
           }
         >
