@@ -36,7 +36,6 @@ const EXAMS = ["Monthly Exam", "Midsem", "Final"];
 const getCategoryByClassName = (name = "") => {
   const lower = name.toLowerCase();
 
-  // 🔹 NURSERY / LKG / UKG / PRIMARY WORD
   if (
     lower.includes("nursery") ||
     lower.includes("lkg") ||
@@ -46,7 +45,6 @@ const getCategoryByClassName = (name = "") => {
     return "PRIMARY";
   }
 
-  // 🔹 CLASS 1 TO 5
   if (
     lower.includes("1st") ||
     lower.includes("2nd") ||
@@ -57,8 +55,16 @@ const getCategoryByClassName = (name = "") => {
     return "MIDDLE";
   }
 
+<<<<<<< HEAD
   // 🔹 CLASS 6 TO 8
   if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
+=======
+  if (
+    lower.includes("6th") ||
+    lower.includes("7th") ||
+    lower.includes("8th")
+  ) {
+>>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
     return "SECONDARY";
   }
 
@@ -69,8 +75,26 @@ export default function TeacherAddMarks() {
   /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
+<<<<<<< HEAD
   const storedSession = JSON.parse(localStorage.getItem("activeSession"));
   const sessionId = storedSession?.id || 1;
+=======
+  // ✅ FINAL SAFE SESSION HANDLING (Admin + Teacher compatible)
+  let sessionId = null;
+  try {
+    const activeSession = JSON.parse(localStorage.getItem("activeSession"));
+    const selectedSession = JSON.parse(localStorage.getItem("selectedSession"));
+
+    sessionId =
+      activeSession?.id ||
+      activeSession?.sessionId ||
+      selectedSession?.id ||
+      selectedSession?.sessionId ||
+      null;
+  } catch (e) {
+    sessionId = null;
+  }
+>>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
@@ -153,7 +177,10 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
+<<<<<<< HEAD
     // ✅ HARD VALIDATION
+=======
+>>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
     if (!teacherId) {
       alert("Teacher not logged in");
       return;
@@ -165,7 +192,11 @@ export default function TeacherAddMarks() {
     }
 
     if (!sessionId) {
+<<<<<<< HEAD
       alert("Academic session not active. Please contact admin.");
+=======
+      alert("Kindly select an academic session to continue.");
+>>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
       return;
     }
 
