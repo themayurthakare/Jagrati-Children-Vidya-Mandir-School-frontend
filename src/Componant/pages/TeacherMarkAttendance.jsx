@@ -168,7 +168,7 @@ const TeacherMarkAttendance = () => {
           <table className="attendance-table">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Sr No</th>
                 <th>Student Name</th>
                 <th>Status</th>
               </tr>

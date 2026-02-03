@@ -121,7 +121,7 @@ const TeacherViewEnrolledStudents = () => {
           <table className="students-table">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Sr No</th>
                 <th>Name</th>
                 <th>Gender</th>
                 <th>Contact</th>
