@@ -55,16 +55,7 @@ const getCategoryByClassName = (name = "") => {
     return "MIDDLE";
   }
 
-<<<<<<< HEAD
-  // 🔹 CLASS 6 TO 8
   if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
-=======
-  if (
-    lower.includes("6th") ||
-    lower.includes("7th") ||
-    lower.includes("8th")
-  ) {
->>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
     return "SECONDARY";
   }
 
@@ -75,10 +66,6 @@ export default function TeacherAddMarks() {
   /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
-<<<<<<< HEAD
-  const storedSession = JSON.parse(localStorage.getItem("activeSession"));
-  const sessionId = storedSession?.id || 1;
-=======
   // ✅ FINAL SAFE SESSION HANDLING (Admin + Teacher compatible)
   let sessionId = null;
   try {
@@ -94,7 +81,6 @@ export default function TeacherAddMarks() {
   } catch (e) {
     sessionId = null;
   }
->>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
 
   /* ================= STATE ================= */
   const [classes, setClasses] = useState([]);
@@ -177,10 +163,6 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
-<<<<<<< HEAD
-    // ✅ HARD VALIDATION
-=======
->>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
     if (!teacherId) {
       alert("Teacher not logged in");
       return;
@@ -192,11 +174,7 @@ export default function TeacherAddMarks() {
     }
 
     if (!sessionId) {
-<<<<<<< HEAD
-      alert("Academic session not active. Please contact admin.");
-=======
       alert("Kindly select an academic session to continue.");
->>>>>>> 32a991163ea9c3df4013d6f3593e349fffe1fb8f
       return;
     }
 

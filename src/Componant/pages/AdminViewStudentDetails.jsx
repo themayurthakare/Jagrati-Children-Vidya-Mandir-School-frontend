@@ -40,13 +40,13 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                 c.classId === classId ||
                 c.id === classId ||
                 String(c.classId) === String(classId) ||
-                String(c.id) === String(classId)
+                String(c.id) === String(classId),
             )
           : null;
 
         if (classObj) {
           setClassName(
-            classObj.className || classObj.name || `Class ${classId}`
+            classObj.className || classObj.name || `Class ${classId}`,
           );
         } else {
           setClassName(`Class ${classId}`);
@@ -84,7 +84,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
             `${apiBase}/api/documents/download/${userId}/${type}`,
             {
               method: "GET",
-            }
+            },
           );
 
           if (response.ok) {
@@ -115,7 +115,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               (doc.endpoint &&
                 (doc.endpoint.toUpperCase().includes("PHOTO") ||
                   doc.endpoint.toUpperCase().includes("IMAGE") ||
-                  doc.endpoint.toUpperCase().includes("PROFILE")))
+                  doc.endpoint.toUpperCase().includes("PROFILE"))),
           );
 
           if (photoDoc && photoDoc.url) {
@@ -126,7 +126,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
               const photoResponse = await fetch(
                 `${apiBase}/api/documents/download/${userId}/${
                   photoDoc.type || photoDoc.endpoint
-                }`
+                }`,
               );
               if (photoResponse.ok) {
                 const blob = await photoResponse.blob();
@@ -164,7 +164,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       setError(null);
       try {
         const res = await fetch(
-          `${apiBase}/api/users/${sessionId}/${studentId}`
+          `${apiBase}/api/users/${sessionId}/${studentId}`,
         );
 
         if (res.status === 404) {
@@ -235,7 +235,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
       }
 
       const downloadUrl = `${apiBase}/api/documents/download/${userId}/${encodeURIComponent(
-        type
+        type,
       )}`;
       window.open(downloadUrl, "_blank");
     } catch (err) {
@@ -598,7 +598,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                         : "-"
                     }</td>
                   </tr>
-                `
+                `,
                   )
                   .join("")}
               </tbody>
@@ -619,7 +619,7 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                   year: "numeric",
                   hour: "2-digit",
                   minute: "2-digit",
-                }
+                },
               )}
             </div>
             <div class="signature-section">
@@ -789,6 +789,12 @@ const AdminViewStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
                     <span className="vsd-header-label">Email:</span>
                     <span className="vsd-header-value">
                       {user.email || "—"}
+                    </span>
+                  </div>
+                  <div className="vsd-header-item">
+                    <span className="vsd-header-label">Password:</span>
+                    <span className="vsd-header-value">
+                      {user.password || "—"}
                     </span>
                   </div>
                 </div>
