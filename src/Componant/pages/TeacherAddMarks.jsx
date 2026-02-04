@@ -36,14 +36,8 @@ const EXAMS = ["Monthly Exam", "Midsem", "Final"];
 const getCategoryByClassName = (name = "") => {
   const lower = name.toLowerCase();
 
-  if (
-    lower.includes("nursery") ||
-    lower.includes("lkg") ||
-    lower.includes("ukg") ||
-    lower.includes("primary")
-  ) {
+  if (lower.includes("nursery") || lower.includes("lkg") || lower.includes("ukg"))
     return "PRIMARY";
-  }
 
   if (
     lower.includes("1st") ||
@@ -51,13 +45,11 @@ const getCategoryByClassName = (name = "") => {
     lower.includes("3rd") ||
     lower.includes("4th") ||
     lower.includes("5th")
-  ) {
+  )
     return "MIDDLE";
-  }
 
-  if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
+  if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th"))
     return "SECONDARY";
-  }
 
   return null;
 };
@@ -66,27 +58,38 @@ export default function TeacherAddMarks() {
   /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
-  /* ================= SESSION (FROM DATABASE) ================= */
+  /* ================= SESSION ================= */
   const [sessionId, setSessionId] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
 
   useEffect(() => {
-    const fetchActiveSession = async () => {
-      try {
-        const res = await fetch("http://localhost:8080/api/sessions/active");
-        if (!res.ok) throw new Error("No active session");
+    const initSession = async () => {
+      // 1️⃣ Try localStorage first
+      const savedId = localStorage.getItem("sessionId");
+      if (savedId) {
+        setSessionId(Number(savedId));
+        setLoadingSession(false);
+        return;
+      }
 
+      // 2️⃣ Fallback → active session from DB
+      try {
+        const res = await fetch("http://localhost:8080/api/sessions/getAll");
         const data = await res.json();
-        setSessionId(data.id); // ✅ ACTIVE session from DB
+
+        const active = data.find((s) => s.active === true);
+        if (active) {
+          localStorage.setItem("sessionId", active.sessionId);
+          setSessionId(active.sessionId);
+        }
       } catch (e) {
-        console.error("Active session fetch failed", e);
-        setSessionId(null);
+        console.error("Session init failed", e);
       } finally {
         setLoadingSession(false);
       }
     };
 
-    fetchActiveSession();
+    initSession();
   }, []);
 
   /* ================= STATE ================= */
@@ -103,7 +106,6 @@ export default function TeacherAddMarks() {
         const res = await fetch(
           `http://localhost:8080/api/teachers/${teacherId}/classes`
         );
-        if (!res.ok) throw new Error();
         const data = await res.json();
         setClasses(data);
       } catch {
@@ -114,7 +116,7 @@ export default function TeacherAddMarks() {
     if (teacherId) fetchClasses();
   }, [teacherId]);
 
-  /* ================= SUBJECTS BY SELECTED CLASS ================= */
+  /* ================= SUBJECTS ================= */
   const category = useMemo(() => {
     return selectedClass
       ? getCategoryByClassName(selectedClass.className)
@@ -133,12 +135,6 @@ export default function TeacherAddMarks() {
       const res = await fetch(
         `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`
       );
-
-      if (!res.ok) {
-        setRows([]);
-        return;
-      }
-
       const data = await res.json();
 
       const formatted = data.map((s, index) => {
@@ -170,30 +166,10 @@ export default function TeacherAddMarks() {
 
   /* ================= SAVE MARKS ================= */
   const handleSave = async () => {
-    if (!teacherId) {
-      alert("Teacher not logged in");
-      return;
-    }
-
-    if (!selectedClass?.classId) {
-      alert("Please select class");
-      return;
-    }
-
-    if (!sessionId) {
-      alert("Active academic session not found.");
-      return;
-    }
-
-    if (!examType) {
-      alert("Please select exam");
-      return;
-    }
-
-    if (rows.length === 0) {
-      alert("No students found");
-      return;
-    }
+    if (!teacherId) return alert("Teacher not logged in");
+    if (!selectedClass) return alert("Please select class");
+    if (!sessionId) return alert("Academic session not set");
+    if (!examType) return alert("Please select exam");
 
     try {
       setSaving(true);
@@ -215,15 +191,10 @@ export default function TeacherAddMarks() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        alert("Marks save failed ❌");
-        return;
-      }
-
+      if (!res.ok) throw new Error();
       alert("Marks saved successfully ✅");
-    } catch (e) {
-      console.error(e);
-      alert("Server error");
+    } catch {
+      alert("Marks save failed ❌");
     } finally {
       setSaving(false);
     }
@@ -237,12 +208,6 @@ export default function TeacherAddMarks() {
   return (
     <div className="marks-container">
       <h2>Add Student Marks</h2>
-
-      {/* ✅ Active session display */}
-      <div style={{ marginBottom: 10, fontSize: 14 }}>
-        <b>Active Session:</b>{" "}
-        {sessionName ? sessionName : "Not Active (Contact Admin)"}
-      </div>
 
       <div className="filter-row">
         <select
@@ -283,13 +248,11 @@ export default function TeacherAddMarks() {
                 ))}
               </tr>
             </thead>
-
             <tbody>
               {rows.map((row, i) => (
                 <tr key={row.id}>
                   <td>{row.srno}</td>
                   <td>{row.name}</td>
-
                   {activeSubjects.map((sub) => (
                     <td key={sub.key}>
                       <input
