@@ -237,7 +237,20 @@ const AdminMarksheetStudents = () => {
                       {student.studentPhone || student.parentPhone || "N/A"}
                     </td>
                     <td>
-                      <button className="payment-btn">print marksheet</button>
+                      <button
+                        className="payment-btn"
+                        onClick={() =>
+                          navigate("/admindashboard/print-marksheet", {
+                            state: {
+                              studentId: student.userId,
+                              sessionId: selectedSession.id,
+                              className: className,
+                            },
+                          })
+                        }
+                      >
+                        Print Marksheet
+                      </button>
                     </td>
                   </tr>
                 ))}

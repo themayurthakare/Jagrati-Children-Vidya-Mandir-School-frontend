@@ -1,0 +1,196 @@
+@media print {
+    body {
+        margin: 0;
+    }
+
+    .ms-controls {
+        display: none;
+    }
+}
+
+/* ================= PAGE LAYOUT ================= */
+
+.ms-page-wrapper {
+    display: flex;
+    justify-content: center;
+    padding-bottom: 40px;
+}
+
+.ms-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 10px;
+    border: 2px solid red;
+    background-image:
+        linear-gradient(#e5e5e5 1px, transparent 1px),
+        linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+    background-size: 25px 25px;
+    font-family: "Times New Roman";
+}
+
+/* ================= HEADER ================= */
+
+.ms-recognized {
+    text-align: center;
+    color: red;
+    font-size: 14px;
+}
+
+.ms-school-name {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    color: #556b2f;
+}
+
+.ms-school-address {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.ms-class-session {
+    text-align: center;
+    font-weight: bold;
+}
+
+.ms-dise {
+    text-align: center;
+    font-size: 13px;
+    color: gray;
+}
+
+/* ================= COMMON TABLE ================= */
+
+.ms-top-table,
+.ms-student-table,
+.ms-marks-table,
+.ms-grade-result {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.ms-top-table th,
+.ms-top-table td,
+.ms-student-table th,
+.ms-student-table td,
+.ms-marks-table th,
+.ms-marks-table td,
+.ms-grade-result th,
+.ms-grade-result td {
+    border: 2px solid #5b7f3a;
+    text-align: center;
+    font-size: 13px;
+    padding: 4px;
+}
+
+/* ================= TABLE HEADERS ================= */
+
+.ms-top-table th,
+.ms-student-table th,
+.ms-marks-table th,
+.ms-grade-result th {
+    background: #dfecc2;
+    font-weight: bold;
+}
+
+/* ================= STUDENT DETAILS ================= */
+
+.ms-student-table td {
+    text-align: left;
+    background: #ffffff;
+}
+
+.ms-label {
+    font-weight: bold;
+}
+
+/* ================= MARK SHEET TITLE ================= */
+
+.ms-marksheet-title {
+    margin-top: 20px;
+    background: #dfecc2;
+    border: 2px solid #5b7f3a;
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* ================= MARKS TABLE ================= */
+
+.ms-marks-table {
+    table-layout: fixed;
+    word-break: break-word;
+}
+
+.ms-bold {
+    font-weight: bold;
+}
+
+/* ================= RESULT ================= */
+
+.ms-result {
+    color: red;
+    font-size: 32px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+/* ================= CONTROLS ================= */
+
+.ms-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+}
+
+.ms-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ms-btn.print {
+    background: #2e7d32;
+    color: white;
+}
+
+.ms-btn.refresh {
+    background: #0277bd;
+    color: white;
+}
+
+.ms-btn.back {
+    background: #555;
+    color: white;
+}
+
+/* ================= SIGNATURE SECTION ================= */
+
+.ms-signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 70px;
+    padding: 0 20px;
+}
+
+.ms-sign-box {
+    width: 30%;
+    text-align: center;
+}
+
+.ms-sign-line {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.ms-sign-label {
+    font-size: 14px;
+    font-weight: bold;
+}

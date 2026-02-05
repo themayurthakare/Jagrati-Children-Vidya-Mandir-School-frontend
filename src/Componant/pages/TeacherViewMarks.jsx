@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/ViewMarks.css";
 
-
 export default function ViewMarks() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +48,7 @@ export default function ViewMarks() {
   const filteredStudents = students.filter(
     (s) =>
       (classFilter === "" || s.className === classFilter) &&
-      (examFilter === "" || s.exam === examFilter)
+      (examFilter === "" || s.exam === examFilter),
   );
 
   const classes = [...new Set(students.map((s) => s.className))];
@@ -65,17 +64,27 @@ export default function ViewMarks() {
 
       {/* FILTERS */}
       <div className="filter-row">
-        <select value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
+        <select
+          value={classFilter}
+          onChange={(e) => setClassFilter(e.target.value)}
+        >
           <option value="">All Classes</option>
           {classes.map((cls) => (
-            <option key={cls} value={cls}>{cls}</option>
+            <option key={cls} value={cls}>
+              {cls}
+            </option>
           ))}
         </select>
 
-        <select value={examFilter} onChange={(e) => setExamFilter(e.target.value)}>
+        <select
+          value={examFilter}
+          onChange={(e) => setExamFilter(e.target.value)}
+        >
           <option value="">All Exams</option>
           {exams.map((exam) => (
-            <option key={exam} value={exam}>{exam}</option>
+            <option key={exam} value={exam}>
+              {exam}
+            </option>
           ))}
         </select>
       </div>
@@ -118,7 +127,9 @@ export default function ViewMarks() {
 
           {filteredStudents.length === 0 && (
             <tr>
-              <td colSpan="7" className="no-data">No records found</td>
+              <td colSpan="7" className="no-data">
+                No records found
+              </td>
             </tr>
           )}
         </tbody>

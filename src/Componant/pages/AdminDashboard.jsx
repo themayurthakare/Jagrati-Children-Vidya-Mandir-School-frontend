@@ -50,6 +50,7 @@ import AdminGenerateTC from "./AdminGenerateTC";
 import ViewTCStudents from "./ViewTCStudents";
 import AdminMarksheetClass from "./AdminMarksheetClasses";
 import AdminMarksheetStudents from "./AdminMarksheetStudents";
+import AdminPrintMarksheet from "./AdminPrintMarksheet";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -337,6 +338,7 @@ const AdminDashboard = () => {
               path="generate-marksheet"
               element={<AdminMarksheetStudents />}
             />
+            <Route path="print-marksheet" element={<AdminPrintMarksheet />} />
           </Routes>
         </main>
       </SessionProvider>
