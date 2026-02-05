@@ -59,11 +59,7 @@ const getCategoryByClassName = (name = "") => {
   }
 
   // Class 6 to 8
-  if (
-    lower.includes("6th") ||
-    lower.includes("7th") ||
-    lower.includes("8th")
-  ) {
+  if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
     return "SECONDARY";
   }
 
@@ -120,7 +116,7 @@ export default function EditMarks() {
   /* ================= CATEGORY & SUBJECTS ================= */
   const category = useMemo(
     () => getCategoryByClassName(studentInfo.className),
-    [studentInfo.className]
+    [studentInfo.className],
   );
 
   const activeSubjects = SUBJECT_BY_CATEGORY[category] || [];
@@ -167,9 +163,15 @@ export default function EditMarks() {
       {error && <div className="error-message">{error}</div>}
 
       <div className="student-info">
-        <p><strong>Name:</strong> {studentInfo.name}</p>
-        <p><strong>Class:</strong> {studentInfo.className}</p>
-        <p><strong>Exam:</strong> {studentInfo.examType}</p>
+        <p>
+          <strong>Name:</strong> {studentInfo.name}
+        </p>
+        <p>
+          <strong>Class:</strong> {studentInfo.className}
+        </p>
+        <p>
+          <strong>Exam:</strong> {studentInfo.examType}
+        </p>
       </div>
 
       <table className="edit-marks-table">
@@ -189,9 +191,7 @@ export default function EditMarks() {
                   min="0"
                   max="100"
                   value={marks[sub.key] ?? ""}
-                  onChange={(e) =>
-                    handleChange(sub.key, e.target.value)
-                  }
+                  onChange={(e) => handleChange(sub.key, e.target.value)}
                 />
               </td>
             </tr>
