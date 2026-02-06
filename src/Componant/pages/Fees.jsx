@@ -29,7 +29,6 @@ const Fees = () => {
         setLoading(true);
         setError("");
 
-        // student
         const studentRes = await fetch(
           `http://localhost:8080/api/users/${studentId}`
         );
@@ -37,7 +36,6 @@ const Fees = () => {
           setStudentInfo(await studentRes.json());
         }
 
-        // fees
         const feeRes = await fetch(
           `http://localhost:8080/api/fees/user/${studentId}`
         );
@@ -48,7 +46,6 @@ const Fees = () => {
           setFees([]);
         }
 
-        // transactions
         const txRes = await fetch(
           `http://localhost:8080/api/transactions/user/${studentId}`
         );
@@ -85,12 +82,16 @@ const Fees = () => {
         })
       : "-";
 
-  const totalFees = fees.reduce((s, f) => s + (f.amount || 0), 0);
-  const totalPaid = fees.reduce((s, f) => s + (f.paidAmount || 0), 0);
-  const totalRemaining = fees.reduce(
-    (s, f) => s + (f.remainingAmount || 0),
-    0
-  );
+  /* ---------------- ADMIN-LIKE CALCULATION ---------------- */
+  const totalFees = fees.reduce((sum, f) => sum + (f.amount || 0), 0);
+
+  const totalPaid = transactions
+    .filter(
+      (t) => t.status && t.status.toLowerCase() === "success"
+    )
+    .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
+
+  const totalRemaining = Math.max(0, totalFees - totalPaid);
 
   /* ---------------- UI ---------------- */
   return (
@@ -153,7 +154,7 @@ const Fees = () => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {/* -------- FEE STRUCTURE TABLE (SAME AS ADMIN) -------- */}
+      {/* -------- FEE STRUCTURE (UNCHANGED) -------- */}
       <div className="section-header">
         <h3>Fee Structure</h3>
       </div>
@@ -207,16 +208,14 @@ const Fees = () => {
         )}
       </div>
 
-      {/* -------- TRANSACTIONS TABLE (SAME AS ADMIN) -------- */}
+      {/* -------- TRANSACTIONS (UNCHANGED) -------- */}
       <div className="section-header">
         <h3>Payment Transactions</h3>
       </div>
 
       <div className="transactions-table-container">
         {transactions.length === 0 ? (
-          <div className="empty-state">
-            No payment transactions found.
-          </div>
+          <div className="empty-state">No payment transactions found.</div>
         ) : (
           <div className="table-wrapper">
             <table className="transactions-table">
