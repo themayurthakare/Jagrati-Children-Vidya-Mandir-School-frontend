@@ -30,8 +30,6 @@ const SUBJECT_BY_CATEGORY = {
   ],
 };
 
-const EXAMS = ["Monthly Exam", "Midsem", "Final"];
-
 /* ===== CLASS NAME → CATEGORY ===== */
 const getCategoryByClassName = (name = "") => {
   const lower = name.toLowerCase();
@@ -230,13 +228,28 @@ export default function TeacherAddMarks() {
           ))}
         </select>
 
+        {/* ✅ ONLY DROPDOWN UPDATED */}
         <select value={examType} onChange={(e) => setExamType(e.target.value)}>
           <option value="">Select Exam</option>
-          {EXAMS.map((ex) => (
-            <option key={ex} value={ex}>
-              {ex}
-            </option>
-          ))}
+
+          <option disabled>── Exam Types ──</option>
+          <option value="Quarterly">Quarterly</option>
+          <option value="Half Yearly">Half Yearly</option>
+          <option value="Annual">Annual</option>
+
+          <option disabled>── Months ──</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
         </select>
       </div>
 
