@@ -188,7 +188,8 @@ const Fees = () => {
                       {formatCurrency(fee.paidAmount)}
                     </td>
                     <td className="text-right remaining">
-                      {formatCurrency(fee.remainingAmount)}
+                      {formatCurrency(totalRemaining)}
+                      {/* {formatCurrency(fee.remainingAmount)} */}
                     </td>
                     <td className="text-center1">
                       <span
