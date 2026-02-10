@@ -30,14 +30,14 @@ const Fees = () => {
         setError("");
 
         const studentRes = await fetch(
-          `http://localhost:8080/api/users/${studentId}`
+          `http://localhost:8080/api/users/${studentId}`,
         );
         if (studentRes.ok) {
           setStudentInfo(await studentRes.json());
         }
 
         const feeRes = await fetch(
-          `http://localhost:8080/api/fees/user/${studentId}`
+          `http://localhost:8080/api/fees/user/${studentId}`,
         );
         if (feeRes.ok) {
           const data = await feeRes.json();
@@ -47,7 +47,7 @@ const Fees = () => {
         }
 
         const txRes = await fetch(
-          `http://localhost:8080/api/transactions/user/${studentId}`
+          `http://localhost:8080/api/transactions/user/${studentId}`,
         );
         if (txRes.ok) {
           const data = await txRes.json();
@@ -86,9 +86,7 @@ const Fees = () => {
   const totalFees = fees.reduce((sum, f) => sum + (f.amount || 0), 0);
 
   const totalPaid = transactions
-    .filter(
-      (t) => t.status && t.status.toLowerCase() === "success"
-    )
+    .filter((t) => t.status && t.status.toLowerCase() === "success")
     .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
 
   const totalRemaining = Math.max(0, totalFees - totalPaid);
@@ -106,9 +104,7 @@ const Fees = () => {
           <div className="summary-stats">
             <div className="stat-item">
               <span>Total Fees:</span>
-              <span className="stat-value">
-                {formatCurrency(totalFees)}
-              </span>
+              <span className="stat-value">{formatCurrency(totalFees)}</span>
             </div>
             <div className="stat-item">
               <span>Paid:</span>
@@ -185,7 +181,7 @@ const Fees = () => {
                       {formatCurrency(fee.amount)}
                     </td>
                     <td className="text-right paid">
-                      {formatCurrency(fee.paidAmount)}
+                      {formatCurrency(totalPaid)}
                     </td>
                     <td className="text-right remaining">
                       {formatCurrency(totalRemaining)}
