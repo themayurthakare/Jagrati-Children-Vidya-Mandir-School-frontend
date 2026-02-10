@@ -93,6 +93,15 @@ const Fees = () => {
 
   const totalRemaining = Math.max(0, totalFees - totalPaid);
 
+  /* ✅ STATUS CALCULATION (ONLY CHANGE) */
+  const getCalculatedStatus = () => {
+    if (totalPaid >= totalFees && totalFees > 0) return "Paid";
+    if (totalPaid > 0 && totalPaid < totalFees) return "Partial";
+    return "Pending";
+  };
+
+  const calculatedStatus = getCalculatedStatus();
+
   /* ---------------- UI ---------------- */
   return (
     <div className="admin-fee-details-container">
@@ -154,7 +163,7 @@ const Fees = () => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {/* -------- FEE STRUCTURE (UNCHANGED) -------- */}
+      {/* -------- FEE STRUCTURE (UNCHANGED UI) -------- */}
       <div className="section-header">
         <h3>Fee Structure</h3>
       </div>
@@ -185,17 +194,16 @@ const Fees = () => {
                       {formatCurrency(fee.amount)}
                     </td>
                     <td className="text-right paid">
-                      {formatCurrency(fee.paidAmount)}
+                      {formatCurrency(totalPaid)}
                     </td>
                     <td className="text-right remaining">
                       {formatCurrency(totalRemaining)}
-                      {/* {formatCurrency(fee.remainingAmount)} */}
                     </td>
                     <td className="text-center1">
                       <span
-                        className={`status-badge ${fee.paymentStatus?.toLowerCase()}`}
+                        className={`status-badge ${calculatedStatus.toLowerCase()}`}
                       >
-                        {fee.paymentStatus || "Pending"}
+                        {calculatedStatus}
                       </span>
                     </td>
                     <td className="text-center1">
