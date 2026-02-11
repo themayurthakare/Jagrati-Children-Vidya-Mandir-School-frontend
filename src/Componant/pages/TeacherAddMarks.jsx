@@ -4,29 +4,30 @@ import "../styles/Addmarks.css";
 /* ===== SUBJECTS BY CATEGORY ===== */
 const SUBJECT_BY_CATEGORY = {
   PRIMARY: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "gk", label: "GK" },
-    { key: "drawing", label: "Drawing" },
+    { key: "hindi", label: "Hindi", project: true },
+    { key: "english", label: "English", project: true },
+    { key: "maths", label: "Maths", project: true },
+    { key: "gk", label: "GK", project: false },
+    { key: "drawing", label: "Drawing", project: false },
   ],
   MIDDLE: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "evs", label: "EVS" },
-    { key: "computer", label: "Computer" },
-    { key: "gk", label: "GK" },
-    { key: "drawing", label: "Drawing" },
+    { key: "hindi", label: "Hindi", project: true },
+    { key: "english", label: "English", project: true },
+    { key: "maths", label: "Maths", project: true },
+    { key: "evs", label: "EVS", project: true },
+    { key: "computer", label: "Computer", project: false },
+    { key: "gk", label: "GK", project: false },
+    { key: "drawing", label: "Drawing", project: false },
   ],
   SECONDARY: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "science", label: "Science" },
-    { key: "socialScience", label: "Social Science" },
-    { key: "sanskrit", label: "Sanskrit" },
-    { key: "gk", label: "GK" },
+    { key: "hindi", label: "Hindi", project: true },
+    { key: "english", label: "English", project: true },
+    { key: "maths", label: "Maths", project: true },
+    { key: "science", label: "Science", project: true },
+    { key: "socialScience", label: "Social Science", project: true },
+    { key: "sanskrit", label: "Sanskrit", project: true },
+    { key: "marathi", label: "Marathi", project: true },
+    { key: "gk", label: "GK", project: false },
   ],
 };
 
@@ -57,7 +58,6 @@ const getCategoryByClassName = (name = "") => {
 };
 
 export default function TeacherAddMarks() {
-  /* ================= AUTH ================= */
   const teacherId = localStorage.getItem("userId");
 
   /* ================= SESSION ================= */
@@ -66,7 +66,6 @@ export default function TeacherAddMarks() {
 
   useEffect(() => {
     const initSession = async () => {
-      // 1️⃣ Try localStorage first
       const savedId = localStorage.getItem("sessionId");
       if (savedId) {
         setSessionId(Number(savedId));
@@ -74,7 +73,6 @@ export default function TeacherAddMarks() {
         return;
       }
 
-      // 2️⃣ Fallback → active session from DB
       try {
         const res = await fetch("http://localhost:8080/api/sessions/getAll");
         const data = await res.json();
@@ -145,7 +143,12 @@ export default function TeacherAddMarks() {
           srno: index + 1,
           name: s.name,
         };
-        activeSubjects.forEach((sub) => (row[sub.key] = ""));
+
+        activeSubjects.forEach((sub) => {
+          row[`${sub.key}Theory`] = "";
+          if (sub.project) row[`${sub.key}Project`] = "";
+        });
+
         return row;
       });
 
@@ -159,10 +162,24 @@ export default function TeacherAddMarks() {
     fetchStudents();
   }, [fetchStudents]);
 
-  /* ================= INPUT CHANGE ================= */
+  /* ================= INPUT CHANGE (VALIDATION) ================= */
   const handleChange = (rowIndex, key, value) => {
+    let val = value === "" ? "" : Number(value);
+
+    // Theory max 80
+    if (key.includes("Theory")) {
+      if (val !== "" && val > 80) val = 80;
+      if (val !== "" && val < 0) val = 0;
+    }
+
+    // Project max 20
+    if (key.includes("Project")) {
+      if (val !== "" && val > 20) val = 20;
+      if (val !== "" && val < 0) val = 0;
+    }
+
     const updated = [...rows];
-    updated[rowIndex][key] = value;
+    updated[rowIndex][key] = val;
     setRows(updated);
   };
 
@@ -176,16 +193,28 @@ export default function TeacherAddMarks() {
     try {
       setSaving(true);
 
-      const payload = rows.map((r) => ({
-        studentId: r.id,
-        teacherId: Number(teacherId),
-        classId: Number(selectedClass.classId),
-        sessionId: Number(sessionId),
-        examType,
-        ...Object.fromEntries(
-          activeSubjects.map((s) => [s.key, Number(r[s.key]) || 0]),
-        ),
-      }));
+      const payload = rows.map((r) => {
+        const obj = {
+          studentId: r.id,
+          teacherId: Number(teacherId),
+          classId: Number(selectedClass.classId),
+          sessionId: Number(sessionId),
+          examType,
+        };
+
+        activeSubjects.forEach((sub) => {
+          obj[`${sub.key}Theory`] = Number(r[`${sub.key}Theory`]) || 0;
+
+          if (sub.project) {
+            obj[`${sub.key}Project`] = Number(r[`${sub.key}Project`]) || 0;
+          } else {
+            obj[`${sub.key}Project`] = 0;
+          }
+        });
+
+        return obj;
+      });
+ 
 
       const res = await fetch("http://localhost:8080/api/marks/bulk", {
         method: "POST",
@@ -194,6 +223,7 @@ export default function TeacherAddMarks() {
       });
 
       if (!res.ok) throw new Error();
+
       alert("Marks saved successfully ✅");
     } catch {
       alert("Marks save failed ❌");
@@ -228,7 +258,6 @@ export default function TeacherAddMarks() {
           ))}
         </select>
 
-        {/* ✅ ONLY DROPDOWN UPDATED */}
         <select value={examType} onChange={(e) => setExamType(e.target.value)}>
           <option value="">Select Exam</option>
 
@@ -260,28 +289,56 @@ export default function TeacherAddMarks() {
               <tr>
                 <th>Sr No</th>
                 <th>Student Name</th>
+
                 {activeSubjects.map((sub) => (
-                  <th key={sub.key}>{sub.label}</th>
+                  <React.Fragment key={sub.key}>
+                    <th>{sub.label} Theory</th>
+                    {sub.project && <th>{sub.label} Project</th>}
+                  </React.Fragment>
                 ))}
               </tr>
             </thead>
+
             <tbody>
               {rows.map((row, i) => (
                 <tr key={row.id}>
                   <td>{row.srno}</td>
                   <td>{row.name}</td>
+
                   {activeSubjects.map((sub) => (
-                    <td key={sub.key}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={row[sub.key]}
-                        onChange={(e) =>
-                          handleChange(i, sub.key, e.target.value)
-                        }
-                      />
-                    </td>
+                    <React.Fragment key={sub.key}>
+                      {/* THEORY */}
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          max="80"
+                          value={row[`${sub.key}Theory`]}
+                          onChange={(e) =>
+                            handleChange(i, `${sub.key}Theory`, e.target.value)
+                          }
+                        />
+                      </td>
+
+                      {/* PROJECT */}
+                      {sub.project && (
+                        <td>
+                          <input
+                            type="number"
+                            min="0"
+                            max="20"
+                            value={row[`${sub.key}Project`]}
+                            onChange={(e) =>
+                              handleChange(
+                                i,
+                                `${sub.key}Project`,
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tr>
               ))}

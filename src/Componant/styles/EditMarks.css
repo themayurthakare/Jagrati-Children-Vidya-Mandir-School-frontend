@@ -3,13 +3,15 @@
 .edit-marks-container {
   background: #ffffff;
   padding: 25px;
-  border-radius: 8px;
+  border-radius: 10px;
+  max-width: 1100px;
+  margin: auto;
 }
 
 .student-info {
   background: #f5f6fa;
   padding: 15px;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 20px;
 }
 
@@ -21,34 +23,50 @@
 .edit-marks-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  margin-top: 20px;
+  table-layout: fixed;
 }
 
 .edit-marks-table th,
 .edit-marks-table td {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 12px;
   text-align: center;
+  vertical-align: middle;
 }
 
 .edit-marks-table th {
   background-color: #2f4050;
   color: white;
+  font-weight: 600;
+}
+
+.edit-marks-table td:first-child {
+  font-weight: 600;
+  text-align: left;
+  padding-left: 20px;
 }
 
 .edit-marks-table input {
   width: 80px;
   padding: 6px;
   text-align: center;
+  border: 1px solid #999;
+  border-radius: 5px;
+  outline: none;
+}
+
+.edit-marks-table input:focus {
+  border-color: #1ab394;
 }
 
 .preview-box {
   margin-top: 20px;
   padding: 12px;
   background: #eef2f7;
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
-  gap: 30px;
+  justify-content: space-between;
   font-weight: 600;
 }
 
@@ -64,13 +82,15 @@
   margin-top: 25px;
   display: flex;
   gap: 15px;
+  justify-content: flex-end;
 }
 
 .btn-group button {
   padding: 10px 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .btn-group button:first-child {
@@ -90,7 +110,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,20 +119,23 @@
 .confirm-modal {
   background: #fff;
   padding: 25px;
-  border-radius: 8px;
-  width: 300px;
+  border-radius: 10px;
+  width: 320px;
   text-align: center;
 }
 
 .confirm-modal button {
   margin: 10px;
   padding: 8px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
 }
 
 .success-toast {
   background: #1ab394;
   color: white;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 6px;
   margin-bottom: 15px;
 }
