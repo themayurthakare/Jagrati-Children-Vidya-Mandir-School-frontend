@@ -28,11 +28,11 @@ export default function ViewMarks() {
       const formatted = data.map((m) => {
         const percentage = m.percentage ?? 0;
         return {
-          marksId: m.marksId, // 🔥 VERY IMPORTANT
+          marksId: m.marksId,
           name: m.studentName,
           className: m.className,
           exam: m.examType,
-          percentage,
+          percentage: Number(percentage.toFixed(2)),
           remarks: percentage >= 35 ? "Pass" : "Fail",
         };
       });
@@ -62,7 +62,6 @@ export default function ViewMarks() {
 
       {error && <div className="error-message">{error}</div>}
 
-      {/* FILTERS */}
       <div className="filter-row">
         <select
           value={classFilter}
@@ -89,7 +88,6 @@ export default function ViewMarks() {
         </select>
       </div>
 
-      {/* TABLE */}
       <table className="view-table">
         <thead>
           <tr>
@@ -102,6 +100,7 @@ export default function ViewMarks() {
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {filteredStudents.map((s, i) => (
             <tr key={s.marksId}>
@@ -112,7 +111,6 @@ export default function ViewMarks() {
               <td>{s.percentage}%</td>
               <td>{s.remarks}</td>
               <td>
-                {/* ✅ ONLY EDIT BUTTON */}
                 <button
                   className="edit-btn"
                   onClick={() =>

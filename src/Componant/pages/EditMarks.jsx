@@ -2,42 +2,41 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "../styles/EditMarks.css";
 
-/* ===== SUBJECTS BY CATEGORY (SAME AS ADD MARKS) ===== */
+/* ===== SUBJECT CONFIG ===== */
 const SUBJECT_BY_CATEGORY = {
   PRIMARY: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "gk", label: "GK" },
-    { key: "drawing", label: "Drawing" },
+    { key: "hindi", label: "Hindi", hasProject: true },
+    { key: "english", label: "English", hasProject: true },
+    { key: "maths", label: "Maths", hasProject: true },
+    { key: "gk", label: "GK", hasProject: false },
+    { key: "drawing", label: "Drawing", hasProject: false },
   ],
 
   MIDDLE: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "computer", label: "Computer" },
-    { key: "gk", label: "GK" },
-    { key: "drawing", label: "Drawing" },
-    { key: "evs", label: "EVS" },
+    { key: "hindi", label: "Hindi", hasProject: true },
+    { key: "english", label: "English", hasProject: true },
+    { key: "maths", label: "Maths", hasProject: true },
+    { key: "computer", label: "Computer", hasProject: false },
+    { key: "gk", label: "GK", hasProject: false },
+    { key: "drawing", label: "Drawing", hasProject: false },
+    { key: "evs", label: "EVS", hasProject: true },
   ],
 
   SECONDARY: [
-    { key: "hindi", label: "Hindi" },
-    { key: "english", label: "English" },
-    { key: "maths", label: "Maths" },
-    { key: "science", label: "Science" },
-    { key: "socialScience", label: "Social Science" },
-    { key: "sanskrit", label: "Sanskrit" },
-    { key: "gk", label: "GK" },
+    { key: "hindi", label: "Hindi", hasProject: true },
+    { key: "english", label: "English", hasProject: true },
+    { key: "maths", label: "Maths", hasProject: true },
+    { key: "science", label: "Science", hasProject: true },
+    { key: "socialScience", label: "Social Science", hasProject: true },
+    { key: "sanskrit", label: "Sanskrit", hasProject: true },
+    { key: "gk", label: "GK", hasProject: false },
   ],
 };
 
-/* ===== CLASS → CATEGORY (SAME AS ADD MARKS) ===== */
+/* ===== CLASS → CATEGORY ===== */
 const getCategoryByClassName = (name = "") => {
   const lower = name.toLowerCase();
 
-  // Nursery / LKG / UKG
   if (
     lower.includes("nursery") ||
     lower.includes("lkg") ||
@@ -47,7 +46,6 @@ const getCategoryByClassName = (name = "") => {
     return "PRIMARY";
   }
 
-  // Class 1 to 5
   if (
     lower.includes("1st") ||
     lower.includes("2nd") ||
@@ -58,7 +56,6 @@ const getCategoryByClassName = (name = "") => {
     return "MIDDLE";
   }
 
-  // Class 6 to 8
   if (lower.includes("6th") || lower.includes("7th") || lower.includes("8th")) {
     return "SECONDARY";
   }
@@ -76,6 +73,7 @@ export default function EditMarks() {
     className: "",
     examType: "",
   });
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -94,10 +92,8 @@ export default function EditMarks() {
 
         const record = await res.json();
 
-        // save all marks
         setMarks(record);
 
-        // save student info
         setStudentInfo({
           name: record.studentName || "",
           className: record.className || "",
@@ -116,14 +112,17 @@ export default function EditMarks() {
   /* ================= CATEGORY & SUBJECTS ================= */
   const category = useMemo(
     () => getCategoryByClassName(studentInfo.className),
-    [studentInfo.className],
+    [studentInfo.className]
   );
 
   const activeSubjects = SUBJECT_BY_CATEGORY[category] || [];
 
   /* ================= CHANGE ================= */
-  const handleChange = (key, value) => {
-    setMarks((prev) => ({ ...prev, [key]: value }));
+  const handleChange = (field, value) => {
+    setMarks((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   /* ================= SAVE ================= */
@@ -132,10 +131,17 @@ export default function EditMarks() {
       setSaving(true);
       setError("");
 
-      // send ONLY allowed subjects
       const payload = {};
-      activeSubjects.forEach((s) => {
-        payload[s.key] = Number(marks[s.key]) || 0;
+
+      activeSubjects.forEach((sub) => {
+        const theoryField = `${sub.key}Theory`;
+        const projectField = `${sub.key}Project`;
+
+        payload[theoryField] = Number(marks[theoryField]) || 0;
+
+        if (sub.hasProject) {
+          payload[projectField] = Number(marks[projectField]) || 0;
+        }
       });
 
       const res = await fetch(`http://localhost:8080/api/marks/${marksId}`, {
@@ -146,6 +152,7 @@ export default function EditMarks() {
 
       if (!res.ok) throw new Error("Failed to update marks");
 
+      alert("Marks Updated Successfully ✅");
       navigate("/teacherdashboard/view-marks");
     } catch (err) {
       setError(err.message);
@@ -178,24 +185,63 @@ export default function EditMarks() {
         <thead>
           <tr>
             <th>Subject</th>
-            <th>Marks</th>
+            <th>Theory</th>
+            <th>Project</th>
+            <th>Total</th>
           </tr>
         </thead>
+
         <tbody>
-          {activeSubjects.map((sub) => (
-            <tr key={sub.key}>
-              <td>{sub.label}</td>
-              <td>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={marks[sub.key] ?? ""}
-                  onChange={(e) => handleChange(sub.key, e.target.value)}
-                />
-              </td>
-            </tr>
-          ))}
+          {activeSubjects.map((sub) => {
+            const theoryField = `${sub.key}Theory`;
+            const projectField = `${sub.key}Project`;
+
+            const theoryVal = Number(marks[theoryField]) || 0;
+            const projectVal = sub.hasProject
+              ? Number(marks[projectField]) || 0
+              : 0;
+
+            const totalVal = theoryVal + projectVal;
+
+            return (
+              <tr key={sub.key}>
+                <td>{sub.label}</td>
+
+                {/* THEORY */}
+                <td>
+                  <input
+                    type="number"
+                    min="0"
+                    max="80"
+                    value={marks[theoryField] ?? ""}
+                    onChange={(e) => handleChange(theoryField, e.target.value)}
+                  />
+                </td>
+
+                {/* PROJECT */}
+                <td>
+                  {sub.hasProject ? (
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={marks[projectField] ?? ""}
+                      onChange={(e) =>
+                        handleChange(projectField, e.target.value)
+                      }
+                    />
+                  ) : (
+                    <span style={{ color: "gray" }}>N/A</span>
+                  )}
+                </td>
+
+                {/* TOTAL */}
+                <td>
+                  <strong>{totalVal}</strong>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
