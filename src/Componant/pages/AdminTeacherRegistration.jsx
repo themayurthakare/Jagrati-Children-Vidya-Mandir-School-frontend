@@ -45,8 +45,13 @@ const AdminTeacherRegistration = ({
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email";
+    if (!form.email) {
+      e.email = "Email is required";
+    } else if (
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z.-]+\.[A-Za-z]{2,}$/.test(form.email)
+    ) {
+      e.email = "Enter a valid email format (example: abc@gmail.com)";
+    }
     if (!form.phone || !/^[0-9]{10,15}$/.test(form.phone))
       e.phone = "Enter 10–15 digit phone";
     if (!form.password || form.password.length < 6)
@@ -55,8 +60,20 @@ const AdminTeacherRegistration = ({
       e.educationalDetails = "Educational details required";
     if (!form.yearOfExperience || form.yearOfExperience < 0)
       e.yearOfExperience = "Valid experience required";
-    if (!form.dateOfBirth || !/^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth))
-      e.dateOfBirth = "Date in YYYY-MM-DD format";
+    if (!form.dateOfBirth) {
+      e.dateOfBirth = "Date of Birth is required";
+    } else {
+      const selectedDate = new Date(form.dateOfBirth);
+      const today = new Date();
+
+      // Remove time part
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate > today) {
+        e.dateOfBirth = "Future date is not allowed";
+      }
+    }
+
     if (!form.aadharNo.trim()) e.aadharNo = "Aadhaar number required";
     if (!form.address.trim()) e.address = "Address required";
     if (selectedClassNames.length === 0)
@@ -68,7 +85,22 @@ const AdminTeacherRegistration = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+
+    if (name === "name") {
+      // Allow only alphabets and spaces
+      const onlyAlphabets = value.replace(/[^A-Za-z\s]/g, "");
+      setForm((p) => ({ ...p, name: onlyAlphabets }));
+    } else if (name === "aadharNo") {
+      // Allow only numbers & max 12 digits
+      const onlyNumbers = value.replace(/\D/g, "").slice(0, 12);
+      setForm((p) => ({ ...p, aadharNo: onlyNumbers }));
+    } else if (name === "phone") {
+      const onlyNumbers = value.replace(/\D/g, "").slice(0, 10);
+      setForm((p) => ({ ...p, phone: onlyNumbers }));
+    } else {
+      setForm((p) => ({ ...p, [name]: value }));
+    }
+
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
@@ -83,16 +115,22 @@ const AdminTeacherRegistration = ({
 
   const removeClass = (classNameToRemove) => {
     setSelectedClassNames((prev) =>
-      prev.filter((name) => name !== classNameToRemove)
+      prev.filter((name) => name !== classNameToRemove),
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccessMsg("");
-    if (!validate()) return;
+
+    if (!validate()) {
+      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorMsg = errors[firstErrorField];
+      window.alert(firstErrorMsg || "Please fix the form errors.");
+      return;
+    }
 
     setLoading(true);
+
     try {
       const payload = {
         name: form.name.trim(),
@@ -113,30 +151,28 @@ const AdminTeacherRegistration = ({
         body: JSON.stringify(payload),
       });
 
+      const data = await res.json().catch(() => null);
+
       if (res.ok || res.status === 201) {
-        const body = await res.json().catch(() => null);
-        const teacherId = body?.teacherId || body?.id || Date.now();
+        const teacherId = data?.teacherId ?? data?.id;
 
-        if (typeof onAddTeacher === "function") {
-          onAddTeacher(body || { teacherId, ...payload });
-        }
+        window.alert(data?.message || "Teacher registered successfully!");
 
-        setSuccessMsg(
-          "Teacher registered successfully! Redirecting to documents..."
-        );
         setForm(initialForm);
         setSelectedClassNames([]);
 
-        // REDIRECT TO DOCUMENT UPLOAD
         setTimeout(() => {
           navigate(`/admindashboard/teacher-documents?teacherId=${teacherId}`);
-        }, 1500);
+        }, 800);
+
+        if (onAddTeacher) onAddTeacher(data || payload);
       } else {
-        const body = await res.json().catch(() => ({}));
-        setErrors({ form: body.message || "Registration failed" });
+        // 🔥 Show exact backend message like student code
+        const msg = data?.message || "Registration failed";
+        window.alert(msg);
       }
     } catch (err) {
-      setErrors({ form: err.message || "Network error" });
+      window.alert("Network error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -226,12 +262,13 @@ const AdminTeacherRegistration = ({
           </label>
 
           <label className="full">
-            Date of Birth (YYYY-MM-DD)
+            Date of Birth (MM-DD-YYYY)
             <input
               name="dateOfBirth"
               type="date"
               value={form.dateOfBirth}
               onChange={handleChange}
+              max={new Date().toISOString().split("T")[0]}
             />
             {errors.dateOfBirth && (
               <small className="field-error">{errors.dateOfBirth}</small>
@@ -242,6 +279,7 @@ const AdminTeacherRegistration = ({
             Aadhaar Number *
             <input
               name="aadharNo"
+              type="number"
               value={form.aadharNo}
               onChange={handleChange}
             />

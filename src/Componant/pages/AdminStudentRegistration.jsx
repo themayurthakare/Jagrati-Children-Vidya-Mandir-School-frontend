@@ -129,8 +129,16 @@ const AdminStudentRegistration = ({
 
     setLoading(true);
     try {
+      const cleanData = (obj) => {
+        const newObj = {};
+        Object.keys(obj).forEach((key) => {
+          newObj[key] = obj[key] === "" ? null : obj[key];
+        });
+        return newObj;
+      };
+
       const payload = {
-        ...form,
+        ...cleanData(form),
         studentClassId: Number(form.studentClassId),
       };
 
