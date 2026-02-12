@@ -116,7 +116,7 @@ const Login = () => {
         <form onSubmit={handleLogin}>
           <input
             type="text"
-            placeholder="Phone Number"
+            placeholder="Phone Number or Admission Number"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             required
