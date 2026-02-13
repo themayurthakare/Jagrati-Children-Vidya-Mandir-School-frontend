@@ -151,9 +151,16 @@ const AdminTeacherRegistration = ({
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json().catch(() => null);
+      const text = await res.text();
 
-      if (res.ok || res.status === 201) {
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
+
+      if (res.ok) {
         const teacherId = data?.teacherId ?? data?.id;
 
         window.alert(data?.message || "Teacher registered successfully!");
@@ -165,10 +172,12 @@ const AdminTeacherRegistration = ({
           navigate(`/admindashboard/teacher-documents?teacherId=${teacherId}`);
         }, 800);
 
-        if (onAddTeacher) onAddTeacher(data || payload);
+        if (onAddTeacher) onAddTeacher(data);
       } else {
-        // 🔥 Show exact backend message like student code
-        const msg = data?.message || "Registration failed";
+        // 🔥 Always show backend message first
+        const msg =
+          data?.message || data?.error || text || "Registration failed";
+
         window.alert(msg);
       }
     } catch (err) {

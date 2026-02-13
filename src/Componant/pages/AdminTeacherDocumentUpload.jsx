@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import "./AdminTeacherDocumentUpload.css"; // Reuse student CSS with teacher naming
+import "./AdminTeacherDocumentUpload.css";
 
 const DOC_TYPES = [
   { key: "photo", label: "Teacher Photo", endpoint: "TEACHER_PHOTO" },
@@ -13,6 +13,8 @@ const DOC_TYPES = [
     endpoint: "TEACHER_CERTIFICATE",
   },
 ];
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const AdminTeacherDocumentUpload = ({
   apiBase = "http://localhost:8080/api",
@@ -44,6 +46,14 @@ const AdminTeacherDocumentUpload = ({
 
   const [uploadingGlobal, setUploadingGlobal] = useState(false);
   const [validationError, setValidationError] = useState("");
+
+  // ✅ File size formatter
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "0 KB";
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    return `${(kb / 1024).toFixed(2)} MB`;
+  };
 
   useEffect(() => {
     if (!teacherId) {
@@ -78,18 +88,32 @@ const AdminTeacherDocumentUpload = ({
         method: "POST",
         body: fd,
       });
+
       if (!res.ok) {
         const txt = await res.text().catch(() => "");
         throw new Error(txt || `Status ${res.status}`);
       }
+
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message || String(err) };
     }
   };
 
+  // ✅ Updated file change with size validation
   const handleFileChange = (e, key) => {
     const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      window.alert(
+        `File size exceeds 5MB limit.\nSelected file size: ${formatFileSize(
+          file.size,
+        )}`,
+      );
+      return;
+    }
+
     setDocs((s) => ({ ...s, [key]: file }));
 
     setDocStatus((s) => ({
@@ -124,6 +148,7 @@ const AdminTeacherDocumentUpload = ({
     );
 
     const results = [];
+
     for (const item of toUpload) {
       setDocStatus((s) => ({
         ...s,
@@ -143,8 +168,10 @@ const AdminTeacherDocumentUpload = ({
           [item.key]: { uploading: false, ok: false, error: r.error },
         }));
       }
+
       results.push({ label: item.label, key: item.key, result: r });
     }
+
     setUploadingGlobal(false);
 
     const failed = results.filter((r) => !r.result.ok);
@@ -158,43 +185,8 @@ const AdminTeacherDocumentUpload = ({
     } else {
       const messages = failed.map((f) => `${f.label}: ${f.result.error}`);
       window.alert(
-        `Uploaded ${successCount} succeeded, ${
-          failed.length
-        } failed:\n\n${messages.join("\n")}`,
+        `Uploaded ${successCount} succeeded, ${failed.length} failed:\n\n${messages.join("\n")}`,
       );
-    }
-  };
-
-  const handleBack = () => {
-    const hasSelectedFiles = Object.values(docs).some((doc) => doc !== null);
-    if (
-      hasSelectedFiles &&
-      !window.confirm(
-        "You have unsaved document selections. Are you sure you want to go back?",
-      )
-    ) {
-      return;
-    }
-    navigate("/admindashboard/add-teacher");
-  };
-
-  const handleClearAll = () => {
-    if (window.confirm("Clear all selected documents?")) {
-      setDocs({
-        photo: null,
-        aadhar: null,
-        pan: null,
-        degree: null,
-        certificate: null,
-      });
-      setDocStatus({
-        photo: null,
-        aadhar: null,
-        pan: null,
-        degree: null,
-        certificate: null,
-      });
-      setValidationError("");
     }
   };
 
@@ -203,12 +195,6 @@ const AdminTeacherDocumentUpload = ({
       <div className="ud-card">
         <h2>Upload Teacher Documents</h2>
 
-        {prefillId && (
-          <div className="ud-info">
-            Preparing uploads for teacher id: <strong>{prefillId}</strong>
-          </div>
-        )}
-
         <div className="ud-input-block">
           <label>Teacher ID *</label>
           <input
@@ -216,31 +202,9 @@ const AdminTeacherDocumentUpload = ({
             className="ud-input"
             placeholder="Enter Teacher ID"
             value={teacherId}
-            onChange={(e) => {
-              setTeacherId(e.target.value);
-              if (validationError) setValidationError("");
-            }}
+            onChange={(e) => setTeacherId(e.target.value)}
           />
-          <small style={{ display: "block", marginTop: 6, color: "#666" }}>
-            Note: Documents will only be uploaded when you click "Save (batch)"
-            button.
-          </small>
         </div>
-
-        {validationError && (
-          <div
-            style={{
-              backgroundColor: "#f8d7da",
-              color: "#721c24",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "20px",
-              border: "1px solid #f5c6cb",
-            }}
-          >
-            ⚠️ {validationError}
-          </div>
-        )}
 
         <form className="ud-form" onSubmit={handleSaveAll}>
           <div className="ud-grid">
@@ -253,41 +217,20 @@ const AdminTeacherDocumentUpload = ({
                   disabled={uploadingGlobal}
                   accept={d.key === "photo" ? "image/*" : "image/*,.pdf"}
                 />
+
                 <div className="ud-file-name">
                   {docs[d.key] ? (
                     <div>
-                      <span style={{ color: "#2c3e50", fontWeight: "500" }}>
+                      <span style={{ fontWeight: "500" }}>
                         {docs[d.key].name}
                       </span>
                       <br />
                       <small style={{ color: "#7f8c8d" }}>
-                        Size: {(docs[d.key].size / 1024).toFixed(2)} KB
+                        Size: {formatFileSize(docs[d.key].size)}
                       </small>
                     </div>
                   ) : (
                     <span className="ud-empty">No file chosen</span>
-                  )}
-                </div>
-
-                <div style={{ marginTop: 6, fontSize: 13, minHeight: "20px" }}>
-                  {docStatus[d.key] ? (
-                    docStatus[d.key].uploading ? (
-                      <span style={{ color: "#3498db" }}>Uploading...</span>
-                    ) : docStatus[d.key].ok ? (
-                      <span style={{ color: "green", fontWeight: "500" }}>
-                        ✓ Uploaded Successfully
-                      </span>
-                    ) : (
-                      <span style={{ color: "red" }}>
-                        ✗ Error: {docStatus[d.key].error || "Upload failed"}
-                      </span>
-                    )
-                  ) : (
-                    docs[d.key] && (
-                      <span style={{ color: "#f39c12", fontWeight: "500" }}>
-                        ⏳ Ready to upload
-                      </span>
-                    )
                   )}
                 </div>
               </label>
@@ -296,74 +239,12 @@ const AdminTeacherDocumentUpload = ({
 
           <div className="ud-button-row">
             <button
-              type="button"
-              className="ud-btn ud-back-btn"
-              onClick={handleBack}
-              disabled={uploadingGlobal}
-            >
-              Back
-            </button>
-
-            <button
-              type="button"
-              className="ud-btn ud-clear-btn"
-              onClick={handleClearAll}
-              disabled={uploadingGlobal}
-            >
-              Clear All
-            </button>
-
-            <button
               type="submit"
               className="ud-btn ud-save-btn"
               disabled={uploadingGlobal}
             >
               {uploadingGlobal ? "Uploading..." : "Save (batch)"}
             </button>
-          </div>
-
-          <div
-            style={{
-              marginTop: "30px",
-              padding: "15px",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "6px",
-              borderLeft: "4px solid #3498db",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <div>
-                <strong>Upload Summary:</strong>
-                <div style={{ marginTop: "10px" }}>
-                  <span style={{ marginRight: "20px" }}>
-                    📄 Selected:{" "}
-                    {Object.values(docs).filter((d) => d !== null).length} files
-                  </span>
-                  <span style={{ marginRight: "20px" }}>
-                    ✓ Uploaded:{" "}
-                    {Object.values(docStatus).filter((d) => d?.ok).length} files
-                  </span>
-                  <span>
-                    ⚠️ Pending:{" "}
-                    {Object.values(docs).filter((d) => d !== null).length -
-                      Object.values(docStatus).filter((d) => d?.ok).length}{" "}
-                    files
-                  </span>
-                </div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div>Total Documents: {DOC_TYPES.length}</div>
-                <div
-                  style={{
-                    fontSize: "0.9em",
-                    color: "#7f8c8d",
-                    marginTop: "5px",
-                  }}
-                >
-                  Teacher ID: {teacherId || "Not entered"}
-                </div>
-              </div>
-            </div>
           </div>
         </form>
       </div>
