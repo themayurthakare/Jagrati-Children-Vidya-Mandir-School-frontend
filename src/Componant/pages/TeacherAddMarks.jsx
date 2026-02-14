@@ -104,7 +104,7 @@ export default function TeacherAddMarks() {
     const fetchClasses = async () => {
       try {
         const res = await fetch(
-          `http://localhost:8080/api/teachers/${teacherId}/classes`,
+          `http://localhost:8080/api/teachers/${teacherId}/classes`
         );
         const data = await res.json();
         setClasses(data);
@@ -127,13 +127,27 @@ export default function TeacherAddMarks() {
     return SUBJECT_BY_CATEGORY[category] || [];
   }, [category]);
 
+  /* ================= OUT OF STATE ================= */
+  const [outOf, setOutOf] = useState({});
+
+  useEffect(() => {
+    const newOutOf = {};
+
+    activeSubjects.forEach((sub) => {
+      newOutOf[`${sub.key}Theory`] = "";
+      if (sub.project) newOutOf[`${sub.key}Project`] = "";
+    });
+
+    setOutOf(newOutOf);
+  }, [activeSubjects]);
+
   /* ================= FETCH STUDENTS ================= */
   const fetchStudents = useCallback(async () => {
     if (!teacherId || !selectedClass) return;
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`,
+        `http://localhost:8080/api/teachers/${teacherId}/class/${selectedClass.classId}/students`
       );
       const data = await res.json();
 
@@ -162,20 +176,29 @@ export default function TeacherAddMarks() {
     fetchStudents();
   }, [fetchStudents]);
 
-  /* ================= INPUT CHANGE (VALIDATION) ================= */
+  /* ================= OUT OF CHANGE ================= */
+  const handleOutOfChange = (key, value) => {
+    let val = value === "" ? "" : Number(value);
+
+    if (val !== "" && val < 0) val = 0;
+    if (val !== "" && val > 100) val = 100;
+
+    setOutOf((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
+
+  /* ================= MARKS CHANGE (VALIDATION) ================= */
   const handleChange = (rowIndex, key, value) => {
     let val = value === "" ? "" : Number(value);
 
-    // Theory max 80
-    if (key.includes("Theory")) {
-      if (val !== "" && val > 80) val = 80;
-      if (val !== "" && val < 0) val = 0;
-    }
+    if (val !== "" && val < 0) val = 0;
 
-    // Project max 20
-    if (key.includes("Project")) {
-      if (val !== "" && val > 20) val = 20;
-      if (val !== "" && val < 0) val = 0;
+    const maxAllowed = Number(outOf[key]) || 0;
+
+    if (maxAllowed > 0 && val !== "" && val > maxAllowed) {
+      val = maxAllowed;
     }
 
     const updated = [...rows];
@@ -189,6 +212,16 @@ export default function TeacherAddMarks() {
     if (!selectedClass) return alert("Please select class");
     if (!sessionId) return alert("Academic session not set");
     if (!examType) return alert("Please select exam");
+
+    // OutOf validation
+    for (let sub of activeSubjects) {
+      if (!outOf[`${sub.key}Theory`]) {
+        return alert(`Please set Out Of for ${sub.label} Theory`);
+      }
+      if (sub.project && !outOf[`${sub.key}Project`]) {
+        return alert(`Please set Out Of for ${sub.label} Project`);
+      }
+    }
 
     try {
       setSaving(true);
@@ -204,17 +237,20 @@ export default function TeacherAddMarks() {
 
         activeSubjects.forEach((sub) => {
           obj[`${sub.key}Theory`] = Number(r[`${sub.key}Theory`]) || 0;
+          obj[`${sub.key}TheoryOutOf`] = Number(outOf[`${sub.key}Theory`]) || 0;
 
           if (sub.project) {
             obj[`${sub.key}Project`] = Number(r[`${sub.key}Project`]) || 0;
+            obj[`${sub.key}ProjectOutOf`] =
+              Number(outOf[`${sub.key}Project`]) || 0;
           } else {
             obj[`${sub.key}Project`] = 0;
+            obj[`${sub.key}ProjectOutOf`] = 0;
           }
         });
 
         return obj;
       });
- 
 
       const res = await fetch("http://localhost:8080/api/marks/bulk", {
         method: "POST",
@@ -225,7 +261,8 @@ export default function TeacherAddMarks() {
       if (!res.ok) throw new Error();
 
       alert("Marks saved successfully ✅");
-    } catch {
+    } catch (e) {
+      console.log(e);
       alert("Marks save failed ❌");
     } finally {
       setSaving(false);
@@ -239,14 +276,14 @@ export default function TeacherAddMarks() {
 
   return (
     <div className="marks-container">
-      <h2>Add Student Marks</h2>
+      <h2 className="marks-title">Add Student Marks</h2>
 
       <div className="filter-row">
         <select
           value={selectedClass?.classId || ""}
           onChange={(e) =>
             setSelectedClass(
-              classes.find((c) => c.classId === Number(e.target.value)),
+              classes.find((c) => c.classId === Number(e.target.value))
             )
           }
         >
@@ -284,70 +321,129 @@ export default function TeacherAddMarks() {
 
       {rows.length > 0 && (
         <>
-          <table className="marks-table">
-            <thead>
-              <tr>
-                <th>Sr No</th>
-                <th>Student Name</th>
-
-                {activeSubjects.map((sub) => (
-                  <React.Fragment key={sub.key}>
-                    <th>{sub.label} Theory</th>
-                    {sub.project && <th>{sub.label} Project</th>}
-                  </React.Fragment>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {rows.map((row, i) => (
-                <tr key={row.id}>
-                  <td>{row.srno}</td>
-                  <td>{row.name}</td>
+          {/* ✅ Wrapper only scrolls table */}
+          <div className="table-wrapper">
+            <table className="marks-table">
+              <thead>
+                <tr>
+                  <th>Sr No</th>
+                  <th>Student Name</th>
 
                   {activeSubjects.map((sub) => (
                     <React.Fragment key={sub.key}>
-                      {/* THEORY */}
+                      <th>{sub.label} Theory</th>
+                      {sub.project && <th>{sub.label} Project</th>}
+                    </React.Fragment>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {/* ===== Out Of Row ===== */}
+                <tr className="outof-row">
+                  <td colSpan="2">Out Of</td>
+
+                  {activeSubjects.map((sub) => (
+                    <React.Fragment key={sub.key}>
                       <td>
                         <input
                           type="number"
-                          min="0"
-                          max="80"
-                          value={row[`${sub.key}Theory`]}
+                          className="outof-input"
+                          value={outOf[`${sub.key}Theory`]}
                           onChange={(e) =>
-                            handleChange(i, `${sub.key}Theory`, e.target.value)
+                            handleOutOfChange(
+                              `${sub.key}Theory`,
+                              e.target.value
+                            )
                           }
+                          placeholder="Out Of"
                         />
                       </td>
 
-                      {/* PROJECT */}
                       {sub.project && (
                         <td>
                           <input
                             type="number"
-                            min="0"
-                            max="20"
-                            value={row[`${sub.key}Project`]}
+                            className="outof-input"
+                            value={outOf[`${sub.key}Project`]}
                             onChange={(e) =>
-                              handleChange(
-                                i,
+                              handleOutOfChange(
                                 `${sub.key}Project`,
                                 e.target.value
                               )
                             }
+                            placeholder="Out Of"
                           />
                         </td>
                       )}
                     </React.Fragment>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
 
-          <button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save Marks"}
-          </button>
+                {/* ===== Student Marks Rows ===== */}
+                {rows.map((row, i) => (
+                  <tr key={row.id}>
+                    <td>{row.srno}</td>
+                    <td>{row.name}</td>
+
+                    {activeSubjects.map((sub) => (
+                      <React.Fragment key={sub.key}>
+                        {/* THEORY */}
+                        <td>
+                          <div className="marks-cell">
+                            <input
+                              type="number"
+                              className="marks-input"
+                              value={row[`${sub.key}Theory`]}
+                              onChange={(e) =>
+                                handleChange(
+                                  i,
+                                  `${sub.key}Theory`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                            <span className="slash-text">
+                              / {outOf[`${sub.key}Theory`] || 0}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* PROJECT */}
+                        {sub.project && (
+                          <td>
+                            <div className="marks-cell">
+                              <input
+                                type="number"
+                                className="marks-input"
+                                value={row[`${sub.key}Project`]}
+                                onChange={(e) =>
+                                  handleChange(
+                                    i,
+                                    `${sub.key}Project`,
+                                    e.target.value
+                                  )
+                                }
+                              />
+                              <span className="slash-text">
+                                / {outOf[`${sub.key}Project`] || 0}
+                              </span>
+                            </div>
+                          </td>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="btn-group">
+            <button className="save-btn" onClick={handleSave} disabled={saving}>
+              {saving ? "Saving..." : "Save Marks"}
+            </button>
+          </div>
         </>
       )}
     </div>
