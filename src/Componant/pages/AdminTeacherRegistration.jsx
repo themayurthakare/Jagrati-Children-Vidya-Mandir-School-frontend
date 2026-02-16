@@ -245,12 +245,22 @@ const AdminTeacherRegistration = ({
 
           <label className="full">
             Educational Details
-            <input
+            {/* <input
               name="educationalDetails"
               value={form.educationalDetails}
               onChange={handleChange}
               placeholder="e.g., M.A. B.Ed"
-            />
+            /> */}
+            <select
+              name="educationalDetails"
+              value={form.educationalDetails}
+              onChange={handleChange}
+            >
+              <option value="">Select Qualification</option>
+              <option value="B.A. B.Ed">B.A. B.Ed</option>
+              <option value="M.A. B.Ed">M.A. B.Ed</option>
+              <option value="B.Sc B.Ed">B.Sc B.Ed</option>
+            </select>
             {errors.educationalDetails && (
               <small className="field-error">{errors.educationalDetails}</small>
             )}
