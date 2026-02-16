@@ -143,7 +143,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
         const initialDocs = {};
         docsArray.forEach((doc) => {
           const docType = DOC_TYPES.find(
-            (d) => d.endpoint === doc.docType || d.endpoint === doc.type
+            (d) => d.endpoint === doc.docType || d.endpoint === doc.type,
           );
           if (docType) {
             initialDocs[docType.key] = {
@@ -273,7 +273,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     setUploadingDocs(true);
 
     const filesToUpload = Object.keys(docs).filter(
-      (key) => docs[key]?.file && !docs[key]?.exists
+      (key) => docs[key]?.file && !docs[key]?.exists,
     );
 
     let allSuccess = true;
@@ -290,7 +290,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
       await fetchDocuments(); // Refresh documents list
     } else {
       window.alert(
-        "Some documents failed to upload. Please check individual file status."
+        "Some documents failed to upload. Please check individual file status.",
       );
     }
 
@@ -445,7 +445,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
 
       // Then upload documents if any
       const hasNewDocuments = Object.keys(docs).some(
-        (key) => docs[key]?.file && !docs[key]?.exists
+        (key) => docs[key]?.file && !docs[key]?.exists,
       );
 
       let docsSuccess = true;
@@ -470,9 +470,30 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   };
 
   // Handle form reset
+  // const handleReset = () => {
+  //   if (window.confirm("Are you sure you want to reset all changes?")) {
+  //     window.location.reload();
+  //   }
+  // };
   const handleReset = () => {
     if (window.confirm("Are you sure you want to reset all changes?")) {
-      window.location.reload();
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        dateOfBirth: "",
+        yearOfExperience: "",
+        educationalDetails: "",
+        aadharNo: "",
+        address: "",
+        panNo: "",
+        designation: "",
+        subject: "",
+      });
+
+      setErrors({});
+      setUpdateSuccess(false);
     }
   };
 
@@ -484,13 +505,13 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     });
 
     const hasNewDocs = Object.keys(docs).some(
-      (key) => docs[key]?.file && !docs[key]?.exists
+      (key) => docs[key]?.file && !docs[key]?.exists,
     );
 
     if (
       (hasChanges || hasNewDocs) &&
       !window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?"
+        "You have unsaved changes. Are you sure you want to leave?",
       )
     ) {
       return;
@@ -742,7 +763,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
               const doc = docs[docType.key];
               const existingDoc = existingDocs.find(
                 (d) =>
-                  d.docType === docType.endpoint || d.type === docType.endpoint
+                  d.docType === docType.endpoint || d.type === docType.endpoint,
               );
               const status = docStatus[docType.key];
 
