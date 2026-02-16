@@ -286,7 +286,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     setUploadingDocs(false);
 
     if (allSuccess) {
-      window.alert("All documents uploaded successfully!");
+      window.alert("Documents uploaded successfully!");
       await fetchDocuments(); // Refresh documents list
     } else {
       window.alert(
