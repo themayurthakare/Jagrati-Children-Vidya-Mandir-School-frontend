@@ -8,17 +8,17 @@ const SUBJECT_BY_CATEGORY = {
     { key: "hindi", label: "Hindi", hasProject: true },
     { key: "english", label: "English", hasProject: true },
     { key: "maths", label: "Maths", hasProject: true },
-    { key: "gk", label: "GK", hasProject: false },
-    { key: "drawing", label: "Drawing", hasProject: false },
+    { key: "gk", label: "GK", hasProject: false, isGrade: true },
+    { key: "drawing", label: "Drawing", hasProject: false, isGrade: true },
   ],
 
   MIDDLE: [
     { key: "hindi", label: "Hindi", hasProject: true },
     { key: "english", label: "English", hasProject: true },
     { key: "maths", label: "Maths", hasProject: true },
-    { key: "computer", label: "Computer", hasProject: false },
-    { key: "gk", label: "GK", hasProject: false },
-    { key: "drawing", label: "Drawing", hasProject: false },
+    { key: "computer", label: "Computer", hasProject: false, isGrade: true },
+    { key: "gk", label: "GK", hasProject: false, isGrade: true },
+    { key: "drawing", label: "Drawing", hasProject: false, isGrade: true },
     { key: "evs", label: "EVS", hasProject: true },
   ],
 
@@ -29,7 +29,7 @@ const SUBJECT_BY_CATEGORY = {
     { key: "science", label: "Science", hasProject: true },
     { key: "socialScience", label: "Social Science", hasProject: true },
     { key: "sanskrit", label: "Sanskrit", hasProject: true },
-    { key: "gk", label: "GK", hasProject: false },
+    { key: "gk", label: "GK", hasProject: false, isGrade: true },
   ],
 };
 
@@ -62,6 +62,8 @@ const getCategoryByClassName = (name = "") => {
 
   return null;
 };
+
+const GRADE_OPTIONS = ["A+", "A", "B+", "B", "C+", "C", "D+", "D", "E+", "E"];
 
 export default function EditMarks() {
   const { marksId } = useParams();
@@ -137,10 +139,17 @@ export default function EditMarks() {
         const theoryField = `${sub.key}Theory`;
         const projectField = `${sub.key}Project`;
 
-        payload[theoryField] = Number(marks[theoryField]) || 0;
+        if (sub.isGrade) {
+          payload[theoryField] = marks[theoryField] || "";
+          payload[projectField] = 0;
+        } else {
+          payload[theoryField] = Number(marks[theoryField]) || 0;
 
-        if (sub.hasProject) {
-          payload[projectField] = Number(marks[projectField]) || 0;
+          if (sub.hasProject) {
+            payload[projectField] = Number(marks[projectField]) || 0;
+          } else {
+            payload[projectField] = 0;
+          }
         }
       });
 
@@ -196,12 +205,15 @@ export default function EditMarks() {
             const theoryField = `${sub.key}Theory`;
             const projectField = `${sub.key}Project`;
 
-            const theoryVal = Number(marks[theoryField]) || 0;
+            const theoryVal = sub.isGrade
+              ? marks[theoryField] || ""
+              : Number(marks[theoryField]) || 0;
+
             const projectVal = sub.hasProject
               ? Number(marks[projectField]) || 0
               : 0;
 
-            const totalVal = theoryVal + projectVal;
+            const totalVal = sub.isGrade ? theoryVal : theoryVal + projectVal;
 
             return (
               <tr key={sub.key}>
@@ -209,13 +221,27 @@ export default function EditMarks() {
 
                 {/* THEORY */}
                 <td>
-                  <input
-                    type="number"
-                    min="0"
-                    max="80"
-                    value={marks[theoryField] ?? ""}
-                    onChange={(e) => handleChange(theoryField, e.target.value)}
-                  />
+                  {sub.isGrade ? (
+                    <select
+                      value={marks[theoryField] || ""}
+                      onChange={(e) => handleChange(theoryField, e.target.value)}
+                    >
+                      <option value="">Select Grade</option>
+                      {GRADE_OPTIONS.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="number"
+                      min="0"
+                      max="80"
+                      value={marks[theoryField] ?? ""}
+                      onChange={(e) => handleChange(theoryField, e.target.value)}
+                    />
+                  )}
                 </td>
 
                 {/* PROJECT */}

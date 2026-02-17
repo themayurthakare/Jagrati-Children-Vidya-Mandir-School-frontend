@@ -4,32 +4,35 @@ import "../styles/Addmarks.css";
 /* ===== SUBJECTS BY CATEGORY ===== */
 const SUBJECT_BY_CATEGORY = {
   PRIMARY: [
-    { key: "hindi", label: "Hindi", project: true },
-    { key: "english", label: "English", project: true },
-    { key: "maths", label: "Maths", project: true },
-    { key: "gk", label: "GK", project: false },
-    { key: "drawing", label: "Drawing", project: false },
+    { key: "hindi", label: "Hindi", project: true, isGrade: false },
+    { key: "english", label: "English", project: true, isGrade: false },
+    { key: "maths", label: "Maths", project: true, isGrade: false },
+    { key: "gk", label: "GK", project: false, isGrade: true },
+    { key: "drawing", label: "Drawing", project: false, isGrade: true },
   ],
   MIDDLE: [
-    { key: "hindi", label: "Hindi", project: true },
-    { key: "english", label: "English", project: true },
-    { key: "maths", label: "Maths", project: true },
-    { key: "evs", label: "EVS", project: true },
-    { key: "computer", label: "Computer", project: false },
-    { key: "gk", label: "GK", project: false },
-    { key: "drawing", label: "Drawing", project: false },
+    { key: "hindi", label: "Hindi", project: true, isGrade: false },
+    { key: "english", label: "English", project: true, isGrade: false },
+    { key: "maths", label: "Maths", project: true, isGrade: false },
+    { key: "evs", label: "EVS", project: true, isGrade: false },
+    { key: "computer", label: "Computer", project: false, isGrade: true },
+    { key: "gk", label: "GK", project: false, isGrade: true },
+    { key: "drawing", label: "Drawing", project: false, isGrade: true },
   ],
   SECONDARY: [
-    { key: "hindi", label: "Hindi", project: true },
-    { key: "english", label: "English", project: true },
-    { key: "maths", label: "Maths", project: true },
-    { key: "science", label: "Science", project: true },
-    { key: "socialScience", label: "Social Science", project: true },
-    { key: "sanskrit", label: "Sanskrit", project: true },
-    { key: "marathi", label: "Marathi", project: true },
-    { key: "gk", label: "GK", project: false },
+    { key: "hindi", label: "Hindi", project: true, isGrade: false },
+    { key: "english", label: "English", project: true, isGrade: false },
+    { key: "maths", label: "Maths", project: true, isGrade: false },
+    { key: "science", label: "Science", project: true, isGrade: false },
+    { key: "socialScience", label: "Social Science", project: true, isGrade: false },
+    { key: "sanskrit", label: "Sanskrit", project: true, isGrade: false },
+    { key: "marathi", label: "Marathi", project: true, isGrade: false },
+    { key: "gk", label: "GK", project: false, isGrade: true },
   ],
 };
+
+/* ===== GRADE OPTIONS ===== */
+const GRADE_OPTIONS = ["A+", "A", "B+", "B", "C+", "C", "D+", "D", "E+", "E"];
 
 /* ===== CLASS NAME → CATEGORY ===== */
 const getCategoryByClassName = (name = "") => {
@@ -134,8 +137,10 @@ export default function TeacherAddMarks() {
     const newOutOf = {};
 
     activeSubjects.forEach((sub) => {
-      newOutOf[`${sub.key}Theory`] = "";
-      if (sub.project) newOutOf[`${sub.key}Project`] = "";
+      if (!sub.isGrade) {
+        newOutOf[`${sub.key}Theory`] = "";
+        if (sub.project) newOutOf[`${sub.key}Project`] = "";
+      }
     });
 
     setOutOf(newOutOf);
@@ -189,8 +194,16 @@ export default function TeacherAddMarks() {
     }));
   };
 
-  /* ================= MARKS CHANGE (VALIDATION) ================= */
-  const handleChange = (rowIndex, key, value) => {
+  /* ================= MARKS CHANGE ================= */
+  const handleChange = (rowIndex, key, value, isGrade) => {
+    const updated = [...rows];
+
+    if (isGrade) {
+      updated[rowIndex][key] = value;
+      setRows(updated);
+      return;
+    }
+
     let val = value === "" ? "" : Number(value);
 
     if (val !== "" && val < 0) val = 0;
@@ -201,7 +214,6 @@ export default function TeacherAddMarks() {
       val = maxAllowed;
     }
 
-    const updated = [...rows];
     updated[rowIndex][key] = val;
     setRows(updated);
   };
@@ -213,19 +225,50 @@ export default function TeacherAddMarks() {
     if (!sessionId) return alert("Academic session not set");
     if (!examType) return alert("Please select exam");
 
-    // OutOf validation
+    // OutOf validation (ONLY numeric subjects)
     for (let sub of activeSubjects) {
-      if (!outOf[`${sub.key}Theory`]) {
-        return alert(`Please set Out Of for ${sub.label} Theory`);
+      if (!sub.isGrade) {
+        if (!outOf[`${sub.key}Theory`]) {
+          return alert(`Please set Out Of for ${sub.label} Theory`);
+        }
+        if (sub.project && !outOf[`${sub.key}Project`]) {
+          return alert(`Please set Out Of for ${sub.label} Project`);
+        }
       }
-      if (sub.project && !outOf[`${sub.key}Project`]) {
-        return alert(`Please set Out Of for ${sub.label} Project`);
+    }
+
+    // Grade validation (ONLY filled student rows)
+    for (let row of rows) {
+      const isRowFilled = activeSubjects.some((sub) => {
+        const theoryVal = row[`${sub.key}Theory`];
+        const projectVal = row[`${sub.key}Project`];
+
+        if (sub.isGrade) {
+          return theoryVal && theoryVal !== "";
+        } else {
+          return (
+            (theoryVal !== "" && Number(theoryVal) > 0) ||
+            (sub.project && projectVal !== "" && Number(projectVal) > 0)
+          );
+        }
+      });
+
+      if (!isRowFilled) continue;
+
+      for (let sub of activeSubjects) {
+        if (sub.isGrade) {
+          const gradeValue = row[`${sub.key}Theory`];
+          if (!GRADE_OPTIONS.includes(gradeValue)) {
+            return alert(`Please select valid grade for ${sub.label}`);
+          }
+        }
       }
     }
 
     try {
       setSaving(true);
 
+      // IMPORTANT: Save ALL students (even blank)
       const payload = rows.map((r) => {
         const obj = {
           studentId: r.id,
@@ -236,16 +279,24 @@ export default function TeacherAddMarks() {
         };
 
         activeSubjects.forEach((sub) => {
-          obj[`${sub.key}Theory`] = Number(r[`${sub.key}Theory`]) || 0;
-          obj[`${sub.key}TheoryOutOf`] = Number(outOf[`${sub.key}Theory`]) || 0;
+          if (sub.isGrade) {
+            obj[`${sub.key}Theory`] = r[`${sub.key}Theory`] || null;
+            obj[`${sub.key}TheoryOutOf`] = 100;
 
-          if (sub.project) {
-            obj[`${sub.key}Project`] = Number(r[`${sub.key}Project`]) || 0;
-            obj[`${sub.key}ProjectOutOf`] =
-              Number(outOf[`${sub.key}Project`]) || 0;
-          } else {
             obj[`${sub.key}Project`] = 0;
             obj[`${sub.key}ProjectOutOf`] = 0;
+          } else {
+            obj[`${sub.key}Theory`] = Number(r[`${sub.key}Theory`]) || 0;
+            obj[`${sub.key}TheoryOutOf`] = Number(outOf[`${sub.key}Theory`]) || 0;
+
+            if (sub.project) {
+              obj[`${sub.key}Project`] = Number(r[`${sub.key}Project`]) || 0;
+              obj[`${sub.key}ProjectOutOf`] =
+                Number(outOf[`${sub.key}Project`]) || 0;
+            } else {
+              obj[`${sub.key}Project`] = 0;
+              obj[`${sub.key}ProjectOutOf`] = 0;
+            }
           }
         });
 
@@ -321,7 +372,6 @@ export default function TeacherAddMarks() {
 
       {rows.length > 0 && (
         <>
-          {/* ✅ Wrapper only scrolls table */}
           <div className="table-wrapper">
             <table className="marks-table">
               <thead>
@@ -331,8 +381,8 @@ export default function TeacherAddMarks() {
 
                   {activeSubjects.map((sub) => (
                     <React.Fragment key={sub.key}>
-                      <th>{sub.label} Theory</th>
-                      {sub.project && <th>{sub.label} Project</th>}
+                      <th>{sub.label}</th>
+                      {!sub.isGrade && sub.project && <th>{sub.label} Project</th>}
                     </React.Fragment>
                   ))}
                 </tr>
@@ -346,21 +396,25 @@ export default function TeacherAddMarks() {
                   {activeSubjects.map((sub) => (
                     <React.Fragment key={sub.key}>
                       <td>
-                        <input
-                          type="number"
-                          className="outof-input"
-                          value={outOf[`${sub.key}Theory`]}
-                          onChange={(e) =>
-                            handleOutOfChange(
-                              `${sub.key}Theory`,
-                              e.target.value
-                            )
-                          }
-                          placeholder="Out Of"
-                        />
+                        {sub.isGrade ? (
+                          <span style={{ color: "gray" }}>Grade</span>
+                        ) : (
+                          <input
+                            type="number"
+                            className="outof-input"
+                            value={outOf[`${sub.key}Theory`]}
+                            onChange={(e) =>
+                              handleOutOfChange(
+                                `${sub.key}Theory`,
+                                e.target.value
+                              )
+                            }
+                            placeholder="Out Of"
+                          />
+                        )}
                       </td>
 
-                      {sub.project && (
+                      {!sub.isGrade && sub.project && (
                         <td>
                           <input
                             type="number"
@@ -388,29 +442,52 @@ export default function TeacherAddMarks() {
 
                     {activeSubjects.map((sub) => (
                       <React.Fragment key={sub.key}>
-                        {/* THEORY */}
+                        {/* THEORY / GRADE */}
                         <td>
-                          <div className="marks-cell">
-                            <input
-                              type="number"
+                          {sub.isGrade ? (
+                            <select
                               className="marks-input"
-                              value={row[`${sub.key}Theory`]}
+                              value={row[`${sub.key}Theory`] || ""}
                               onChange={(e) =>
                                 handleChange(
                                   i,
                                   `${sub.key}Theory`,
-                                  e.target.value
+                                  e.target.value,
+                                  true
                                 )
                               }
-                            />
-                            <span className="slash-text">
-                              / {outOf[`${sub.key}Theory`] || 0}
-                            </span>
-                          </div>
+                            >
+                              <option value="">Select</option>
+                              {GRADE_OPTIONS.map((g) => (
+                                <option key={g} value={g}>
+                                  {g}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <div className="marks-cell">
+                              <input
+                                type="number"
+                                className="marks-input"
+                                value={row[`${sub.key}Theory`]}
+                                onChange={(e) =>
+                                  handleChange(
+                                    i,
+                                    `${sub.key}Theory`,
+                                    e.target.value,
+                                    false
+                                  )
+                                }
+                              />
+                              <span className="slash-text">
+                                / {outOf[`${sub.key}Theory`] || 0}
+                              </span>
+                            </div>
+                          )}
                         </td>
 
                         {/* PROJECT */}
-                        {sub.project && (
+                        {!sub.isGrade && sub.project && (
                           <td>
                             <div className="marks-cell">
                               <input
@@ -421,7 +498,8 @@ export default function TeacherAddMarks() {
                                   handleChange(
                                     i,
                                     `${sub.key}Project`,
-                                    e.target.value
+                                    e.target.value,
+                                    false
                                   )
                                 }
                               />
