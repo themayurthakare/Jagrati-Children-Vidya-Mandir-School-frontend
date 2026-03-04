@@ -51,6 +51,9 @@ import ViewTCStudents from "./ViewTCStudents";
 import AdminMarksheetClass from "./AdminMarksheetClasses";
 import AdminMarksheetStudents from "./AdminMarksheetStudents";
 import AdminPrintMarksheet from "./AdminPrintMarksheet";
+import MarksheetClass1to5 from "./MarksheetClass1to5";
+import MarksheetPrePrimary from "./MarksheetPrePrimary";
+import MarksheetClass6to8 from "./MarksheetClass6to8";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -172,7 +175,7 @@ const Sidebar = () => {
           <FaFileUpload /> <span>TC Students</span>
         </NavLink>
         <NavLink
-          to="/admindashboard/marksheet"
+          to="/admindashboard/marksheet-class"
           className={({ isActive }) =>
             isActive ? "nav-item active" : "nav-item"
           }
@@ -333,12 +336,14 @@ const AdminDashboard = () => {
                 </div>
               }
             />
-            <Route path="marksheet" element={<AdminMarksheetClass />} />
+            <Route path="marksheet-class" element={<AdminMarksheetClass />} />
             <Route
-              path="generate-marksheet"
+              path="marksheet-students"
               element={<AdminMarksheetStudents />}
             />
-            <Route path="print-marksheet" element={<AdminPrintMarksheet />} />
+            <Route path="marksheet-pre" element={<MarksheetPrePrimary />} />
+            <Route path="marksheet-1-5" element={<MarksheetClass1to5 />} />
+            <Route path="marksheet-6-8" element={<MarksheetClass6to8 />} />
           </Routes>
         </main>
       </SessionProvider>

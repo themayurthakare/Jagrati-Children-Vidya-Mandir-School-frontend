@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SessionContext } from "./SessionContext";
-
 import "./AdminViewClassStudents.css";
 
 const AdminMarksheetStudents = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get class ID from navigation state
   const classId = location.state?.classId;
   const className = location.state?.className || "Class";
 
@@ -17,246 +15,300 @@ const AdminMarksheetStudents = () => {
 
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
-  const [classInfo, setClassInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch class details and students
   useEffect(() => {
     if (!classId) {
-      setError(
-        "No class selected. Please select a class from the classes list.",
-      );
+      setError("No class selected.");
       setLoading(false);
       return;
     }
 
-    const fetchClassData = async () => {
+    if (!sessionId) {
+      setError("No session selected. Please select a session first.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchStudents = async () => {
       try {
         setLoading(true);
         setError("");
 
-        // Fetch class details
-        const classResponse = await fetch(
-          `http://localhost:8080/api/classes/${classId}`,
+        console.log(
+          "Fetching students for class:",
+          classId,
+          "session:",
+          sessionId,
         );
 
-        if (!classResponse.ok) {
-          if (classResponse.status === 404) {
-            throw new Error("Class not found");
+        // First try: Get students by class from users endpoint
+        const response = await fetch(
+          `http://localhost:8080/api/users/${sessionId}/getAll`,
+        );
+
+        if (response.ok) {
+          const allUsers = await response.json();
+          console.log("All users:", allUsers);
+
+          if (Array.isArray(allUsers)) {
+            // Filter users who are students and belong to this class
+            const classStudents = allUsers.filter((user) => {
+              // Check if user is a student (you might have a role field)
+              const isStudent =
+                !user.role ||
+                user.role === "student" ||
+                user.role === "Student";
+
+              // Check class ID match (try different possible field names)
+              const userClassId =
+                user.studentClassId || user.classId || user.class;
+
+              return (
+                isStudent && userClassId?.toString() === classId.toString()
+              );
+            });
+
+            console.log("Filtered students:", classStudents);
+
+            if (classStudents.length > 0) {
+              setStudents(classStudents);
+              setFilteredStudents(classStudents);
+            } else {
+              // If no students found, show all users for debugging
+              setError(
+                `No students found in class ${className}. Total users: ${allUsers.length}`,
+              );
+              setStudents([]);
+              setFilteredStudents([]);
+            }
           }
-          throw new Error(
-            `Failed to fetch class details: ${classResponse.status}`,
-          );
+        } else {
+          setError(`Failed to fetch users: ${response.status}`);
         }
-
-        const classData = await classResponse.json();
-        setClassInfo(classData);
-
-        // Fetch students for this class
-        // Try class-specific endpoint first
-        const studentsResponse = await fetch(
-          `http://localhost:8080/api/classes/${classId}/students`,
-        );
-
-        if (!studentsResponse.ok) {
-          // If endpoint doesn't exist, try the general students endpoint
-          await fetchAllStudentsAndFilter();
-          return;
-        }
-
-        const studentsData = await studentsResponse.json();
-        const studentsList = Array.isArray(studentsData) ? studentsData : [];
-        setStudents(studentsList);
-        setFilteredStudents(studentsList);
       } catch (err) {
-        console.error("Error fetching class data:", err);
-        setError(err.message || "Failed to load class data");
-        setStudents([]);
-        setFilteredStudents([]);
+        console.error("Error fetching students:", err);
+        setError(`Error: ${err.message}`);
       } finally {
         setLoading(false);
       }
     };
 
-    // Alternative: Fetch all students and filter by class
-    const fetchAllStudentsAndFilter = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/api/users/${sessionId}/getAll`,
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch students");
-        }
+    fetchStudents();
+  }, [classId, sessionId, className]);
 
-        const allStudents = await response.json();
-        const filteredStudents = Array.isArray(allStudents)
-          ? allStudents.filter(
-              (student) =>
-                student.studentClassId === classId ||
-                student.studentClass === classId ||
-                (student.studentClass &&
-                  student.studentClass.toString() === classId.toString()),
-            )
-          : [];
-
-        setStudents(filteredStudents);
-        setFilteredStudents(filteredStudents);
-      } catch (err) {
-        console.error("Error fetching students:", err);
-        setError("Could not load students for this class");
-        setStudents([]);
-        setFilteredStudents([]);
-      }
-    };
-
-    fetchClassData();
-  }, [classId]);
-
-  // Handle search
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredStudents(students);
-    } else {
-      const term = searchTerm.toLowerCase();
-      const filtered = students.filter(
-        (student) =>
-          (student.name && student.name.toLowerCase().includes(term)) ||
-          (student.admissionNo &&
-            student.admissionNo.toLowerCase().includes(term)) ||
-          (student.studentPhone && student.studentPhone.includes(term)) ||
-          (student.parentPhone && student.parentPhone.includes(term)),
-      );
-      setFilteredStudents(filtered);
+      return;
     }
+
+    const term = searchTerm.toLowerCase().trim();
+    const filtered = students.filter(
+      (student) =>
+        (student.name?.toLowerCase() || "").includes(term) ||
+        (student.fullName?.toLowerCase() || "").includes(term) ||
+        (student.admissionNo?.toLowerCase() || "").includes(term) ||
+        (student.userId?.toString() || "").includes(term),
+    );
+    setFilteredStudents(filtered);
   }, [searchTerm, students]);
 
-  // Clear search
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
+  const openMarksheet = (student) => {
+    if (!selectedSession?.id) {
+      alert("No session selected");
+      return;
+    }
 
-  // Navigate back to classes list
-  const goBackToClasses = () => {
-    navigate("/admindashboard/marksheet");
+    // Determine class range
+    let classNumber;
+    const classStr = className.toString().toLowerCase();
+
+    if (
+      classStr.includes("nursery") ||
+      classStr.includes("kg") ||
+      classStr.includes("pre") ||
+      classStr.includes("play")
+    ) {
+      classNumber = 0; // Pre-primary
+    } else {
+      const match = classStr.match(/\d+/);
+      classNumber = match ? parseInt(match[0]) : 0;
+    }
+
+    let route = "";
+    if (classNumber < 1) {
+      route = "/admindashboard/marksheet-pre";
+    } else if (classNumber >= 1 && classNumber <= 5) {
+      route = "/admindashboard/marksheet-1-5";
+    } else if (classNumber >= 6 && classNumber <= 8) {
+      route = "/admindashboard/marksheet-6-8";
+    } else {
+      alert(`No marksheet template for class ${className}`);
+      return;
+    }
+
+    console.log("Navigating to:", route, "with student:", student);
+
+    navigate(route, {
+      state: {
+        studentId: student.userId || student.id,
+        sessionId: selectedSession.id,
+        className: className,
+      },
+    });
   };
 
   return (
     <div className="class-students-container">
-      {/* Header */}
       <div className="class-students-header">
-        <div className="header-left">
-          <button className="back-btn" onClick={goBackToClasses}>
-            ← Back to Classes
-          </button>
-          <h2 className="page-title">{className} Students</h2>
-        </div>
-
-        <div className="header-right">
-          {!loading && !error && (
-            <div className="total-students">
-              Total Students:{" "}
-              <span className="student-count">{students.length}</span>
-            </div>
-          )}
-        </div>
+        <button
+          className="back-btn"
+          onClick={() => navigate("/admindashboard/marksheet-class")}
+          style={{
+            padding: "8px 16px",
+            marginRight: "20px",
+            cursor: "pointer",
+          }}
+        >
+          ← Back to Classes
+        </button>
+        <h2>{className} - Students</h2>
       </div>
 
-      {/* Search Bar */}
-      <div className="search-section">
-        <div className="search-container">
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search by name, admission no, or phone..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button className="search-clear-btn" onClick={clearSearch}>
-              ×
-            </button>
-          )}
-        </div>
-        {searchTerm && (
-          <div className="search-stats">
-            Showing {filteredStudents.length} of {students.length} students
-          </div>
-        )}
+      {/* Search Section */}
+      <div className="search-section" style={{ margin: "20px 0" }}>
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search students..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            padding: "8px",
+            width: "300px",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+          }}
+        />
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-        </div>
-      )}
 
       {/* Students Table */}
       <div className="students-table-container1">
         {loading ? (
-          <div className="loading-state">
-            <p>Loading students...</p>
+          <p style={{ textAlign: "center", padding: "50px" }}>
+            Loading students...
+          </p>
+        ) : error ? (
+          <div style={{ textAlign: "center", padding: "50px", color: "red" }}>
+            <p>{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                marginTop: "20px",
+                padding: "10px 20px",
+                cursor: "pointer",
+              }}
+            >
+              Retry
+            </button>
           </div>
         ) : filteredStudents.length === 0 ? (
-          <div className="empty-state">
-            {searchTerm ? (
-              <>
-                <p>No students found matching "{searchTerm}"</p>
-                <button className="clear-search-btn" onClick={clearSearch}>
-                  Clear Search
-                </button>
-              </>
-            ) : (
-              <p>No students found in this class.</p>
+          <div style={{ textAlign: "center", padding: "50px" }}>
+            <p>No students found in this class.</p>
+            {students.length === 0 && (
+              <div>
+                <p>Debug Info:</p>
+                <p>Class ID: {classId}</p>
+                <p>Session ID: {sessionId}</p>
+                <p>Class Name: {className}</p>
+              </div>
             )}
           </div>
         ) : (
-          <div className="table-class-wrapper">
-            <table className="students-class-table">
-              <thead>
-                <tr>
-                  <th>Sr. No.</th>
-                  <th>Student Name</th>
-                  <th>Phone</th>
-                  <th>Actions</th>
+          <table
+            className="students-class-table"
+            style={{ width: "100%", borderCollapse: "collapse" }}
+          >
+            <thead>
+              <tr style={{ backgroundColor: "#f2f2f2" }}>
+                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
+                  Sr. No.
+                </th>
+                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
+                  Student Name
+                </th>
+                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
+                  Admission No.
+                </th>
+                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
+                  Roll No.
+                </th>
+                <th style={{ padding: "12px", border: "1px solid #ddd" }}>
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredStudents.map((student, index) => (
+                <tr key={student.userId || student.id || index}>
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {index + 1}
+                  </td>
+                  <td style={{ padding: "10px", border: "1px solid #ddd" }}>
+                    {student.name || student.fullName || "N/A"}
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {student.admissionNo || "N/A"}
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    {student.userId || student.id || "N/A"}
+                  </td>
+                  <td
+                    style={{
+                      padding: "10px",
+                      border: "1px solid #ddd",
+                      textAlign: "center",
+                    }}
+                  >
+                    <button
+                      onClick={() => openMarksheet(student)}
+                      style={{
+                        padding: "6px 12px",
+                        backgroundColor: "#4CAF50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Generate Marksheet
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-
-              <tbody>
-                {filteredStudents.map((student, index) => (
-                  <tr key={student.userId}>
-                    <td className="text-center">{index + 1}</td>
-                    <td>
-                      <div className="student-name">
-                        {student.name || "N/A"}
-                      </div>
-                    </td>
-                    <td>
-                      {student.studentPhone || student.parentPhone || "N/A"}
-                    </td>
-                    <td>
-                      <button
-                        className="payment-btn"
-                        onClick={() =>
-                          navigate("/admindashboard/print-marksheet", {
-                            state: {
-                              studentId: student.userId,
-                              sessionId: selectedSession.id,
-                              className: className,
-                            },
-                          })
-                        }
-                      >
-                        Print Marksheet
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
