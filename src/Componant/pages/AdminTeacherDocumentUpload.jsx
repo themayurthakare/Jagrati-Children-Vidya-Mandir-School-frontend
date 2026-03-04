@@ -190,8 +190,20 @@ const AdminTeacherDocumentUpload = ({
     }
   };
 
+  // Handle back navigation
+  const handleBack = () => {
+    navigate(-1);
+  };
+
   return (
     <div className="ud-container">
+      {/* Back Button - Added exactly as you had it */}
+      <div className="ud-back-button-container">
+        <button onClick={handleBack} className="ud-back-btn">
+          ← Back
+        </button>
+      </div>
+
       <div className="ud-card">
         <h2>Upload Teacher Documents</h2>
 
@@ -238,6 +250,13 @@ const AdminTeacherDocumentUpload = ({
           </div>
 
           <div className="ud-button-row">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="ud-btn ud-cancel-btn"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               className="ud-btn ud-save-btn"

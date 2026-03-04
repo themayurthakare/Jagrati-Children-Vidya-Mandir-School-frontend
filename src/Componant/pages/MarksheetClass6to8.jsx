@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./AdminPrintMarksheet.css";
+import "./MarksheetClass6to8.css";
 
 const MarksheetClass6to8 = () => {
   const location = useLocation();
@@ -14,25 +14,40 @@ const MarksheetClass6to8 = () => {
   const [loading, setLoading] = useState(true);
 
   // Subject visibility - Class 6-8: Science, Social Science, Sanskrit are shown
-  const [showScience, setShowScience] = useState(true);
-  const [showSocialScience, setShowSocialScience] = useState(true);
-  const [showSanskrit, setShowSanskrit] = useState(true);
+  // These are always true for Class 6-8, so we don't need setter functions
+  const [showScience] = useState(true);
+  const [showSocialScience] = useState(true);
+  const [showSanskrit] = useState(true);
   // GK is always shown
 
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
+    if (!sessionId || !studentId) {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     const fetchStudent = fetch(
       `http://localhost:8080/api/users/${sessionId}/${studentId}`,
-    ).then((res) => res.json());
+    ).then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch student");
+      return res.json();
+    });
 
     const fetchSession = fetch(
       `http://localhost:8080/api/sessions/${sessionId}`,
-    ).then((res) => res.json());
+    ).then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch session");
+      return res.json();
+    });
 
     const fetchMarks = fetch(
       `http://localhost:8080/api/marks/student/${studentId}?sessionId=${sessionId}`,
-    ).then((res) => res.json());
+    ).then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch marks");
+      return res.json();
+    });
 
     Promise.all([fetchStudent, fetchSession, fetchMarks])
       .then(([studentData, sessionData, marksData]) => {
@@ -44,21 +59,28 @@ const MarksheetClass6to8 = () => {
           ["Quarterly", "Half Yearly", "Annual"].includes(mark.examType),
         );
         setMarks(filteredMarks);
-
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  };
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setLoading(false);
+      });
+  }, [sessionId, studentId]);
 
   useEffect(() => {
-    if (sessionId && studentId) fetchData();
-  }, [sessionId, studentId]);
+    fetchData();
+  }, [fetchData]);
 
   // Helper to get a mark by exam type, subject and field
   const getMarksByExamType = (examType, subject, field) => {
     const examMarks = marks.find((m) => m.examType === examType);
     if (!examMarks) return "";
-    const subjectField = `${subject.toLowerCase()}${field}`;
+
+    // Handle special case for Social Science
+    let subjectKey = subject.toLowerCase();
+    if (subject === "SocialScience") subjectKey = "socialScience";
+
+    const subjectField = `${subjectKey}${field}`;
     return examMarks[subjectField] || "";
   };
 
@@ -193,7 +215,7 @@ const MarksheetClass6to8 = () => {
     (subj) => subj.show,
   );
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="loading">Loading marksheet...</div>;
   if (!student || !session) return <div className="error">No data found</div>;
 
   return (
@@ -278,6 +300,18 @@ const MarksheetClass6to8 = () => {
           <table className="ms-marks-table">
             <colgroup>
               <col style={{ width: "14%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "7.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "7.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "7.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "8.5%" }} />
+              <col style={{ width: "7.5%" }} />
             </colgroup>
             <thead>
               <tr>
@@ -560,87 +594,93 @@ const MarksheetClass6to8 = () => {
                       style={{
                         verticalAlign: "middle",
                         backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                        fontWeight: "bold",
                       }}
                     >
                       ADDITIONAL SUBJECT
                     </td>
                   </tr>
 
-                  {/* Sub-header row */}
-                  <tr>
-                    {additionalSubjects.map((subj) => (
-                      <td
-                        key={`max-${subj.key}`}
-                        style={{ fontWeight: "bold" }}
-                      >
-                        {subj.label}
-                      </td>
-                    ))}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`q-${subj.key}`} style={{ fontWeight: "bold" }}>
-                        {subj.label}
-                      </td>
-                    ))}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`hy-${subj.key}`} style={{ fontWeight: "bold" }}>
-                        {subj.label}
-                      </td>
-                    ))}
-                    {additionalSubjects.map((subj) => (
-                      <td
-                        key={`ann-${subj.key}`}
-                        style={{ fontWeight: "bold" }}
-                      >
-                        {subj.label}
-                      </td>
-                    ))}
+                  {/* Sub-header row - G.K. headers under each section */}
+                  <tr className="additional-subject-headers">
+                    <td
+                      style={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                      }}
+                    >
+                      G.K.
+                    </td>
+                    <td
+                      style={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                      }}
+                    >
+                      G.K.
+                    </td>
+                    <td
+                      style={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                      }}
+                    >
+                      G.K.
+                    </td>
+                    <td
+                      style={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                      }}
+                    >
+                      G.K.
+                    </td>
                   </tr>
 
-                  {/* Values row */}
-                  <tr>
+                  {/* Values row - GRADE and actual values */}
+                  <tr className="grade-values-row">
                     <td
                       className="ms-bold"
                       style={{
                         verticalAlign: "middle",
                         backgroundColor: "#f2f2f2",
+                        textAlign: "center",
+                        fontWeight: "bold",
                       }}
                     >
                       GRADE
                     </td>
 
-                    {/* Maximum values */}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`max-val-${subj.key}`}>
-                        <strong>A+</strong>
-                      </td>
-                    ))}
+                    {/* Maximum value - A+ */}
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>
+                      <strong>A+</strong>
+                    </td>
 
-                    {/* Quarterly values */}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`q-val-${subj.key}`}>
-                        <strong>
-                          {getAdditionalMarks("Quarterly", subj.key) || "A+"}
-                        </strong>
-                      </td>
-                    ))}
+                    {/* Quarterly value */}
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>
+                      <strong>
+                        {getAdditionalMarks("Quarterly", "gk") || "A+"}
+                      </strong>
+                    </td>
 
-                    {/* Half Yearly values */}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`hy-val-${subj.key}`}>
-                        <strong>
-                          {getAdditionalMarks("Half Yearly", subj.key) || "A+"}
-                        </strong>
-                      </td>
-                    ))}
+                    {/* Half Yearly value */}
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>
+                      <strong>
+                        {getAdditionalMarks("Half Yearly", "gk") || "A+"}
+                      </strong>
+                    </td>
 
-                    {/* Annual values */}
-                    {additionalSubjects.map((subj) => (
-                      <td key={`ann-val-${subj.key}`}>
-                        <strong>
-                          {getAdditionalMarks("Annual", subj.key) || "A+"}
-                        </strong>
-                      </td>
-                    ))}
+                    {/* Annual value */}
+                    <td style={{ textAlign: "center", fontWeight: "bold" }}>
+                      <strong>
+                        {getAdditionalMarks("Annual", "gk") || "A+"}
+                      </strong>
+                    </td>
                   </tr>
                 </>
               )}

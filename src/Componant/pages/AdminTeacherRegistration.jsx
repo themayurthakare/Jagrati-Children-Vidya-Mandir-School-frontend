@@ -40,11 +40,12 @@ const AdminTeacherRegistration = ({
         .then((data) => setClasses(data || []))
         .catch(() => setClasses([]));
     }
-  }, [classesProp, apiBase]);
+  }, [classesProp, apiBase, sessionId]);
 
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
+
     if (!form.email) {
       e.email = "Email is required";
     } else if (
@@ -52,14 +53,19 @@ const AdminTeacherRegistration = ({
     ) {
       e.email = "Enter a valid email format (example: abc@gmail.com)";
     }
+
     if (!form.phone || !/^[0-9]{10,15}$/.test(form.phone))
       e.phone = "Enter 10–15 digit phone";
+
     if (!form.password || form.password.length < 6)
       e.password = "Password must be at least 6 characters";
+
     if (!form.educationalDetails.trim())
       e.educationalDetails = "Educational details required";
+
     if (!form.yearOfExperience || form.yearOfExperience < 0)
       e.yearOfExperience = "Valid experience required";
+
     if (!form.dateOfBirth) {
       e.dateOfBirth = "Date of Birth is required";
     } else {
@@ -74,8 +80,17 @@ const AdminTeacherRegistration = ({
       }
     }
 
-    if (!form.aadharNo.trim()) e.aadharNo = "Aadhaar number required";
+    // Aadhar validation - exactly 12 digits
+    if (!form.aadharNo.trim()) {
+      e.aadharNo = "Aadhaar number is required";
+    } else if (form.aadharNo.length !== 12) {
+      e.aadharNo = "Aadhaar number must be exactly 12 digits";
+    } else if (!/^\d{12}$/.test(form.aadharNo)) {
+      e.aadharNo = "Aadhaar number must contain only digits";
+    }
+
     if (!form.address.trim()) e.address = "Address required";
+
     if (selectedClassNames.length === 0)
       e.classNames = "Select at least one class";
 
@@ -91,9 +106,11 @@ const AdminTeacherRegistration = ({
       const onlyAlphabets = value.replace(/[^A-Za-z\s]/g, "");
       setForm((p) => ({ ...p, name: onlyAlphabets }));
     } else if (name === "aadharNo") {
-      // Allow only numbers & max 12 digits
-      const onlyNumbers = value.replace(/\D/g, "").slice(0, 12);
-      setForm((p) => ({ ...p, aadharNo: onlyNumbers }));
+      // Allow only numbers & enforce exactly 12 digits
+      const onlyNumbers = value.replace(/\D/g, "");
+      // Limit to 12 digits max
+      const limitedNumbers = onlyNumbers.slice(0, 12);
+      setForm((p) => ({ ...p, aadharNo: limitedNumbers }));
     } else if (name === "phone") {
       const onlyNumbers = value.replace(/\D/g, "").slice(0, 10);
       setForm((p) => ({ ...p, phone: onlyNumbers }));
@@ -101,6 +118,7 @@ const AdminTeacherRegistration = ({
       setForm((p) => ({ ...p, [name]: value }));
     }
 
+    // Clear error for this field
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
@@ -224,6 +242,7 @@ const AdminTeacherRegistration = ({
               value={form.phone}
               onChange={handleChange}
               type="tel"
+              maxLength="10"
             />
             {errors.phone && (
               <small className="field-error">{errors.phone}</small>
@@ -244,13 +263,7 @@ const AdminTeacherRegistration = ({
           </label>
 
           <label className="full">
-            Educational Details
-            {/* <input
-              name="educationalDetails"
-              value={form.educationalDetails}
-              onChange={handleChange}
-              placeholder="e.g., M.A. B.Ed"
-            /> */}
+            Educational Details *
             <select
               name="educationalDetails"
               value={form.educationalDetails}
@@ -267,7 +280,7 @@ const AdminTeacherRegistration = ({
           </label>
 
           <label>
-            Years of Experience
+            Years of Experience *
             <input
               name="yearOfExperience"
               type="number"
@@ -281,7 +294,7 @@ const AdminTeacherRegistration = ({
           </label>
 
           <label className="full">
-            Date of Birth (MM-DD-YYYY)
+            Date of Birth *
             <input
               name="dateOfBirth"
               type="date"
@@ -298,13 +311,30 @@ const AdminTeacherRegistration = ({
             Aadhaar Number *
             <input
               name="aadharNo"
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={form.aadharNo}
               onChange={handleChange}
+              placeholder="Enter 12-digit Aadhaar number"
+              maxLength="12"
             />
             {errors.aadharNo && (
               <small className="field-error">{errors.aadharNo}</small>
             )}
+            {form.aadharNo &&
+              form.aadharNo.length > 0 &&
+              form.aadharNo.length !== 12 && (
+                <small
+                  className="field-warning"
+                  style={{
+                    color: "#f57c00",
+                    display: "block",
+                    marginTop: "4px",
+                  }}
+                >
+                  {form.aadharNo.length}/12 digits entered
+                </small>
+              )}
           </label>
 
           <label className="full">
@@ -330,7 +360,7 @@ const AdminTeacherRegistration = ({
               size="6"
             >
               {classes.map((c) => (
-                <option key={c.id} value={c.className}>
+                <option key={c.classId || c.id} value={c.className}>
                   {c.className}
                 </option>
               ))}

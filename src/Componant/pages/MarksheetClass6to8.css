@@ -1,0 +1,707 @@
+/* ================= NORMAL SCREEN MODE ================= */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f5f5;
+}
+
+/* ================= CONTROLS ================= */
+.ms-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-bottom: 2px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.ms-btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.ms-btn.print {
+    background: #2e7d32;
+    color: white;
+}
+
+.ms-btn.print:hover {
+    background: #1b5e20;
+}
+
+.ms-btn.refresh {
+    background: #0288d1;
+    color: white;
+}
+
+.ms-btn.refresh:hover {
+    background: #01579b;
+}
+
+.ms-btn.back {
+    background: #616161;
+    color: white;
+}
+
+.ms-btn.back:hover {
+    background: #424242;
+}
+
+/* ================= PAGE LAYOUT ================= */
+.ms-page-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    min-height: calc(100vh - 80px);
+}
+
+.ms-page {
+    width: 900px;
+    background: white;
+    padding: 15px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border-radius: 4px;
+}
+
+/* ================= HEADER ================= */
+.ms-recognized {
+    text-align: center;
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.ms-school-name {
+    text-align: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #556b2f;
+    text-transform: uppercase;
+    margin: 5px 0;
+    letter-spacing: 1px;
+}
+
+.ms-school-address {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+    font-size: 13px;
+    margin: 3px 0;
+}
+
+.ms-class-session {
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.ms-dise {
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* ================= COMMON TABLE ================= */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* ================= TOP TABLE ================= */
+.ms-top-table {
+    width: 100%;
+    border: 2px solid #000;
+    margin-bottom: 12px;
+}
+
+.ms-top-table th,
+.ms-top-table td {
+    border: 1.6px solid #000;
+    text-align: center;
+    font-size: 13px;
+    padding: 6px 4px;
+}
+
+.ms-top-table th {
+    background: #d8e4bc;
+    font-weight: bold;
+}
+
+/* ================= STUDENT TABLE ================= */
+.ms-student-table {
+    width: 100%;
+    border: 2px solid #000;
+    margin-top: 25px;
+}
+
+.ms-student-table th {
+    border: 1.6px solid #000;
+    background: #d8e4bc;
+    padding: 8px;
+    font-size: 17px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.ms-student-table td {
+    border: 1.6px solid #000;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+
+.ms-label {
+    font-weight: bold;
+    width: 120px;
+}
+
+/* ================= MARKSHEET TITLE ================= */
+.ms-marksheet-title {
+    background: #d8e4bc;
+    border: 2px solid #000;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    padding: 8px;
+    margin: 25px 0;
+    letter-spacing: 2px;
+}
+
+/* ================= MARKS TABLE ================= */
+.ms-marks-table {
+    width: 100%;
+    border: 1px solid #000;
+    table-layout: fixed;
+    margin-bottom: 10px;
+}
+
+.ms-marks-table th,
+.ms-marks-table td {
+    border: 1px solid #000;
+    text-align: center;
+    padding: 4px 2px;
+    font-size: 12px;
+    position: relative;
+}
+
+.ms-marks-table th {
+    background: #d8e4bc;
+    font-weight: bold;
+}
+
+.ms-marks-table td:first-child {
+    text-align: left;
+    font-weight: bold;
+    padding-left: 8px;
+    background: #f5f5f5;
+}
+
+.ms-grand-total-row td,
+.ms-percentage-row td,
+.ms-grade-row td {
+    background: #f5f5f5;
+    font-weight: bold;
+}
+
+.ms-grand-total-row td:first-child,
+.ms-percentage-row td:first-child,
+.ms-grade-row td:first-child {
+    background: #e8e8e8;
+}
+
+/* ================= ADDITIONAL SUBJECTS SECTION FIX ================= */
+
+/* Style for the ADDITIONAL SUBJECT label cell */
+.ms-marks-table td[rowspan="2"].ms-bold {
+    background-color: #f2f2f2 !important;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px 5px;
+    width: 14%;
+    border: 1px solid #000;
+}
+
+/* Style for the sub-header row (G.K. headers) */
+.ms-marks-table tr.additional-subject-headers td {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-align: center;
+    padding: 6px 2px;
+    border: 1px solid #000;
+}
+
+/* Style for the GRADE row */
+.ms-marks-table tr.grade-values-row td:first-child {
+    background-color: #f2f2f2 !important;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #000;
+}
+
+/* Style for all grade value cells */
+.ms-marks-table tr.grade-values-row td:not(:first-child) {
+    text-align: center;
+    padding: 6px 2px;
+    border: 1px solid #000;
+    font-weight: bold;
+    background-color: #ffffff;
+}
+
+/* Set specific column widths */
+.ms-marks-table col:nth-child(1) {
+    width: 14%;
+}
+
+/* SUBJECT column */
+.ms-marks-table col:nth-child(2) {
+    width: 8.5%;
+}
+
+/* Max THEORY */
+.ms-marks-table col:nth-child(3) {
+    width: 8.5%;
+}
+
+/* Max PROJECT */
+.ms-marks-table col:nth-child(4) {
+    width: 7.5%;
+}
+
+/* Max TOTAL */
+.ms-marks-table col:nth-child(5) {
+    width: 8.5%;
+}
+
+/* Quarterly THEORY */
+.ms-marks-table col:nth-child(6) {
+    width: 8.5%;
+}
+
+/* Quarterly PROJECT */
+.ms-marks-table col:nth-child(7) {
+    width: 7.5%;
+}
+
+/* Quarterly TOTAL */
+.ms-marks-table col:nth-child(8) {
+    width: 8.5%;
+}
+
+/* Half Yearly THEORY */
+.ms-marks-table col:nth-child(9) {
+    width: 8.5%;
+}
+
+/* Half Yearly PROJECT */
+.ms-marks-table col:nth-child(10) {
+    width: 7.5%;
+}
+
+/* Half Yearly TOTAL */
+.ms-marks-table col:nth-child(11) {
+    width: 8.5%;
+}
+
+/* Annual THEORY */
+.ms-marks-table col:nth-child(12) {
+    width: 8.5%;
+}
+
+/* Annual PROJECT */
+.ms-marks-table col:nth-child(13) {
+    width: 7.5%;
+}
+
+/* Annual TOTAL */
+
+/* Target the additional subjects section specifically */
+.ms-marks-table tbody tr.additional-subject-headers td {
+    border-top: 2px solid #000;
+}
+
+/* Style for the G.K. headers under each section */
+.ms-marks-table tr.additional-subject-headers td:nth-child(1) {
+    /* This is the first G.K. header - under Maximum */
+    background-color: #f2f2f2;
+}
+
+.ms-marks-table tr.additional-subject-headers td:nth-child(2) {
+    /* This is the second G.K. header - under Quarterly */
+    background-color: #f2f2f2;
+}
+
+.ms-marks-table tr.additional-subject-headers td:nth-child(3) {
+    /* This is the third G.K. header - under Half Yearly */
+    background-color: #f2f2f2;
+}
+
+.ms-marks-table tr.additional-subject-headers td:nth-child(4) {
+    /* This is the fourth G.K. header - under Annual */
+    background-color: #f2f2f2;
+}
+
+/* Style for grade values under each section */
+.ms-marks-table tr.grade-values-row td:nth-child(2) {
+    /* Grade under Maximum */
+    text-align: center;
+}
+
+.ms-marks-table tr.grade-values-row td:nth-child(3) {
+    /* Grade under Quarterly */
+    text-align: center;
+}
+
+.ms-marks-table tr.grade-values-row td:nth-child(4) {
+    /* Grade under Half Yearly */
+    text-align: center;
+}
+
+.ms-marks-table tr.grade-values-row td:nth-child(5) {
+    /* Grade under Annual */
+    text-align: center;
+}
+
+/* Fix for empty space filling */
+.ms-marks-table tr.grade-values-row td:empty::after {
+    content: "-";
+    color: #666;
+    font-weight: normal;
+}
+
+/* Ensure all cells have proper borders */
+.ms-marks-table tr.additional-subject-headers td,
+.ms-marks-table tr.grade-values-row td {
+    border: 1px solid #000;
+}
+
+/* Remove any extra spacing */
+.ms-marks-table tr.additional-subject-headers td,
+.ms-marks-table tr.grade-values-row td {
+    box-sizing: border-box;
+}
+
+/* ================= GRADE SYSTEM ================= */
+.ms-grade-result {
+    width: 100%;
+    border: 1px solid #000;
+    margin-top: 35px;
+}
+
+.ms-grade-result th,
+.ms-grade-result td {
+    border: 1px solid #000;
+    text-align: center;
+    padding: 8px 5px;
+    font-size: 12px;
+    position: relative;
+}
+
+.ms-grade-result th {
+    background: #d8e4bc;
+    font-size: 14px;
+}
+
+.ms-result {
+    color: red;
+    font-size: 28px;
+    font-weight: bold;
+    vertical-align: middle;
+}
+
+/* ================= SIGNATURE ================= */
+.ms-signature-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+.ms-sign-box {
+    width: 30%;
+    text-align: center;
+}
+
+.ms-sign-line {
+    border-bottom: 2px solid #000;
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.ms-sign-label {
+    font-size: 13px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* ================= LOADING AND ERROR STATES ================= */
+.loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 20px;
+    color: #666;
+    background: white;
+    border-radius: 4px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.error {
+    text-align: center;
+    padding: 60px;
+    font-size: 20px;
+    color: #d32f2f;
+    background: white;
+    border-radius: 4px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ================= PRINT MODE ================= */
+@media print {
+    @page {
+        size: A4 portrait;
+        margin: 0.5in;
+    }
+
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden;
+        background: white;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    .ms-page-wrapper {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: white;
+        display: block;
+    }
+
+    .ms-page {
+        position: relative;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0.25in;
+        box-shadow: none;
+        background: white;
+    }
+
+    .ms-page,
+    .ms-page * {
+        visibility: visible;
+    }
+
+    .ms-controls {
+        display: none !important;
+    }
+
+    /* Ensure all borders print properly */
+    .ms-marks-table th,
+    .ms-marks-table td,
+    .ms-top-table th,
+    .ms-top-table td,
+    .ms-student-table th,
+    .ms-student-table td,
+    .ms-grade-result th,
+    .ms-grade-result td {
+        border: 1px solid #000 !important;
+    }
+
+    /* Background colors for print - including additional subjects */
+    .ms-marks-table th,
+    .ms-top-table th,
+    .ms-student-table th,
+    .ms-grade-result th,
+    .ms-marksheet-title,
+    .ms-marks-table td[rowspan="2"].ms-bold,
+    .ms-marks-table tr.additional-subject-headers td,
+    .ms-marks-table tr.grade-values-row td:first-child {
+        background-color: #d8e4bc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .ms-marks-table td:first-child,
+    .ms-grand-total-row td,
+    .ms-percentage-row td,
+    .ms-grade-row td,
+    .ms-marks-table tr.grade-values-row td:not(:first-child) {
+        background-color: #f5f5f5 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Adjust font sizes for print */
+    .ms-school-name {
+        font-size: 24px;
+    }
+
+    .ms-marksheet-title {
+        font-size: 28px;
+    }
+
+    .ms-result {
+        color: red !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Ensure signatures print properly */
+    .ms-sign-line {
+        border-bottom: 2px solid #000 !important;
+    }
+
+    /* Prevent page breaks inside tables */
+    .ms-marks-table,
+    .ms-grade-result {
+        page-break-inside: avoid;
+    }
+
+    /* Ensure consistent spacing */
+    .ms-page {
+        page-break-after: avoid;
+        page-break-before: avoid;
+    }
+
+    /* Additional subjects print optimization */
+    .ms-marks-table tr.grade-values-row td:empty::after {
+        content: "-";
+        color: #000;
+    }
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+@media screen and (max-width: 950px) {
+    .ms-page {
+        width: 100%;
+        padding: 10px;
+    }
+
+    .ms-controls {
+        flex-wrap: wrap;
+    }
+
+    .ms-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .ms-marks-table {
+        font-size: 11px;
+    }
+
+    .ms-marks-table th,
+    .ms-marks-table td {
+        padding: 3px 1px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .ms-school-name {
+        font-size: 20px;
+    }
+
+    .ms-marksheet-title {
+        font-size: 24px;
+    }
+
+    .ms-result {
+        font-size: 22px;
+    }
+
+    .ms-signature-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .ms-sign-box {
+        width: 80%;
+    }
+}
+
+/* ================= ADDITIONAL UTILITIES ================= */
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.mt-20 {
+    margin-top: 20px;
+}
+
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+/* Hover effects for interactive elements */
+.ms-btn:active {
+    transform: scale(0.98);
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.ms-btn:focus {
+    outline: 2px solid #2196f3;
+    outline-offset: 2px;
+}
+
+/* Table cell hover effect (non-print only) */
+@media screen {
+    .ms-marks-table tbody tr:hover td {
+        background-color: #f9f9f9;
+    }
+
+    .ms-marks-table tbody tr:hover td:first-child {
+        background-color: #e0e0e0;
+    }
+}
+
+/* Ensure proper box sizing */
+* {
+    box-sizing: border-box;
+}
