@@ -470,20 +470,20 @@ table {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* ================= PRINT MODE ================= */
+/* ================= PRINT MODE (FINAL FIX) ================= */
 @media print {
     @page {
         size: A4 portrait;
-        margin: 0.5in;
+        margin: 0.5cm;
     }
 
+    /* Hide everything by default */
     html,
     body {
         width: 100%;
         height: 100%;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden;
         background: white;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -493,38 +493,51 @@ table {
         visibility: hidden;
     }
 
-    .ms-page-wrapper {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background: white;
-        display: block;
-    }
-
-    .ms-page {
-        position: relative;
-        width: 100%;
-        height: auto;
-        margin: 0;
-        padding: 0.25in;
-        box-shadow: none;
-        background: white;
-    }
-
-    .ms-page,
-    .ms-page * {
+    /* Show only the marksheet content */
+    .ms-page-wrapper,
+    .ms-page-wrapper * {
         visibility: visible;
     }
 
+    .ms-page-wrapper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .ms-page {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        background: white;
+        page-break-after: avoid;
+        page-break-before: avoid;
+    }
+
+    /* Hide controls */
     .ms-controls {
         display: none !important;
     }
 
-    /* Ensure all borders print properly */
+    /* Ensure tables don't overflow */
+    .ms-marks-table,
+    .ms-top-table,
+    .ms-student-table,
+    .ms-grade-result {
+        width: 100%;
+        table-layout: fixed;
+        page-break-inside: avoid;
+    }
+
+    /* Fix table borders for print */
     .ms-marks-table th,
     .ms-marks-table td,
     .ms-top-table th,
@@ -536,7 +549,7 @@ table {
         border: 1px solid #000 !important;
     }
 
-    /* Background colors for print - including additional subjects */
+    /* Background colors for print */
     .ms-marks-table th,
     .ms-top-table th,
     .ms-student-table th,
@@ -562,146 +575,141 @@ table {
 
     /* Adjust font sizes for print */
     .ms-school-name {
-        font-size: 24px;
+        font-size: 22px;
+        margin: 5px 0;
+    }
+
+    .ms-school-address {
+        font-size: 11px;
     }
 
     .ms-marksheet-title {
-        font-size: 28px;
-    }
-
-    .ms-result {
-        color: red !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    /* Ensure signatures print properly */
-    .ms-sign-line {
-        border-bottom: 2px solid #000 !important;
-    }
-
-    /* Prevent page breaks inside tables */
-    .ms-marks-table,
-    .ms-grade-result {
-        page-break-inside: avoid;
-    }
-
-    /* Ensure consistent spacing */
-    .ms-page {
-        page-break-after: avoid;
-        page-break-before: avoid;
-    }
-
-    /* Additional subjects print optimization */
-    .ms-marks-table tr.grade-values-row td:empty::after {
-        content: "-";
-        color: #000;
-    }
-}
-
-/* ================= RESPONSIVE DESIGN ================= */
-@media screen and (max-width: 950px) {
-    .ms-page {
-        width: 100%;
-        padding: 10px;
-    }
-
-    .ms-controls {
-        flex-wrap: wrap;
-    }
-
-    .ms-btn {
-        padding: 6px 12px;
-        font-size: 13px;
+        font-size: 24px;
+        padding: 5px;
+        margin: 15px 0;
     }
 
     .ms-marks-table {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .ms-marks-table th,
     .ms-marks-table td {
         padding: 3px 1px;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    .ms-school-name {
-        font-size: 20px;
+        word-wrap: break-word;
     }
 
-    .ms-marksheet-title {
-        font-size: 24px;
+    /* Ensure text doesn't overflow in cells */
+    .ms-marks-table td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Allow subject names to wrap if needed */
+    .ms-marks-table td:first-child {
+        white-space: normal;
+        word-wrap: break-word;
+    }
+
+    /* Fix signature section for print */
+    .ms-signature-section {
+        margin-top: 30px;
+        margin-bottom: 0;
+        page-break-inside: avoid;
+    }
+
+    .ms-sign-line {
+        border-bottom: 1px solid #000 !important;
+        height: 30px;
     }
 
     .ms-result {
+        color: red !important;
         font-size: 22px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
-    .ms-signature-section {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
+    /* Fix column widths for print */
+    .ms-marks-table col:nth-child(1) {
+        width: 14%;
     }
 
-    .ms-sign-box {
-        width: 80%;
-    }
-}
-
-/* ================= ADDITIONAL UTILITIES ================= */
-.text-center {
-    text-align: center;
-}
-
-.text-left {
-    text-align: left;
-}
-
-.text-right {
-    text-align: right;
-}
-
-.font-bold {
-    font-weight: bold;
-}
-
-.mt-20 {
-    margin-top: 20px;
-}
-
-.mb-20 {
-    margin-bottom: 20px;
-}
-
-/* Hover effects for interactive elements */
-.ms-btn:active {
-    transform: scale(0.98);
-}
-
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Focus states for accessibility */
-.ms-btn:focus {
-    outline: 2px solid #2196f3;
-    outline-offset: 2px;
-}
-
-/* Table cell hover effect (non-print only) */
-@media screen {
-    .ms-marks-table tbody tr:hover td {
-        background-color: #f9f9f9;
+    .ms-marks-table col:nth-child(2) {
+        width: 7%;
     }
 
-    .ms-marks-table tbody tr:hover td:first-child {
-        background-color: #e0e0e0;
+    .ms-marks-table col:nth-child(3) {
+        width: 7%;
     }
-}
 
-/* Ensure proper box sizing */
-* {
-    box-sizing: border-box;
+    .ms-marks-table col:nth-child(4) {
+        width: 6%;
+    }
+
+    .ms-marks-table col:nth-child(5) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(6) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(7) {
+        width: 6%;
+    }
+
+    .ms-marks-table col:nth-child(8) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(9) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(10) {
+        width: 6%;
+    }
+
+    .ms-marks-table col:nth-child(11) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(12) {
+        width: 7%;
+    }
+
+    .ms-marks-table col:nth-child(13) {
+        width: 6%;
+    }
+
+    /* Fix additional subjects section for print */
+    .ms-marks-table tr.additional-subject-headers td,
+    .ms-marks-table tr.grade-values-row td {
+        padding: 2px 1px;
+    }
+
+    .ms-marks-table tr.grade-values-row td:empty::after {
+        content: "-";
+        color: #000;
+        font-weight: normal;
+    }
+
+    /* Ensure the page fits properly */
+    .ms-page-wrapper {
+        transform: scale(1);
+        transform-origin: top left;
+    }
+
+    /* Prevent any content from being cut off */
+    .ms-page {
+        overflow: visible;
+    }
+
+    /* Ensure all content fits within page width */
+    .ms-page * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 }

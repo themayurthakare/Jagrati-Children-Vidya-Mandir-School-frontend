@@ -215,10 +215,16 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
       newErrors.phone = "Enter a valid 10-digit phone number";
     }
 
+    if (form.dateOfBirth) {
+      const today = new Date().toISOString().split("T")[0];
+      if (form.dateOfBirth > today) {
+        newErrors.dateOfBirth = "Date of birth cannot be a future date";
+      }
+    }
+
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
     }
-
     if (form.aadharNo && !/^[0-9]{12}$/.test(form.aadharNo)) {
       newErrors.aadharNo = "Aadhar must be 12 digits";
     }
@@ -685,7 +691,11 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
                   className="form-input"
                   value={form.dateOfBirth}
                   onChange={handleChange}
+                  max={new Date().toISOString().split("T")[0]}
                 />
+                {errors.dateOfBirth && (
+                  <div className="error-message">{errors.dateOfBirth}</div>
+                )}
               </div>
 
               <div className="form-group">

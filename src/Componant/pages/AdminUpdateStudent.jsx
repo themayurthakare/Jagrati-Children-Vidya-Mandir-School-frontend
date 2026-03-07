@@ -98,7 +98,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       try {
         // Fetch classes
         const classesRes = await fetch(
-          `${apiBase}/api/classes/${sessionId}/getAll`
+          `${apiBase}/api/classes/${sessionId}/getAll`,
         );
         if (classesRes.ok) {
           const classesData = await classesRes.json();
@@ -182,7 +182,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
         const initialDocs = {};
         docsArray.forEach((doc) => {
           const docType = DOC_TYPES.find(
-            (d) => d.endpoint === doc.docType || d.endpoint === doc.type
+            (d) => d.endpoint === doc.docType || d.endpoint === doc.type,
           );
           if (docType) {
             initialDocs[docType.key] = {
@@ -202,36 +202,73 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   // Validation function - UNCHANGED
   const validateForm = () => {
     const newErrors = {};
+    const today = new Date().toISOString().split("T")[0];
 
     // Required fields
     if (!form.name.trim()) newErrors.name = "Name is required";
     if (!form.admissionNo.trim())
       newErrors.admissionNo = "Admission No is required";
+
     if (!form.admissionDate)
       newErrors.admissionDate = "Admission date is required";
+
     if (!form.studentPhone)
       newErrors.studentPhone = "Student phone is required";
+
     if (!form.email) newErrors.email = "Email is required";
+
     if (!form.studentClassId) newErrors.studentClassId = "Class is required";
 
+    // ❗ Admission date cannot be future
+    if (form.admissionDate && form.admissionDate > today) {
+      newErrors.admissionDate = "Admission date cannot be a future date";
+    }
 
+    // ❗ DOB cannot be future
+    if (form.dob && form.dob > today) {
+      newErrors.dob = "Birth date cannot be a future date";
+    }
 
+    // ❗ Student phone must be exactly 10 digits
+    if (form.studentPhone && !/^[0-9]{10}$/.test(form.studentPhone)) {
+      newErrors.studentPhone = "Student phone must be exactly 10 digits";
+    }
+
+    if (form.parentPhone && !/^[0-9]{10}$/.test(form.parentPhone)) {
+      newErrors.parentPhone = "Parent phone must be exactly 10 digits";
+    }
+
+    // Email validation
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
     }
 
+    // Aadhar validation
     if (form.studentAadharNo && !/^[0-9]{12}$/.test(form.studentAadharNo)) {
       newErrors.studentAadharNo = "Aadhar must be 12 digits";
     }
-
-   
 
     if (form.parentAadharNo && !/^[0-9]{12}$/.test(form.parentAadharNo)) {
       newErrors.parentAadharNo = "Parent Aadhar must be 12 digits";
     }
 
+    // PAN validation
     if (form.panNo && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.panNo)) {
       newErrors.panNo = "PAN format invalid (e.g., ECPPG4538J)";
+    }
+    // Name validation (Only letters and spaces)
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (form.name && !nameRegex.test(form.name)) {
+      newErrors.name = "Name should contain only letters";
+    }
+
+    if (form.fatherName && !nameRegex.test(form.fatherName)) {
+      newErrors.fatherName = "Father name should contain only letters";
+    }
+
+    if (form.motherName && !nameRegex.test(form.motherName)) {
+      newErrors.motherName = "Mother name should contain only letters";
     }
 
     setErrors(newErrors);
@@ -241,14 +278,19 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
   // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
 
-    // Clear error for this field
+    // Prevent special characters in names
+    if (["name", "fatherName", "motherName"].includes(name)) {
+      const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
+      setForm((prev) => ({ ...prev, [name]: filteredValue }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
+
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
 
-    // Reset success state when form is edited
     if (updateSuccess) {
       setUpdateSuccess(false);
     }
@@ -319,7 +361,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     setUploadingDocs(true);
 
     const filesToUpload = Object.keys(docs).filter(
-      (key) => docs[key]?.file && !docs[key]?.exists
+      (key) => docs[key]?.file && !docs[key]?.exists,
     );
 
     let allSuccess = true;
@@ -336,7 +378,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       await fetchDocuments(); // Refresh documents list
     } else {
       window.alert(
-        "Some documents failed to upload. Please check individual file status."
+        "Some documents failed to upload. Please check individual file status.",
       );
     }
 
@@ -360,7 +402,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       const selectedClass = classes.find(
         (c) =>
           String(c.classId) === String(form.studentClassId) ||
-          String(c.id) === String(form.studentClassId)
+          String(c.id) === String(form.studentClassId),
       );
 
       const payload = {
@@ -441,7 +483,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       const selectedClass = classes.find(
         (c) =>
           String(c.classId) === String(form.studentClassId) ||
-          String(c.id) === String(form.studentClassId)
+          String(c.id) === String(form.studentClassId),
       );
 
       const payload = {
@@ -483,7 +525,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
       }
 
       const hasNewDocuments = Object.keys(docs).some(
-        (key) => docs[key]?.file && !docs[key]?.exists
+        (key) => docs[key]?.file && !docs[key]?.exists,
       );
 
       if (hasNewDocuments) {
@@ -517,13 +559,13 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     });
 
     const hasNewDocs = Object.keys(docs).some(
-      (key) => docs[key]?.file && !docs[key]?.exists
+      (key) => docs[key]?.file && !docs[key]?.exists,
     );
 
     if (
       (hasChanges || hasNewDocs) &&
       !window.confirm(
-        "You have unsaved changes. Are you sure you want to leave?"
+        "You have unsaved changes. Are you sure you want to leave?",
       )
     ) {
       return;
@@ -621,6 +663,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
                 <input
                   type="date"
                   name="admissionDate"
+                  max={new Date().toISOString().split("T")[0]}
                   className="form-input"
                   value={form.admissionDate}
                   onChange={handleChange}
@@ -684,6 +727,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
                 <input
                   type="date"
                   name="dob"
+                  max={new Date().toISOString().split("T")[0]}
                   className="form-input"
                   value={form.dob}
                   onChange={handleChange}
@@ -1004,7 +1048,7 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
               const doc = docs[docType.key];
               const existingDoc = existingDocs.find(
                 (d) =>
-                  d.docType === docType.endpoint || d.type === docType.endpoint
+                  d.docType === docType.endpoint || d.type === docType.endpoint,
               );
               const status = docStatus[docType.key];
 
