@@ -8,6 +8,7 @@ import {
   FaMoneyBillWave,
   FaClipboardList,
   FaIdCard,
+  FaFileAlt,
 } from "react-icons/fa";
 
 import "./AdminDashboard.css";
@@ -48,6 +49,11 @@ import COIdCardPrint from "./COIdCardPrint";
 import COPrintIdCard from "./COPrintIdCard";
 import COGenerateTC from "./COGenerateTC";
 import COViewTCStudents from "./COViewTCStudents";
+import COMarksheetClass from "./COMarksheetClass";
+import COMarksheetStudents from "./COMarksheetStudents";
+import COMarksheetPrePrimary from "./COMarksheetPrePrimary";
+import COMarksheetClass1to5 from "./COMarksheetClass1to5";
+import COMarksheetClass6to8 from "./COMarksheetClass6to8";
 
 const SessionSelect = () => {
   const { sessions, selectedSession, setSelectedSession, reloadSessions } =
@@ -169,6 +175,14 @@ const Sidebar = () => {
           }
         >
           <FaFileUpload /> <span>TC Students</span>
+        </NavLink>
+        <NavLink
+          to="/computeroperator/marksheet-class"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <FaFileAlt /> <span>Generate Marksheet</span>
         </NavLink>
       </nav>
 
@@ -292,7 +306,14 @@ const ComputerOperatorDashboard = () => {
               element={<StudentExcelExport />}
             />
             <Route path="generate-tc" element={<COGenerateTC />} />
-
+            <Route path="marksheet-class" element={<COMarksheetClass />} />
+            <Route
+              path="marksheet-students"
+              element={<COMarksheetStudents />}
+            />
+            <Route path="marksheet-pre" element={<COMarksheetPrePrimary />} />
+            <Route path="marksheet-1-5" element={<COMarksheetClass1to5 />} />
+            <Route path="marksheet-6-8" element={<COMarksheetClass6to8 />} />
             <Route
               path=""
               element={

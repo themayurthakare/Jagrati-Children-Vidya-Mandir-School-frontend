@@ -40,25 +40,57 @@ const COTeacherRegistration = ({
         .then((data) => setClasses(data || []))
         .catch(() => setClasses([]));
     }
-  }, [classesProp, apiBase]);
+  }, [classesProp, apiBase, sessionId]);
 
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Name is required";
-    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      e.email = "Enter a valid email";
+
+    if (!form.email) {
+      e.email = "Email is required";
+    } else if (
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z.-]+\.[A-Za-z]{2,}$/.test(form.email)
+    ) {
+      e.email = "Enter a valid email format (example: abc@gmail.com)";
+    }
+
     if (!form.phone || !/^[0-9]{10,15}$/.test(form.phone))
       e.phone = "Enter 10–15 digit phone";
+
     if (!form.password || form.password.length < 6)
       e.password = "Password must be at least 6 characters";
+
     if (!form.educationalDetails.trim())
       e.educationalDetails = "Educational details required";
+
     if (!form.yearOfExperience || form.yearOfExperience < 0)
       e.yearOfExperience = "Valid experience required";
-    if (!form.dateOfBirth || !/^\d{4}-\d{2}-\d{2}$/.test(form.dateOfBirth))
-      e.dateOfBirth = "Date in YYYY-MM-DD format";
-    if (!form.aadharNo.trim()) e.aadharNo = "Aadhaar number required";
+
+    if (!form.dateOfBirth) {
+      e.dateOfBirth = "Date of Birth is required";
+    } else {
+      const selectedDate = new Date(form.dateOfBirth);
+      const today = new Date();
+
+      // Remove time part
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate > today) {
+        e.dateOfBirth = "Future date is not allowed";
+      }
+    }
+
+    // Aadhar validation - exactly 12 digits
+    if (!form.aadharNo.trim()) {
+      e.aadharNo = "Aadhaar number is required";
+    } else if (form.aadharNo.length !== 12) {
+      e.aadharNo = "Aadhaar number must be exactly 12 digits";
+    } else if (!/^\d{12}$/.test(form.aadharNo)) {
+      e.aadharNo = "Aadhaar number must contain only digits";
+    }
+
     if (!form.address.trim()) e.address = "Address required";
+
     if (selectedClassNames.length === 0)
       e.classNames = "Select at least one class";
 
@@ -68,7 +100,25 @@ const COTeacherRegistration = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+
+    if (name === "name") {
+      // Allow only alphabets and spaces
+      const onlyAlphabets = value.replace(/[^A-Za-z\s]/g, "");
+      setForm((p) => ({ ...p, name: onlyAlphabets }));
+    } else if (name === "aadharNo") {
+      // Allow only numbers & enforce exactly 12 digits
+      const onlyNumbers = value.replace(/\D/g, "");
+      // Limit to 12 digits max
+      const limitedNumbers = onlyNumbers.slice(0, 12);
+      setForm((p) => ({ ...p, aadharNo: limitedNumbers }));
+    } else if (name === "phone") {
+      const onlyNumbers = value.replace(/\D/g, "").slice(0, 10);
+      setForm((p) => ({ ...p, phone: onlyNumbers }));
+    } else {
+      setForm((p) => ({ ...p, [name]: value }));
+    }
+
+    // Clear error for this field
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
@@ -83,16 +133,22 @@ const COTeacherRegistration = ({
 
   const removeClass = (classNameToRemove) => {
     setSelectedClassNames((prev) =>
-      prev.filter((name) => name !== classNameToRemove)
+      prev.filter((name) => name !== classNameToRemove),
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccessMsg("");
-    if (!validate()) return;
+
+    if (!validate()) {
+      const firstErrorField = Object.keys(errors)[0];
+      const firstErrorMsg = errors[firstErrorField];
+      window.alert(firstErrorMsg || "Please fix the form errors.");
+      return;
+    }
 
     setLoading(true);
+
     try {
       const payload = {
         name: form.name.trim(),
@@ -113,32 +169,39 @@ const COTeacherRegistration = ({
         body: JSON.stringify(payload),
       });
 
-      if (res.ok || res.status === 201) {
-        const body = await res.json().catch(() => null);
-        const teacherId = body?.teacherId || body?.id || Date.now();
+      const text = await res.text();
 
-        if (typeof onAddTeacher === "function") {
-          onAddTeacher(body || { teacherId, ...payload });
-        }
+      let data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { message: text };
+      }
 
-        setSuccessMsg(
-          "Teacher registered successfully! Redirecting to documents..."
-        );
+      if (res.ok) {
+        const teacherId = data?.teacherId ?? data?.id;
+
+        window.alert(data?.message || "Teacher registered successfully!");
+
         setForm(initialForm);
         setSelectedClassNames([]);
 
-        // REDIRECT TO DOCUMENT UPLOAD
         setTimeout(() => {
           navigate(
-            `/computeroperator/teacher-documents?teacherId=${teacherId}`
+            `/computeroperator/teacher-documents?teacherId=${teacherId}`,
           );
-        }, 1500);
+        }, 800);
+
+        if (onAddTeacher) onAddTeacher(data);
       } else {
-        const body = await res.json().catch(() => ({}));
-        setErrors({ form: body.message || "Registration failed" });
+        // 🔥 Always show backend message first
+        const msg =
+          data?.message || data?.error || text || "Registration failed";
+
+        window.alert(msg);
       }
     } catch (err) {
-      setErrors({ form: err.message || "Network error" });
+      window.alert("Network error: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -181,6 +244,7 @@ const COTeacherRegistration = ({
               value={form.phone}
               onChange={handleChange}
               type="tel"
+              maxLength="10"
             />
             {errors.phone && (
               <small className="field-error">{errors.phone}</small>
@@ -201,20 +265,24 @@ const COTeacherRegistration = ({
           </label>
 
           <label className="full">
-            Educational Details
-            <input
+            Educational Details *
+            <select
               name="educationalDetails"
               value={form.educationalDetails}
               onChange={handleChange}
-              placeholder="e.g., M.A. B.Ed"
-            />
+            >
+              <option value="">Select Qualification</option>
+              <option value="B.A. B.Ed">B.A. B.Ed</option>
+              <option value="M.A. B.Ed">M.A. B.Ed</option>
+              <option value="B.Sc B.Ed">B.Sc B.Ed</option>
+            </select>
             {errors.educationalDetails && (
               <small className="field-error">{errors.educationalDetails}</small>
             )}
           </label>
 
           <label>
-            Years of Experience
+            Years of Experience *
             <input
               name="yearOfExperience"
               type="number"
@@ -228,12 +296,13 @@ const COTeacherRegistration = ({
           </label>
 
           <label className="full">
-            Date of Birth (YYYY-MM-DD)
+            Date of Birth *
             <input
               name="dateOfBirth"
               type="date"
               value={form.dateOfBirth}
               onChange={handleChange}
+              max={new Date().toISOString().split("T")[0]}
             />
             {errors.dateOfBirth && (
               <small className="field-error">{errors.dateOfBirth}</small>
@@ -244,12 +313,30 @@ const COTeacherRegistration = ({
             Aadhaar Number *
             <input
               name="aadharNo"
+              type="text"
+              inputMode="numeric"
               value={form.aadharNo}
               onChange={handleChange}
+              placeholder="Enter 12-digit Aadhaar number"
+              maxLength="12"
             />
             {errors.aadharNo && (
               <small className="field-error">{errors.aadharNo}</small>
             )}
+            {form.aadharNo &&
+              form.aadharNo.length > 0 &&
+              form.aadharNo.length !== 12 && (
+                <small
+                  className="field-warning"
+                  style={{
+                    color: "#f57c00",
+                    display: "block",
+                    marginTop: "4px",
+                  }}
+                >
+                  {form.aadharNo.length}/12 digits entered
+                </small>
+              )}
           </label>
 
           <label className="full">
@@ -275,7 +362,7 @@ const COTeacherRegistration = ({
               size="6"
             >
               {classes.map((c) => (
-                <option key={c.id} value={c.className}>
+                <option key={c.classId || c.id} value={c.className}>
                   {c.className}
                 </option>
               ))}

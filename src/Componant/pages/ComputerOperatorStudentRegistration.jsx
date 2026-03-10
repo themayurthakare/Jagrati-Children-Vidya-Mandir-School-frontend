@@ -30,6 +30,10 @@ const initialForm = {
   panNo: "",
 };
 
+// ===== INPUT HELPERS =====
+const onlyAlphabets = (v) => v.replace(/[^A-Za-z\s]/g, "");
+const onlyNumbers = (v) => v.replace(/\D/g, "");
+
 const ComputerOperatorStudentRegistration = ({
   onAddStudent,
   classes: classesProp = null,
@@ -38,7 +42,6 @@ const ComputerOperatorStudentRegistration = ({
   const base = apiBase || "http://localhost:8080";
   const navigate = useNavigate();
 
-  // 🔥 SESSION CONTEXT
   const { selectedSession } = useContext(SessionContext);
   const sessionId = selectedSession?.id;
 
@@ -69,34 +72,87 @@ const ComputerOperatorStudentRegistration = ({
       .catch(() => setClasses([]));
   }, [sessionId, base]);
 
+  // ================= HANDLE CHANGE WITH INPUT CONTROL =================
+  const handleChange = (e) => {
+    let { name, value } = e.target;
+
+    // alphabets only
+    if (name === "name" || name === "fatherName" || name === "motherName") {
+      value = onlyAlphabets(value);
+    }
+
+    // phone 10 digit only
+    if (name === "studentPhone" || name === "parentPhone") {
+      value = onlyNumbers(value).slice(0, 10);
+    }
+
+    // aadhar 12 digit only
+    if (name === "studentAadharNo" || name === "parentAadharNo") {
+      value = onlyNumbers(value).slice(0, 12);
+    }
+
+    setForm((p) => ({ ...p, [name]: value }));
+    setErrors((p) => ({ ...p, [name]: undefined }));
+  };
+
   // ================= VALIDATION =================
   const validate = () => {
     const e = {};
 
-    // Required fields (matching UI * marks)
+    // Required
     if (!form.name?.trim()) e.name = "Name is required";
+    else if (!/^[A-Za-z\s]+$/.test(form.name))
+      e.name = "Only alphabets allowed";
+
     if (!form.admissionNo?.trim()) e.admissionNo = "Admission No is required";
     if (!form.admissionDate) e.admissionDate = "Admission Date is required";
+
     if (!form.password) e.password = "Password is required";
     else if (form.password.length < 6)
       e.password = "Password must be at least 6 characters";
+
     if (!form.address?.trim()) e.address = "Address is required";
     if (!form.gender) e.gender = "Please select gender";
     if (!form.rte) e.rte = "Please select RTE option";
     if (!form.studentClassId) e.studentClassId = "Please select a class";
     if (!sessionId) e.session = "Please select academic session";
 
-    // Optional but validated if present
+    // Father & Mother name
+    if (form.fatherName && !/^[A-Za-z\s]+$/.test(form.fatherName))
+      e.fatherName = "Only alphabets allowed";
+
+    if (form.motherName && !/^[A-Za-z\s]+$/.test(form.motherName))
+      e.motherName = "Only alphabets allowed";
+
+    // DOB future block
+    if (form.dob) {
+      const today = new Date();
+      const dob = new Date(form.dob);
+      if (dob > today) e.dob = "Date of birth cannot be future";
+    }
+
+    // phone
     if (form.studentPhone && !/^\d{10}$/.test(form.studentPhone))
-      e.studentPhone = "Student phone must be 10 digits";
+      e.studentPhone = "Student phone must be exactly 10 digits";
+
     if (form.parentPhone && !/^\d{10}$/.test(form.parentPhone))
-      e.parentPhone = "Parent phone must be 10 digits";
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email))
-      e.email = "Invalid email format";
+      e.parentPhone = "Parent phone must be exactly 10 digits";
+
+    // email strict
+    if (
+      form.email &&
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/.test(form.email)
+    )
+      e.email = "Enter valid email like example@gmail.com";
+
+    // aadhar
     if (form.studentAadharNo && !/^\d{12}$/.test(form.studentAadharNo))
       e.studentAadharNo = "Student Aadhar must be 12 digits";
+
     if (form.parentAadharNo && !/^\d{12}$/.test(form.parentAadharNo))
       e.parentAadharNo = "Parent Aadhar must be 12 digits";
+
+    // PAN
     if (
       form.panNo &&
       !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(form.panNo.toUpperCase())
@@ -108,19 +164,11 @@ const ComputerOperatorStudentRegistration = ({
     return Object.keys(e).length === 0;
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
-    // Clear error when user starts typing
-    setErrors((p) => ({ ...p, [name]: undefined }));
-  };
-
   // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validate()) {
-      // Show first specific error instead of generic message
       const firstErrorField = Object.keys(errors)[0];
       const firstErrorMsg = errors[firstErrorField];
       window.alert(firstErrorMsg || "Please fix the form errors.");
@@ -129,8 +177,16 @@ const ComputerOperatorStudentRegistration = ({
 
     setLoading(true);
     try {
+      const cleanData = (obj) => {
+        const newObj = {};
+        Object.keys(obj).forEach((key) => {
+          newObj[key] = obj[key] === "" ? null : obj[key];
+        });
+        return newObj;
+      };
+
       const payload = {
-        ...form,
+        ...cleanData(form),
         studentClassId: Number(form.studentClassId),
       };
 
@@ -154,7 +210,6 @@ const ComputerOperatorStudentRegistration = ({
         setForm(initialForm);
         if (onAddStudent) onAddStudent(saved || payload);
       } else {
-        // Show specific backend message (e.g. duplicate email, admission no, etc.)
         const msg = saved?.message || "Registration failed";
         window.alert(msg);
       }
@@ -176,6 +231,8 @@ const ComputerOperatorStudentRegistration = ({
         )}
 
         <form className="sr-form" onSubmit={handleSubmit}>
+          {/* (UI remains EXACTLY SAME — not modified intentionally) */}
+
           <label>
             Full Name *
             <input
@@ -263,8 +320,11 @@ const ComputerOperatorStudentRegistration = ({
               type="date"
               name="dob"
               value={form.dob}
+              max={new Date().toISOString().split("T")[0]}
               onChange={handleChange}
+              className={errors.dob ? "error" : ""}
             />
+            {errors.dob && <small className="field-error">{errors.dob}</small>}
           </label>
 
           <label>
