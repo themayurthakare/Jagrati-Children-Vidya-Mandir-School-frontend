@@ -8,7 +8,7 @@ const AdminStudentFeeDetails = () => {
   const navigate = useNavigate();
 
   const { selectedSession } = useContext(
-    SessionContext || { selectedSession: null }
+    SessionContext || { selectedSession: null },
   );
   const sessionId = selectedSession.id;
 
@@ -55,7 +55,7 @@ const AdminStudentFeeDetails = () => {
       setError("");
 
       const studentResponse = await fetch(
-        `http://localhost:8080/api/users/${sessionId}/${studentId}`
+        `http://localhost:8080/api/users/${sessionId}/${studentId}`,
       );
       if (studentResponse.ok) {
         const studentData = await studentResponse.json();
@@ -68,7 +68,7 @@ const AdminStudentFeeDetails = () => {
       }
 
       const feeResponse = await fetch(
-        `http://localhost:8080/api/fees/user/${studentId}`
+        `http://localhost:8080/api/fees/user/${studentId}`,
       );
 
       if (feeResponse.ok) {
@@ -79,7 +79,7 @@ const AdminStudentFeeDetails = () => {
       }
 
       const transactionResponse = await fetch(
-        `http://localhost:8080/api/transactions/${sessionId}/getAllUsingSessionId`
+        `http://localhost:8080/api/transactions/${sessionId}/getAllUsingSessionId`,
       );
 
       if (transactionResponse.ok) {
@@ -105,11 +105,11 @@ const AdminStudentFeeDetails = () => {
         }
 
         const studentTransactions = transactionsList.filter(
-          (transaction) => transaction.userId === studentId
+          (transaction) => transaction.userId === studentId,
         );
 
         setTransactions(
-          Array.isArray(studentTransactions) ? studentTransactions : []
+          Array.isArray(studentTransactions) ? studentTransactions : [],
         );
       } else {
         console.log("No transactions found or API error");
@@ -129,7 +129,7 @@ const AdminStudentFeeDetails = () => {
   const fetchClassFees = async (classId) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/classes/${classId}`
+        `http://localhost:8080/api/classes/${classId}`,
       );
 
       if (response.ok) {
@@ -266,66 +266,24 @@ const AdminStudentFeeDetails = () => {
 
     return totalFees;
   };
+  const calculateTotalsFromFees = () => {
+    let totalFees = 0;
+    let totalPaid = 0;
+    let totalRemaining = 0;
 
-  const calculateTransactionTotal = () => {
-    return transactions
-      .filter(
-        (transaction) =>
-          transaction.status && transaction.status.toLowerCase() === "success"
-      )
-      .reduce(
-        (sum, transaction) => sum + (parseFloat(transaction.amount) || 0),
-        0
-      );
+    fees.forEach((fee) => {
+      totalFees += parseFloat(fee.amount) || 0;
+      totalPaid += parseFloat(fee.paidAmount) || 0;
+      totalRemaining += parseFloat(fee.remainingAmount) || 0;
+    });
+
+    return { totalFees, totalPaid, totalRemaining };
   };
 
-  const calculateRemainingAmount = () => {
-    const totalFees = calculateFeeTotals();
-    const totalPaid = calculateTransactionTotal();
-    return Math.max(0, totalFees - totalPaid);
-  };
+  const { totalFees, totalPaid, totalRemaining } = calculateTotalsFromFees();
 
-  const getFeeWithCalculatedPaidAmount = (fee) => {
-    const feeId = fee.feesId;
-    const feeAmount = parseFloat(fee.amount) || 0;
-
-    const feeTransactions = transactions.filter(
-      (t) => t.description && t.description.includes(feeId.toString())
-    );
-
-    let paidAmount = 0;
-
-    if (feeTransactions.length > 0) {
-      paidAmount = feeTransactions
-        .filter((t) => t.status && t.status.toLowerCase() === "success")
-        .reduce((sum, t) => sum + (parseFloat(t.amount) || 0), 0);
-    } else {
-      const totalFees = calculateFeeTotals();
-      const totalPaid = calculateTransactionTotal();
-      if (totalFees > 0) {
-        paidAmount = (feeAmount / totalFees) * totalPaid;
-      }
-    }
-
-    const remaining = Math.max(0, feeAmount - paidAmount);
-
-    return {
-      ...fee,
-      calculatedPaidAmount: paidAmount,
-      calculatedRemaining: remaining,
-      calculatedStatus:
-        paidAmount >= feeAmount
-          ? "Paid"
-          : paidAmount > 0
-          ? "Partial"
-          : "Pending",
-    };
-  };
-
-  const totalFees = calculateFeeTotals();
-  const totalPaid = calculateTransactionTotal();
-  const totalRemaining = calculateRemainingAmount();
-  const paymentPercentage = Math.round((totalPaid / totalFees) * 100) || 0;
+  const paymentPercentage =
+    totalFees > 0 ? Math.round((totalPaid / totalFees) * 100) : 0;
 
   const goBack = () => {
     navigate(-1);
@@ -336,37 +294,36 @@ const AdminStudentFeeDetails = () => {
   };
 
   const handlePayFees = async (fee) => {
-    const feeWithCalculations = getFeeWithCalculatedPaidAmount(fee);
-    const remaining = feeWithCalculations.calculatedRemaining;
+    const remaining = parseFloat(fee.remainingAmount) || 0;
 
     if (remaining > 0) {
       const paymentAmount = prompt(
         `Enter payment amount for Fee ID: ${fee.feesId}\n\n` +
           `Fee Amount: ${formatCurrency(fee.amount)}\n` +
-          `Already Paid: ${formatCurrency(
-            feeWithCalculations.calculatedPaidAmount
-          )}\n` +
-          `Remaining: ${formatCurrency(remaining)}\n\n` +
+          `Already Paid: ${formatCurrency(fee.paidAmount)}\n` +
+          `Remaining: ${formatCurrency(fee.remainingAmount)}\n\n` +
           `Enter amount to pay (max: ${formatCurrency(remaining)}):`,
-        formatCurrency(remaining).replace("₹ ", "")
+        formatCurrency(remaining).replace("₹ ", ""),
       );
 
       if (paymentAmount && !isNaN(parseFloat(paymentAmount))) {
-        const amount = parseFloat(paymentAmount);
+        const cleanAmount = paymentAmount.replace(/,/g, "");
+        const amount = parseFloat(cleanAmount);
+
         if (amount > 0 && amount <= remaining) {
           try {
             const sessionId = selectedSession.id;
 
+            // ✅ STEP 1: Save Transaction
             const transactionData = {
               amount: amount,
               paymentMode: "CASH",
-              description: `Payment for Fee ID: ${fee.feesId} - Student: ${studentName}`,
-              remarks: `Paid for ${studentName}'s fee (ID: ${studentId})`,
-
+              description: `Payment for Fee ID: ${fee.feesId}`,
+              remarks: `Paid for ${studentName}'s fee`,
               userId: parseInt(studentId),
             };
 
-            const response = await fetch(
+            const transactionRes = await fetch(
               `http://localhost:8080/api/transactions/${sessionId}/save`,
               {
                 method: "POST",
@@ -374,28 +331,58 @@ const AdminStudentFeeDetails = () => {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify(transactionData),
-              }
+              },
             );
 
-            if (response.ok) {
-              alert(`Payment of ${formatCurrency(amount)} saved successfully!`);
-
-              fetchData();
-            } else {
-              const errorText = await response.text().catch(() => "");
-              throw new Error(
-                `Failed to save payment: ${response.status} ${errorText}`
-              );
+            if (!transactionRes.ok) {
+              const errorText = await transactionRes.text();
+              throw new Error("Transaction failed: " + errorText);
             }
+
+            // ✅ STEP 2: Update Fees Table
+            const updatedPaid = (parseFloat(fee.paidAmount) || 0) + amount;
+            const totalAmount = parseFloat(fee.amount) || 0;
+            const updatedRemaining = Math.max(0, totalAmount - updatedPaid);
+
+            let status = "UNPAID";
+            if (updatedPaid >= totalAmount) {
+              status = "PAID";
+            } else if (updatedPaid > 0) {
+              status = "PARTIAL";
+            }
+
+            const feeUpdatePayload = {
+              ...fee,
+              paidAmount: updatedPaid,
+              remainingAmount: updatedRemaining,
+              paymentStatus: status,
+            };
+
+            const feeRes = await fetch(
+              `http://localhost:8080/api/fees/${fee.feesId}`,
+              {
+                method: "PUT", // ⚠️ make sure backend supports PUT
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(feeUpdatePayload),
+              },
+            );
+
+            if (!feeRes.ok) {
+              const err = await feeRes.text();
+              throw new Error("Fee update failed: " + err);
+            }
+
+            alert(`Payment of ${formatCurrency(amount)} successful!`);
+
+            // ✅ Refresh UI
+            fetchData();
           } catch (err) {
-            alert(`Error saving payment: ${err.message}`);
+            alert("Error: " + err.message);
           }
         } else {
-          alert(
-            `Please enter a valid amount between 0 and ${formatCurrency(
-              remaining
-            )}`
-          );
+          alert(`Enter valid amount (max: ${formatCurrency(remaining)})`);
         }
       }
     }
@@ -403,9 +390,7 @@ const AdminStudentFeeDetails = () => {
   const printReceipt = (transaction, studentName) => {
     const win = window.open("", "_blank");
 
-    const totalFees = calculateFeeTotals();
-    const totalPaid = calculateTransactionTotal();
-    const totalRemaining = calculateRemainingAmount();
+    const { totalFees, totalPaid, totalRemaining } = calculateTotalsFromFees();
     const paymentProgress = Math.round((totalPaid / totalFees) * 100) || 0;
     const generatedDate = new Date().toLocaleString("en-IN");
 
@@ -677,8 +662,8 @@ const AdminStudentFeeDetails = () => {
             {creatingFees
               ? "Creating fee structure..."
               : refreshing
-              ? "Refreshing data..."
-              : "Loading data..."}
+                ? "Refreshing data..."
+                : "Loading data..."}
           </p>
         </div>
       )}
@@ -724,43 +709,39 @@ const AdminStudentFeeDetails = () => {
 
               <tbody>
                 {fees.map((fee) => {
-                  const feeWithCalculations =
-                    getFeeWithCalculatedPaidAmount(fee);
-
                   return (
                     <tr key={fee.feesId}>
                       <td className="text-center">{fee.feesId}</td>
+
                       <td className="text-right amount">
                         {formatCurrency(fee.amount)}
                       </td>
+
                       <td className="text-right paid">
-                        {formatCurrency(
-                          feeWithCalculations.calculatedPaidAmount
-                        )}
+                        {formatCurrency(fee.paidAmount)}
                       </td>
+
                       <td className="text-right remaining">
-                        {formatCurrency(
-                          feeWithCalculations.calculatedRemaining
-                        )}
+                        {formatCurrency(fee.remainingAmount)}
                       </td>
+
                       <td className="text-center1">
                         <span
                           className={`status-badge ${getFeeStatusClass(
-                            feeWithCalculations.calculatedStatus
+                            fee.paymentStatus,
                           )}`}
                         >
-                          {feeWithCalculations.calculatedStatus}
+                          {fee.paymentStatus}
                         </span>
                       </td>
+
                       <td className="text-center1">
                         <button
                           className="pay-fees-btn"
                           onClick={() => handlePayFees(fee)}
-                          disabled={
-                            feeWithCalculations.calculatedRemaining === 0
-                          }
+                          disabled={parseFloat(fee.remainingAmount) === 0}
                         >
-                          {feeWithCalculations.calculatedRemaining === 0
+                          {parseFloat(fee.remainingAmount) === 0
                             ? "Paid"
                             : "Pay Fees"}
                         </button>
@@ -817,7 +798,7 @@ const AdminStudentFeeDetails = () => {
                     <td className="text-center">
                       <span
                         className={`status-badge ${getStatusClass(
-                          transaction.status
+                          transaction.status,
                         )}`}
                       >
                         {transaction.status || "Pending"}

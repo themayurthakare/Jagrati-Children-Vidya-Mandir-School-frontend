@@ -1,13 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "./AdminUpdateTeacher.css";
-import { SessionContext } from "./SessionContext";
 
 const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   const navigate = useNavigate();
   const { teacherId: paramTeacherId } = useParams();
-  const { selectedSession } = useContext(SessionContext);
-  const sessionId = selectedSession?.id;
   const location = useLocation();
 
   const teacherId =
@@ -16,7 +13,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     location.state?.teacher?.teacherId ||
     location.state?.teacher?.id;
 
-  // Document types configuration for teachers
+  // Document types configuration for teachers - Updated based on your backend
   const DOC_TYPES = [
     { key: "teacherPhoto", label: "Teacher Photo", endpoint: "TEACHER_PHOTO" },
     {
@@ -37,10 +34,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     },
   ];
 
-  // Classes state
-  const [classOptions, setClassOptions] = useState([]);
-
-  // Teacher form state - Added classNames
+  // Teacher form state - Updated to match your JSON structure
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -51,10 +45,9 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     educationalDetails: "",
     aadharNo: "",
     address: "",
-    panNo: "",
-    designation: "",
-    subject: "",
-    classNames: [], // Added this field
+    panNo: "", // Added as optional field
+    designation: "", // Added as optional field
+    subject: "", // Added as optional field
   });
 
   // Documents state
@@ -69,24 +62,6 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
-
-  // Fetch classes when session changes
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
-        if (!res.ok) throw new Error("Failed to fetch classes");
-        const data = await res.json();
-        setClassOptions(data || []);
-      } catch (err) {
-        console.error("Class fetch error:", err);
-      }
-    };
-
-    if (sessionId) {
-      fetchClasses();
-    }
-  }, [sessionId, apiBase]);
 
   // Fetch teacher data and documents
   useEffect(() => {
@@ -122,20 +97,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
           throw new Error("Teacher not found");
         }
 
-        // Extract class names from teacher data if they exist
-        let teacherClassNames = [];
-        if (teacherData.classes && Array.isArray(teacherData.classes)) {
-          teacherClassNames = teacherData.classes
-            .map((cls) => cls.className || cls.name)
-            .filter(Boolean);
-        } else if (
-          teacherData.classNames &&
-          Array.isArray(teacherData.classNames)
-        ) {
-          teacherClassNames = teacherData.classNames;
-        }
-
-        // Update form with fetched data
+        // Update form with fetched data - Only fields from your JSON
         setForm({
           name: teacherData.name || "",
           email: teacherData.email || "",
@@ -148,10 +110,9 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
           educationalDetails: teacherData.educationalDetails || "",
           aadharNo: teacherData.aadharNo || "",
           address: teacherData.address || "",
-          panNo: teacherData.panNo || "",
-          designation: teacherData.designation || "",
-          subject: teacherData.subject || "",
-          classNames: teacherClassNames, // Set the class names
+          panNo: teacherData.panNo || "", // Optional
+          designation: teacherData.designation || "", // Optional
+          subject: teacherData.subject || "", // Optional
         });
 
         // Fetch existing documents
@@ -168,9 +129,10 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     fetchData();
   }, [teacherId, apiBase, navigate]);
 
-  // Fetch existing documents
+  // Fetch existing documents - UPDATED ENDPOINT
   const fetchDocuments = async () => {
     try {
+      // Using the correct endpoint for teacher documents
       const res = await fetch(`${apiBase}/api/teacher-documents/${teacherId}`);
       if (res.ok) {
         const data = await res.json();
@@ -206,25 +168,16 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     if (!form.name.trim()) newErrors.name = "Name is required";
     if (!form.email) newErrors.email = "Email is required";
     if (!form.phone) newErrors.phone = "Phone is required";
-    if (!form.classNames || form.classNames.length === 0) {
-      newErrors.classNames = "At least one class must be selected";
-    }
 
     // Format validations
     if (form.phone && !/^[0-9]{10}$/.test(form.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number";
     }
 
-    if (form.dateOfBirth) {
-      const today = new Date().toISOString().split("T")[0];
-      if (form.dateOfBirth > today) {
-        newErrors.dateOfBirth = "Date of birth cannot be a future date";
-      }
-    }
-
     if (form.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) {
       newErrors.email = "Enter a valid email address";
     }
+
     if (form.aadharNo && !/^[0-9]{12}$/.test(form.aadharNo)) {
       newErrors.aadharNo = "Aadhar must be 12 digits";
     }
@@ -273,7 +226,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     }));
   };
 
-  // Upload single document
+  // Upload single document - UPDATED ENDPOINT
   const uploadDocument = async (key) => {
     const docType = DOC_TYPES.find((d) => d.key === key);
     if (!docType || !docs[key]?.file) return;
@@ -284,9 +237,11 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     }));
 
     try {
+      // Using the correct endpoint: /api/teacher-documents/update/{teacherId}/{docType}
       const url = `${apiBase}/api/teacher-documents/update/${teacherId}/${docType.endpoint}`;
       const formData = new FormData();
       formData.append("file", docs[key].file);
+      // Note: Removed the extra docType append as it might not be needed
 
       const res = await fetch(url, {
         method: "PUT",
@@ -294,6 +249,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
       });
 
       if (res.ok) {
+        const result = await res.json();
         setDocStatus((prev) => ({
           ...prev,
           [key]: { uploading: false, ok: true, error: null },
@@ -330,8 +286,8 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     setUploadingDocs(false);
 
     if (allSuccess) {
-      window.alert("Documents uploaded successfully!");
-      await fetchDocuments();
+      window.alert("All documents uploaded successfully!");
+      await fetchDocuments(); // Refresh documents list
     } else {
       window.alert(
         "Some documents failed to upload. Please check individual file status.",
@@ -366,7 +322,6 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
         panNo: form.panNo,
         designation: form.designation,
         subject: form.subject,
-        classNames: form.classNames, // Include classNames in payload
         teacherId: teacherId,
       };
 
@@ -383,6 +338,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
       ];
 
       let success = false;
+      let responseData = null;
 
       for (const endpoint of updateEndpoints) {
         try {
@@ -397,6 +353,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
 
           if (res.ok || res.status === 200) {
             success = true;
+            responseData = await res.json();
             break;
           }
         } catch (err) {
@@ -448,7 +405,6 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
         panNo: form.panNo,
         designation: form.designation,
         subject: form.subject,
-        classNames: form.classNames, // Include classNames in payload
         teacherId: teacherId,
       };
 
@@ -516,24 +472,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   // Handle form reset
   const handleReset = () => {
     if (window.confirm("Are you sure you want to reset all changes?")) {
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        password: "",
-        dateOfBirth: "",
-        yearOfExperience: "",
-        educationalDetails: "",
-        aadharNo: "",
-        address: "",
-        panNo: "",
-        designation: "",
-        subject: "",
-        classNames: [], // Reset classNames too
-      });
-
-      setErrors({});
-      setUpdateSuccess(false);
+      window.location.reload();
     }
   };
 
@@ -541,7 +480,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
   const handleBackToList = () => {
     const hasChanges = Object.keys(form).some((key) => {
       if (key === "password") return false;
-      return form[key] !== "";
+      return true;
     });
 
     const hasNewDocs = Object.keys(docs).some(
@@ -607,7 +546,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
         </div>
       </div>
 
-      {/* Teacher Details Tab */}
+      {/* Teacher Details Tab - Simplified to match your JSON */}
       {activeTab === "details" && (
         <div className="update-form-container">
           <form className="update-form" onSubmit={handleSubmit}>
@@ -691,11 +630,7 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
                   className="form-input"
                   value={form.dateOfBirth}
                   onChange={handleChange}
-                  max={new Date().toISOString().split("T")[0]}
                 />
-                {errors.dateOfBirth && (
-                  <div className="error-message">{errors.dateOfBirth}</div>
-                )}
               </div>
 
               <div className="form-group">
@@ -744,45 +679,6 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
             </div>
 
             <div className="form-group">
-              <label className="required">Assign Classes</label>
-              <select
-                multiple
-                name="classNames"
-                className="form-input"
-                value={form.classNames}
-                onChange={(e) => {
-                  const selected = Array.from(
-                    e.target.selectedOptions,
-                    (option) => option.value,
-                  );
-                  setForm((prev) => ({
-                    ...prev,
-                    classNames: selected,
-                  }));
-                  // Clear error for classNames
-                  if (errors.classNames) {
-                    setErrors((prev) => ({ ...prev, classNames: undefined }));
-                  }
-                }}
-                style={{ minHeight: "120px" }}
-              >
-                {classOptions.length === 0 ? (
-                  <option disabled>Loading classes...</option>
-                ) : (
-                  classOptions.map((cls) => (
-                    <option key={cls.classId} value={cls.className}>
-                      {cls.className}
-                    </option>
-                  ))
-                )}
-              </select>
-              {errors.classNames && (
-                <div className="error-message">{errors.classNames}</div>
-              )}
-              <small>Hold Ctrl (Windows) or Cmd (Mac) to select multiple</small>
-            </div>
-
-            <div className="form-group">
               <label>Address</label>
               <textarea
                 name="address"
@@ -827,11 +723,141 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
         </div>
       )}
 
-      {/* Documents Tab - Your existing documents tab code remains the same */}
+      {/* Documents Tab */}
       {activeTab === "documents" && (
         <div className="documents-container">
-          {/* Your existing documents tab JSX */}
-          {/* ... */}
+          <div className="documents-info">
+            <p>
+              Upload or update documents for <strong>{form.name}</strong>
+            </p>
+            {existingDocs.length > 0 && (
+              <p className="existing-docs-info">
+                {existingDocs.length} document(s) already uploaded
+              </p>
+            )}
+          </div>
+
+          <div className="documents-grid">
+            {DOC_TYPES.map((docType) => {
+              const doc = docs[docType.key];
+              const existingDoc = existingDocs.find(
+                (d) =>
+                  d.docType === docType.endpoint || d.type === docType.endpoint,
+              );
+              const status = docStatus[docType.key];
+
+              return (
+                <div key={docType.key} className="document-item">
+                  <label className="document-label">
+                    {docType.label}
+                    {existingDoc && (
+                      <span className="existing-badge">✓ Uploaded</span>
+                    )}
+                  </label>
+
+                  <div className="document-input-group">
+                    <input
+                      type="file"
+                      onChange={(e) => handleFileChange(e, docType.key)}
+                      className="document-input"
+                      disabled={uploadingDocs}
+                    />
+
+                    <button
+                      type="button"
+                      className="upload-single-btn"
+                      onClick={() => uploadDocument(docType.key)}
+                      disabled={!doc?.file || uploadingDocs}
+                    >
+                      Upload
+                    </button>
+                  </div>
+
+                  <div className="document-info">
+                    {doc?.file ? (
+                      <div className="file-info">
+                        <span className="file-name">{doc.fileName}</span>
+                        <span className="file-size">
+                          ({(doc.file.size / 1024).toFixed(1)} KB)
+                        </span>
+                      </div>
+                    ) : existingDoc ? (
+                      <div className="existing-file-info">
+                        <span className="existing-file-name">
+                          {existingDoc.fileName || existingDoc.filename}
+                        </span>
+                        {existingDoc.url && (
+                          <a
+                            href={existingDoc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="view-existing-btn"
+                          >
+                            View
+                          </a>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="no-file">No file selected</span>
+                    )}
+                  </div>
+
+                  {status && (
+                    <div className="document-status">
+                      {status.uploading && (
+                        <span className="status-uploading">Uploading...</span>
+                      )}
+                      {status.ok && (
+                        <span className="status-success">✓ Uploaded</span>
+                      )}
+                      {status.error && (
+                        <span className="status-error">
+                          Error: {status.error}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="documents-actions">
+            <button
+              type="button"
+              className="upload-all-btn"
+              onClick={uploadAllDocuments}
+              disabled={
+                uploadingDocs ||
+                !Object.keys(docs).some((key) => docs[key]?.file)
+              }
+            >
+              {uploadingDocs ? (
+                <>
+                  <span className="loading-spinner-small"></span>
+                  Uploading Documents...
+                </>
+              ) : (
+                "Upload All Selected Documents"
+              )}
+            </button>
+
+            <button
+              type="button"
+              className="save-all-btn"
+              onClick={handleSaveAll}
+              disabled={updating || uploadingDocs}
+            >
+              {updating ? (
+                <>
+                  <span className="loading-spinner-small"></span>
+                  Saving All Changes...
+                </>
+              ) : (
+                "Save All (Details + Documents)"
+              )}
+            </button>
+          </div>
         </div>
       )}
     </div>
