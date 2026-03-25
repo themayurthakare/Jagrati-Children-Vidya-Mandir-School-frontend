@@ -47,6 +47,25 @@ const AdminTeacherDocumentUpload = ({
   const [uploadingGlobal, setUploadingGlobal] = useState(false);
   const [validationError, setValidationError] = useState("");
 
+  const handleCancel = () => {
+    setDocs({
+      photo: null,
+      aadhar: null,
+      pan: null,
+      degree: null,
+      certificate: null,
+    });
+
+    setDocStatus({
+      photo: null,
+      aadhar: null,
+      pan: null,
+      degree: null,
+      certificate: null,
+    });
+
+    setValidationError("");
+  };
   // ✅ File size formatter
   const formatFileSize = (bytes) => {
     if (!bytes) return "0 KB";
@@ -114,7 +133,12 @@ const AdminTeacherDocumentUpload = ({
       return;
     }
 
-    setDocs((s) => ({ ...s, [key]: file }));
+    setDocs((s) => ({
+      ...s,
+      [key]: file, // replace old file
+    }));
+
+    e.target.value = null;
 
     setDocStatus((s) => ({
       ...s,
@@ -125,6 +149,13 @@ const AdminTeacherDocumentUpload = ({
   };
 
   const handleSaveAll = async (e) => {
+    setDocs({
+      photo: null,
+      aadhar: null,
+      pan: null,
+      degree: null,
+      certificate: null,
+    });
     e.preventDefault();
 
     if (!validateForm()) {
@@ -252,7 +283,7 @@ const AdminTeacherDocumentUpload = ({
           <div className="ud-button-row">
             <button
               type="button"
-              onClick={handleBack}
+              onClick={handleCancel}
               className="ud-btn ud-cancel-btn"
             >
               Cancel

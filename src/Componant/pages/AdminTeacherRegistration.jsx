@@ -63,8 +63,13 @@ const AdminTeacherRegistration = ({
     if (!form.educationalDetails.trim())
       e.educationalDetails = "Educational details required";
 
-    if (!form.yearOfExperience || form.yearOfExperience < 0)
-      e.yearOfExperience = "Valid experience required";
+    if (
+      !form.yearOfExperience ||
+      form.yearOfExperience < 0 ||
+      form.yearOfExperience > 70
+    ) {
+      e.yearOfExperience = "Experience must be between 0 and 70 years";
+    }
 
     if (!form.dateOfBirth) {
       e.dateOfBirth = "Date of Birth is required";
@@ -285,6 +290,7 @@ const AdminTeacherRegistration = ({
               name="yearOfExperience"
               type="number"
               min="0"
+              max="70"
               value={form.yearOfExperience}
               onChange={handleChange}
             />
@@ -300,7 +306,11 @@ const AdminTeacherRegistration = ({
               type="date"
               value={form.dateOfBirth}
               onChange={handleChange}
-              max={new Date().toISOString().split("T")[0]}
+              max={
+                new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+                  .toISOString()
+                  .split("T")[0]
+              }
             />
             {errors.dateOfBirth && (
               <small className="field-error">{errors.dateOfBirth}</small>

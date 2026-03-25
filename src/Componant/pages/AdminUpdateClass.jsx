@@ -80,6 +80,8 @@ const AdminUpdateClass = ({ apiBase = "http://localhost:8080" }) => {
       newErrors.className = "Class name is required";
     } else if (form.className.length < 2) {
       newErrors.className = "Class name must be at least 2 characters";
+    } else if (!/^[A-Za-z0-9\s]+$/.test(form.className)) {
+      newErrors.className = "Only alphabets and numbers allowed";
     }
 
     if (!form.fees) {
@@ -103,10 +105,11 @@ const AdminUpdateClass = ({ apiBase = "http://localhost:8080" }) => {
       // Ensure only one decimal point
       const parts = filteredValue.split(".");
       if (parts.length > 2) {
-        return; // Don't update if multiple decimal points
-      }
-
-      setForm((prev) => ({ ...prev, [name]: filteredValue }));
+        return;
+      } else setForm((prev) => ({ ...prev, [name]: filteredValue }));
+    } else if (name === "className") {
+      const filteredValue = value.replace(/[^A-Za-z0-9\s]/g, "");
+      setForm((prev) => ({ ...prev, className: filteredValue }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -186,13 +189,13 @@ const AdminUpdateClass = ({ apiBase = "http://localhost:8080" }) => {
         }, 1500);
       } else {
         throw new Error(
-          "Failed to update class. Please check your backend endpoint."
+          "Failed to update class. Please check your backend endpoint.",
         );
       }
     } catch (err) {
       console.error("Update class error:", err);
       setErrorMessage(
-        err.message || "Failed to update class. Please try again."
+        err.message || "Failed to update class. Please try again.",
       );
     } finally {
       setUpdating(false);
@@ -212,7 +215,7 @@ const AdminUpdateClass = ({ apiBase = "http://localhost:8080" }) => {
     if (
       (form.className || form.fees) &&
       !window.confirm(
-        "You have unsaved changes. Are you sure you want to go back?"
+        "You have unsaved changes. Are you sure you want to go back?",
       )
     ) {
       return;

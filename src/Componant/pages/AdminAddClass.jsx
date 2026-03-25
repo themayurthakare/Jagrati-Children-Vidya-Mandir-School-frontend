@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SessionContext } from "./SessionContext";
 
@@ -16,9 +16,25 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [existingClasses, setExistingClasses] = useState([]);
 
   const { selectedSession } = useContext(SessionContext);
   const sessionId = selectedSession?.id;
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await fetch(`${apiBase}/api/classes/${sessionId}/getAll`);
+        const data = await res.json();
+
+        setExistingClasses(data || []);
+      } catch (err) {
+        console.error("Error fetching classes:", err);
+      }
+    };
+
+    if (sessionId) fetchClasses();
+  }, [sessionId]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -33,6 +49,16 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
       newErrors.fees = "Fees is required";
     } else if (isNaN(form.fees) || Number(form.fees) < 0) {
       newErrors.fees = "Please enter a valid positive number";
+    }
+
+    if (
+      existingClasses.some(
+        (c) =>
+          c.className.toLowerCase().trim() ===
+          form.className.toLowerCase().trim(),
+      )
+    ) {
+      newErrors.className = "Class name already exists";
     }
 
     setErrors(newErrors);
@@ -50,6 +76,24 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
       }
 
       setForm((prev) => ({ ...prev, [name]: filteredValue }));
+    } else if (name === "className") {
+      const filteredValue = value.replace(/[^A-Za-z0-9\s]/g, "");
+
+      setForm((prev) => ({ ...prev, className: filteredValue }));
+
+      // 🔥 live duplicate check
+      if (
+        existingClasses.some(
+          (c) =>
+            c.className.toLowerCase().trim() ===
+            filteredValue.toLowerCase().trim(),
+        )
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          className: "Class already exists",
+        }));
+      }
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -124,7 +168,7 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
         }, 1500);
       } else {
         throw new Error(
-          "Failed to add class. Please check your backend endpoint."
+          "Failed to add class. Please check your backend endpoint.",
         );
       }
     } catch (err) {
@@ -151,7 +195,7 @@ const AdminAddClass = ({ apiBase = "http://localhost:8080" }) => {
     if (
       (form.className || form.fees) &&
       !window.confirm(
-        "You have unsaved changes. Are you sure you want to go back?"
+        "You have unsaved changes. Are you sure you want to go back?",
       )
     ) {
       return;

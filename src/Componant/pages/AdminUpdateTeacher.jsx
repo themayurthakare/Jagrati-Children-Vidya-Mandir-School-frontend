@@ -286,8 +286,13 @@ const AdminUpdateTeacher = ({ apiBase = "http://localhost:8080" }) => {
     setUploadingDocs(false);
 
     if (allSuccess) {
-      window.alert("All documents uploaded successfully!");
-      await fetchDocuments(); // Refresh documents list
+      const count = filesToUpload.length;
+
+      window.alert(
+        `${count} document${count > 1 ? "s" : ""} uploaded successfully!`,
+      );
+
+      await fetchDocuments();
     } else {
       window.alert(
         "Some documents failed to upload. Please check individual file status.",
