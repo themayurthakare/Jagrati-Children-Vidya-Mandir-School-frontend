@@ -270,6 +270,47 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
     if (form.motherName && !nameRegex.test(form.motherName)) {
       newErrors.motherName = "Mother name should contain only letters";
     }
+    if (form.caste && !/^[A-Za-z\s]+$/.test(form.caste)) {
+      newErrors.caste = "Only alphabets allowed";
+    }
+
+    if (form.subCaste && !/^[A-Za-z\s]+$/.test(form.subCaste)) {
+      newErrors.subCaste = "Only alphabets allowed";
+    }
+
+    if (form.religion && !/^[A-Za-z\s]+$/.test(form.religion)) {
+      newErrors.religion = "Only alphabets allowed";
+    }
+
+    // ===== APAAR ID =====
+    if (form.apaarId && !/^\d{12}$/.test(form.apaarId)) {
+      newErrors.apaarId = "APAAR ID must be exactly 12 digits";
+    }
+
+    // ===== PAN =====
+    if (form.panNo && !/^[A-Z0-9]{10}$/.test(form.panNo)) {
+      newErrors.panNo = "PAN must be exactly 10 alphanumeric characters";
+    }
+
+    // ===== TC NUMBER =====
+    if (form.tcNumber && !/^[A-Za-z0-9]+$/.test(form.tcNumber)) {
+      newErrors.tcNumber = "TC must be alphanumeric only";
+    }
+
+    // ===== SSSM =====
+    if (form.ssmId && !/^\d{1,9}$/.test(form.ssmId)) {
+      newErrors.ssmId = "SSSM ID must be up to 9 digits";
+    }
+
+    // ===== PASSOUT YEAR =====
+    if (form.passoutClass && !/^\d+$/.test(form.passoutClass)) {
+      newErrors.passoutClass = "Passout year must be numeric";
+    }
+
+    // ===== ADDRESS =====
+    if (form.address && !/^[A-Za-z0-9\s,]+$/.test(form.address)) {
+      newErrors.address = "Address only allows letters, numbers and comma";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -277,15 +318,67 @@ const AdminUpdateStudent = ({ apiBase = "http://localhost:8080" }) => {
 
   // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
 
-    // Prevent special characters in names
+    // ===== NAME FIELDS =====
     if (["name", "fatherName", "motherName"].includes(name)) {
-      const filteredValue = value.replace(/[^A-Za-z\s]/g, "");
-      setForm((prev) => ({ ...prev, [name]: filteredValue }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      value = value.replace(/[^A-Za-z\s]/g, "");
     }
+
+    // ===== PHONE =====
+    if (name === "studentPhone" || name === "parentPhone") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    // ===== ADMISSION NO =====
+    if (name === "admissionNo") {
+      value = value.replace(/\D/g, "");
+    }
+
+    // ===== AADHAR =====
+    if (name === "studentAadharNo" || name === "parentAadharNo") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    // ===== ADDRESS =====
+    if (name === "address") {
+      value = value.replace(/[^A-Za-z0-9\s,]/g, "");
+    }
+
+    // ===== CASTE / SUBCASTE / RELIGION =====
+    if (name === "caste" || name === "subCaste" || name === "religion") {
+      value = value.replace(/[^A-Za-z\s]/g, "");
+    }
+
+    // ===== APAAR ID =====
+    if (name === "apaarId") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    // ===== PAN =====
+    if (name === "panNo") {
+      value = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 10);
+    }
+
+    // ===== TC NUMBER =====
+    if (name === "tcNumber") {
+      value = value.replace(/[^A-Za-z0-9]/g, "");
+    }
+
+    // ===== SSSM =====
+    if (name === "ssmId") {
+      value = value.replace(/\D/g, "").slice(0, 9);
+    }
+
+    // ===== PASSOUT YEAR =====
+    if (name === "passoutClass") {
+      value = value.replace(/\D/g, "");
+    }
+
+    setForm((prev) => ({ ...prev, [name]: value }));
 
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));

@@ -85,16 +85,60 @@ const AdminStudentRegistration = ({
     if (name === "studentPhone" || name === "parentPhone") {
       value = onlyNumbers(value).slice(0, 10);
     }
-
+    // admission number → only numbers
+    if (name === "admissionNo") {
+      value = onlyNumbers(value);
+    }
     // aadhar 12 digit only
     if (name === "studentAadharNo" || name === "parentAadharNo") {
       value = onlyNumbers(value).slice(0, 12);
+    }
+    if (name === "address") {
+      value = value.replace(/[^A-Za-z0-9\s,]/g, "");
+    }
+    if (name === "caste" || name === "subCaste" || name === "religion") {
+      value = onlyAlphabets(value);
+    }
+
+    // apaarId → only 12 digits (not more)
+    if (name === "apaarId") {
+      value = onlyNumbers(value).slice(0, 12);
+    }
+
+    // PAN → uppercase + alphanumeric only (max 10)
+    if (name === "panNo") {
+      value = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 10);
+    }
+
+    // TC Number → alphanumeric only
+    if (name === "tcNumber") {
+      value = value.replace(/[^A-Za-z0-9]/g, "");
+    }
+
+    // SSSM ID → only numbers max 9
+    if (name === "ssmId") {
+      value = onlyNumbers(value).slice(0, 9);
+    }
+
+    // Passout Year → only numbers
+    if (name === "passoutClass") {
+      value = onlyNumbers(value);
     }
 
     setForm((p) => ({ ...p, [name]: value }));
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
 
+  const getPasswordStrength = (password) => {
+    if (password.length < 6) return "Weak";
+    if (password.match(/^(?=.*[A-Z])(?=.*\d).+$/)) return "Good";
+    if (password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/))
+      return "Strong";
+    return "Weak";
+  };
   // ================= VALIDATION =================
   const validate = () => {
     const e = {};
@@ -104,14 +148,25 @@ const AdminStudentRegistration = ({
     else if (!/^[A-Za-z\s]+$/.test(form.name))
       e.name = "Only alphabets allowed";
 
-    if (!form.admissionNo?.trim()) e.admissionNo = "Admission No is required";
+    if (form.admissionNo && !/^\d+$/.test(form.admissionNo)) {
+      e.admissionNo = "Admission number must contain only digits";
+    }
     if (!form.admissionDate) e.admissionDate = "Admission Date is required";
 
-    if (!form.password) e.password = "Password is required";
-    else if (form.password.length < 6)
-      e.password = "Password must be at least 6 characters";
-
-    if (!form.address?.trim()) e.address = "Address is required";
+    // Strong Password Validation
+    if (!form.password) {
+      e.password = "Password is required";
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(
+        form.password,
+      )
+    ) {
+      e.password =
+        "Password must be 6+ chars with uppercase, lowercase, number & special character";
+    }
+    if (form.address && !/^[A-Za-z0-9\s,]+$/.test(form.address)) {
+      e.address = "Address should contain only letters and numbers";
+    }
     if (!form.gender) e.gender = "Please select gender";
     if (!form.rte) e.rte = "Please select RTE option";
     if (!form.studentClassId) e.studentClassId = "Please select a class";
@@ -158,6 +213,44 @@ const AdminStudentRegistration = ({
       !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(form.panNo.toUpperCase())
     ) {
       e.panNo = "Invalid PAN format (ABCDE1234F)";
+    }
+
+    // caste, subCaste, religion
+    if (form.caste && !/^[A-Za-z\s]+$/.test(form.caste)) {
+      e.caste = "Only alphabets allowed";
+    }
+
+    if (form.subCaste && !/^[A-Za-z\s]+$/.test(form.subCaste)) {
+      e.subCaste = "Only alphabets allowed";
+    }
+
+    if (form.religion && !/^[A-Za-z\s]+$/.test(form.religion)) {
+      e.religion = "Only alphabets allowed";
+    }
+
+    // APAAR → exactly 12 digits OR empty
+    if (form.apaarId && !/^\d{12}$/.test(form.apaarId)) {
+      e.apaarId = "APAAR ID must be exactly 12 digits";
+    }
+
+    // PAN → exactly 10 characters OR empty
+    if (form.panNo && !/^[A-Z0-9]{10}$/.test(form.panNo)) {
+      e.panNo = "PAN must be 10 alphanumeric characters";
+    }
+
+    // TC Number → alphanumeric only
+    if (form.tcNumber && !/^[A-Za-z0-9]+$/.test(form.tcNumber)) {
+      e.tcNumber = "TC Number must be alphanumeric";
+    }
+
+    // SSSM → max 9 digits (can be less)
+    if (form.ssmId && !/^\d{1,9}$/.test(form.ssmId)) {
+      e.ssmId = "SSSM ID must be up to 9 digits";
+    }
+
+    // Passout Year → only numbers
+    if (form.passoutClass && !/^\d+$/.test(form.passoutClass)) {
+      e.passoutClass = "Passout year must be numeric";
     }
 
     setErrors(e);
@@ -291,6 +384,9 @@ const AdminStudentRegistration = ({
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
+            {form.password && (
+              <small>Strength: {getPasswordStrength(form.password)}</small>
+            )}
             {errors.password && (
               <small className="field-error">{errors.password}</small>
             )}
