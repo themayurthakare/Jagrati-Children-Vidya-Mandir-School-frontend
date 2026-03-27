@@ -258,7 +258,7 @@ const AdminUploadExcel = ({ apiBase = "http://localhost:8080" }) => {
         {/* Upload Actions */}
         <div className="upload-actions">
           <button
-            className="reset-btn"
+            className="reset-btn1"
             onClick={resetForm}
             disabled={uploading || (!selectedFile && !results)}
           >

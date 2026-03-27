@@ -264,7 +264,7 @@
     cursor: not-allowed;
 }
 
-.reset-btn {
+.reset-btn1 {
     background: #f4f6fb;
     color: #222;
     border: 1px solid #e3e7f5;
@@ -274,9 +274,10 @@
     font-weight: 500;
 }
 
-.reset-btn:hover {
-    background: #eef1f9;
-    border-color: #d0d7f0;
+.reset-btn1:hover {
+    background-color: #f8fafc;
+    color: var(--text-main);
+    border-color: var(--text-main);
 }
 
 /* Progress Section */

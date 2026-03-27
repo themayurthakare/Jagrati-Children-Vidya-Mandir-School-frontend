@@ -7,7 +7,7 @@ import { SessionContext } from "./SessionContext"; // adjust path if needed
 const AdminNotice = () => {
   const navigate = useNavigate();
   const { selectedSession } = useContext(
-    SessionContext || { selectedSession: null }
+    SessionContext || { selectedSession: null },
   );
 
   const [notices, setNotices] = useState([]);
@@ -59,7 +59,7 @@ const AdminNotice = () => {
         if (!response.ok) {
           const text = await response.text().catch(() => "");
           throw new Error(
-            `Failed to load notices (${response.status}) ${text}`
+            `Failed to load notices (${response.status}) ${text}`,
           );
         }
 
@@ -92,6 +92,21 @@ const AdminNotice = () => {
   // Input handling
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    // Allow only alphabets, space, comma, and full stop
+    const regex = /^[A-Za-z\s.,]*$/;
+
+    if (
+      name === "title" ||
+      name === "subject" ||
+      name === "message" ||
+      name === "issuedBy"
+    ) {
+      if (!regex.test(value)) {
+        return; // stop invalid input
+      }
+    }
+
     setNoticeData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -111,7 +126,7 @@ const AdminNotice = () => {
     e.preventDefault();
     if (!selectedSession || !selectedSession.id) {
       alert(
-        "Please select a session from the dashboard before creating a notice."
+        "Please select a session from the dashboard before creating a notice.",
       );
       return;
     }
@@ -176,7 +191,7 @@ const AdminNotice = () => {
 
         const updated = await res.json().catch(() => null);
         setNotices((prev) =>
-          prev.map((n) => (n.noticeId === updated.noticeId ? updated : n))
+          prev.map((n) => (n.noticeId === updated.noticeId ? updated : n)),
         );
         alert("Notice updated successfully!");
       }
@@ -255,13 +270,15 @@ const AdminNotice = () => {
       </style></head><body>
       <div class="print-container"><div class="header"><h1 class="school-name">JAGRATI CHILDREN VIDHYA MANDIR</h1><h2 class="notice-label">OFFICIAL NOTICE</h2></div>
       <div class="notice-content"><div class="notice-meta"><p><strong>Date:</strong> ${formatDate(
-        notice.date
+        notice.date,
       )}</p>${
-      notice.subject ? `<p><strong>Subject:</strong> ${notice.subject}</p>` : ""
-    }</div>
+        notice.subject
+          ? `<p><strong>Subject:</strong> ${notice.subject}</p>`
+          : ""
+      }</div>
       <h3 class="notice-title">${notice.title}</h3><div class="notice-body">${(
-      notice.message || ""
-    ).replace(/\n/g, "<br>")}</div>
+        notice.message || ""
+      ).replace(/\n/g, "<br>")}</div>
       <div class="footer"><div class="issued-by"><p><strong>Issued By:</strong></p><p>${
         notice.issuedBy || ""
       }</p><p>${formatDate(notice.date)}</p></div>
@@ -379,7 +396,7 @@ const AdminNotice = () => {
                     onChange={handleInputChange}
                     className="form-input"
                     required
-                    max={getTodayDate()}
+                    min={getTodayDate()} // ✅ only today + future
                   />
                 </div>
 
@@ -434,8 +451,8 @@ const AdminNotice = () => {
                   {loading
                     ? "Processing..."
                     : noticeData.noticeId
-                    ? "Update Notice"
-                    : "Create Notice"}
+                      ? "Update Notice"
+                      : "Create Notice"}
                 </button>
               </div>
             </form>

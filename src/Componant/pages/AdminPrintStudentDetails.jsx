@@ -153,14 +153,14 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
         </button>
         <h1>Student Registration — Print View</h1>
         <div className="ps-actions">
-          <input
+          {/* <input
             type="text"
             placeholder="Enter student id"
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
             className="ps-id-input"
-          />
-          <button
+          /> */}
+          {/* <button
             onClick={() => {
               if (!studentId || !/^\d+$/.test(studentId)) {
                 alert("Enter numeric student ID");
@@ -171,7 +171,7 @@ const AdminPrintStudentDetails = ({ apiBase = "http://localhost:8080" }) => {
             className="ps-load"
           >
             Load
-          </button>
+          </button> */}
 
           <button
             onClick={onPrint}
