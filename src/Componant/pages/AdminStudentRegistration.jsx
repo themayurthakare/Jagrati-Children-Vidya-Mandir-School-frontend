@@ -51,6 +51,15 @@ const AdminStudentRegistration = ({
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // ================= LOAD CLASSES BY SESSION =================
   useEffect(() => {
     if (!sessionId) {
@@ -71,6 +80,14 @@ const AdminStudentRegistration = ({
       })
       .catch(() => setClasses([]));
   }, [sessionId, base]);
+
+  // Set admission date to today's date when component mounts
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      admissionDate: getTodayDate(),
+    }));
+  }, []);
 
   // ================= HANDLE CHANGE WITH INPUT CONTROL =================
   const handleChange = (e) => {
@@ -128,6 +145,12 @@ const AdminStudentRegistration = ({
       value = onlyNumbers(value);
     }
 
+    // Prevent manual editing of admission date
+    if (name === "admissionDate") {
+      // Do not allow changing admission date
+      return;
+    }
+
     setForm((p) => ({ ...p, [name]: value }));
     setErrors((p) => ({ ...p, [name]: undefined }));
   };
@@ -139,6 +162,7 @@ const AdminStudentRegistration = ({
       return "Strong";
     return "Weak";
   };
+
   // ================= VALIDATION =================
   const validate = () => {
     const e = {};
@@ -151,7 +175,14 @@ const AdminStudentRegistration = ({
     if (form.admissionNo && !/^\d+$/.test(form.admissionNo)) {
       e.admissionNo = "Admission number must contain only digits";
     }
-    if (!form.admissionDate) e.admissionDate = "Admission Date is required";
+
+    // Validate admission date is today's date
+    const todayDate = getTodayDate();
+    if (!form.admissionDate) {
+      e.admissionDate = "Admission Date is required";
+    } else if (form.admissionDate !== todayDate) {
+      e.admissionDate = "Admission date must be today's date";
+    }
 
     // Strong Password Validation
     if (!form.password) {
@@ -301,6 +332,11 @@ const AdminStudentRegistration = ({
           state: { studentId: id },
         });
         setForm(initialForm);
+        // Reset admission date to today's date after form reset
+        setForm((prev) => ({
+          ...prev,
+          admissionDate: getTodayDate(),
+        }));
         if (onAddStudent) onAddStudent(saved || payload);
       } else {
         const msg = saved?.message || "Registration failed";
@@ -358,7 +394,7 @@ const AdminStudentRegistration = ({
               type="date"
               name="admissionDate"
               value={form.admissionDate}
-              onChange={handleChange}
+              disabled
               className={errors.admissionDate ? "error" : ""}
             />
             {errors.admissionDate && (
@@ -632,6 +668,11 @@ const AdminStudentRegistration = ({
               onClick={() => {
                 setForm(initialForm);
                 setErrors({});
+                // Reset admission date to today's date after reset
+                setForm((prev) => ({
+                  ...prev,
+                  admissionDate: getTodayDate(),
+                }));
               }}
             >
               Reset

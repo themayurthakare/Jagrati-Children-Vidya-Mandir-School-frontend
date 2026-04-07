@@ -20,13 +20,16 @@ const DOC_TYPES = [
   { key: "caste", label: "Caste Certificate", endpoint: "CASTE_CERTIFICATE" },
 ];
 
+// Maximum file size: 10MB (10 * 1024 * 1024 bytes)
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const prefillId = location.state?.studentId ?? null;
 
   const [studentId, setStudentId] = useState(
-    prefillId ? String(prefillId) : ""
+    prefillId ? String(prefillId) : "",
   );
   const [docs, setDocs] = useState({
     adhar: null,
@@ -43,6 +46,20 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
   });
 
   const [docStatus, setDocStatus] = useState({
+    adhar: null,
+    sssm: null,
+    photo: null,
+    birth: null,
+    income: null,
+    tc: null,
+    bank: null,
+    domicile: null,
+    parentAdhar: null,
+    pan: null,
+    caste: null,
+  });
+
+  const [docErrors, setDocErrors] = useState({
     adhar: null,
     sssm: null,
     photo: null,
@@ -79,6 +96,15 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
       return false;
     }
 
+    // Check if any document has size error
+    const hasSizeError = Object.values(docErrors).some(
+      (error) => error !== null,
+    );
+    if (hasSizeError) {
+      setValidationError("Please fix file size errors before uploading.");
+      return false;
+    }
+
     setValidationError("");
     return true;
   };
@@ -106,6 +132,31 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
 
   const handleFileChange = (e, key) => {
     const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+
+    // Clear previous error for this document
+    setDocErrors((s) => ({
+      ...s,
+      [key]: null,
+    }));
+
+    if (file) {
+      // Check file size (max 10MB)
+      if (file.size > MAX_FILE_SIZE) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        const maxSizeMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+
+        setDocErrors((s) => ({
+          ...s,
+          [key]: `File size (${fileSizeMB}MB) exceeds the ${maxSizeMB}MB limit. Please select a smaller file.`,
+        }));
+
+        // Clear the file input
+        e.target.value = "";
+        setDocs((s) => ({ ...s, [key]: null }));
+        return;
+      }
+    }
+
     setDocs((s) => ({ ...s, [key]: file }));
 
     setDocStatus((s) => ({
@@ -142,7 +193,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
     });
 
     const toUpload = DOC_TYPES.map((d) => ({ ...d, file: docs[d.key] })).filter(
-      (d) => d.file
+      (d) => d.file,
     );
 
     const results = [];
@@ -174,7 +225,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
 
     if (failed.length === 0) {
       window.alert(
-        `All ${successCount} document(s) uploaded successfully for student ${studentId}.`
+        `All ${successCount} document(s) uploaded successfully for student ${studentId}.`,
       );
       navigate("/admindashboard/print-student", {
         state: { studentId },
@@ -184,7 +235,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
       window.alert(
         `Uploaded ${successCount} succeeded, ${
           failed.length
-        } failed:\n\n${messages.join("\n")}`
+        } failed:\n\n${messages.join("\n")}`,
       );
     }
   };
@@ -194,7 +245,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
     if (
       hasSelectedFiles &&
       !window.confirm(
-        "You have unsaved document selections. Are you sure you want to go back?"
+        "You have unsaved document selections. Are you sure you want to go back?",
       )
     ) {
       return;
@@ -230,9 +281,28 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
         pan: null,
         caste: null,
       });
+      setDocErrors({
+        adhar: null,
+        sssm: null,
+        photo: null,
+        birth: null,
+        income: null,
+        tc: null,
+        bank: null,
+        domicile: null,
+        parentAdhar: null,
+        pan: null,
+        caste: null,
+      });
       setValidationError("");
     }
   };
+
+  // Calculate statistics
+  const totalDocuments = DOC_TYPES.length;
+  const selectedCount = Object.values(docs).filter((d) => d !== null).length;
+  const pendingCount = totalDocuments - selectedCount; // Documents NOT selected yet
+  const uploadedCount = Object.values(docStatus).filter((d) => d?.ok).length;
 
   return (
     <div className="ud-container">
@@ -259,7 +329,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
           />
           <small style={{ display: "block", marginTop: 6, color: "#666" }}>
             Note: Documents will only be uploaded when you click "Save (batch)"
-            button.
+            button. Maximum file size: 10MB per document.
           </small>
         </div>
 
@@ -287,6 +357,7 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                   type="file"
                   onChange={(e) => handleFileChange(e, d.key)}
                   disabled={uploadingGlobal}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                 />
                 <div className="ud-file-name">
                   {docs[d.key] ? (
@@ -304,27 +375,43 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                   )}
                 </div>
 
-                <div style={{ marginTop: 6, fontSize: 13, minHeight: "20px" }}>
-                  {docStatus[d.key] ? (
-                    docStatus[d.key].uploading ? (
-                      <span style={{ color: "#3498db" }}>Uploading...</span>
-                    ) : docStatus[d.key].ok ? (
-                      <span style={{ color: "green", fontWeight: "500" }}>
-                        ✓ Uploaded Successfully
-                      </span>
+                {/* File size error message */}
+                {docErrors[d.key] && (
+                  <div
+                    style={{ marginTop: 6, fontSize: 13, minHeight: "20px" }}
+                  >
+                    <span style={{ color: "#dc3545", fontWeight: "500" }}>
+                      ✗ {docErrors[d.key]}
+                    </span>
+                  </div>
+                )}
+
+                {/* Upload status message */}
+                {!docErrors[d.key] && (
+                  <div
+                    style={{ marginTop: 6, fontSize: 13, minHeight: "20px" }}
+                  >
+                    {docStatus[d.key] ? (
+                      docStatus[d.key].uploading ? (
+                        <span style={{ color: "#3498db" }}>Uploading...</span>
+                      ) : docStatus[d.key].ok ? (
+                        <span style={{ color: "green", fontWeight: "500" }}>
+                          ✓ Uploaded Successfully
+                        </span>
+                      ) : (
+                        <span style={{ color: "red" }}>
+                          ✗ Error: {docStatus[d.key].error || "Upload failed"}
+                        </span>
+                      )
                     ) : (
-                      <span style={{ color: "red" }}>
-                        ✗ Error: {docStatus[d.key].error || "Upload failed"}
-                      </span>
-                    )
-                  ) : (
-                    docs[d.key] && (
-                      <span style={{ color: "#f39c12", fontWeight: "500" }}>
-                        ⏳ Ready to upload
-                      </span>
-                    )
-                  )}
-                </div>
+                      docs[d.key] && (
+                        <span style={{ color: "#f39c12", fontWeight: "500" }}>
+                          ⏳ Ready to upload
+                        </span>
+                      )
+                    )}
+                  </div>
+                )}
               </label>
             ))}
           </div>
@@ -375,23 +462,18 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                 <strong>Upload Summary:</strong>
                 <div style={{ marginTop: "10px" }}>
                   <span style={{ marginRight: "20px" }}>
-                    📄 Selected:{" "}
-                    {Object.values(docs).filter((d) => d !== null).length} files
+                    📄 Selected: {selectedCount} files
                   </span>
                   <span style={{ marginRight: "20px" }}>
-                    ✓ Uploaded:{" "}
-                    {Object.values(docStatus).filter((d) => d?.ok).length} files
+                    ✓ Uploaded: {uploadedCount} files
                   </span>
-                  <span>
-                    ⚠️ Pending:{" "}
-                    {Object.values(docs).filter((d) => d !== null).length -
-                      Object.values(docStatus).filter((d) => d?.ok).length}{" "}
-                    files
+                  <span style={{ color: "#e74c3c" }}>
+                    ⏳ Pending: {pendingCount} files
                   </span>
                 </div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div>Total Documents: {DOC_TYPES.length}</div>
+                <div>Total Documents: {totalDocuments}</div>
                 <div
                   style={{
                     fontSize: "0.9em",
@@ -400,6 +482,15 @@ const AdminUploadStudentDocuments = ({ apiBase = "http://localhost:8080" }) => {
                   }}
                 >
                   Student ID: {studentId || "Not entered"}
+                </div>
+                <div
+                  style={{
+                    fontSize: "0.8em",
+                    color: "#e74c3c",
+                    marginTop: "5px",
+                  }}
+                >
+                  Max file size: 10MB per document
                 </div>
               </div>
             </div>
